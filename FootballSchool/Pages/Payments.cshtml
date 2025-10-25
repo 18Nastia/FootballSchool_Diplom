@@ -1,0 +1,454 @@
+﻿@page
+@model FootballSchool.Pages.PaymentsModel
+@{
+    ViewData["Title"] = "Платежи и счета";
+}
+
+@section Styles {
+    <style>
+        .payments-page .main-content {
+            margin-left: 0 !important;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .header-text h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .subtitle {
+            color: #6e6e73;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            margin-bottom: 16px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+            .btn-primary:hover {
+                background-color: #1d4ed8;
+            }
+
+        .next-payment-card {
+            background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .next-payment-label {
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .next-payment-date {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .payment-warning {
+            background-color: #fff7ed;
+            color: #c2410c;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border: 1px solid #e5e5e7;
+            background-color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #6e6e73;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .tab:hover {
+                border-color: #2563eb;
+                color: #2563eb;
+            }
+
+            .tab.active {
+                background-color: #eff6ff;
+                border-color: #2563eb;
+                color: #2563eb;
+            }
+
+        .payment-history h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1d1d1f;
+        }
+
+        .payment-card {
+            background-color: white;
+            border: 1px solid #e5e5e7;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: box-shadow 0.2s;
+        }
+
+            .payment-card:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        .payment-info {
+            display: flex;
+            gap: 80px;
+        }
+
+        .payment-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .payment-label {
+            color: #6e6e73;
+            font-size: 13px;
+        }
+
+        .payment-value {
+            color: #1d1d1f;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .payment-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+            .status-badge.success {
+                background-color: #dcfce7;
+                color: #15803d;
+            }
+
+            .status-badge.error {
+                background-color: #fee2e2;
+                color: #dc2626;
+            }
+
+        .btn-secondary {
+            background-color: white;
+            color: #6e6e73;
+            border: 1px solid #e5e5e7;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+            .btn-secondary:hover {
+                border-color: #2563eb;
+                color: #2563eb;
+            }
+
+        .btn-primary-small {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+
+            .btn-primary-small:hover {
+                background-color: #1d4ed8;
+            }
+
+        .alert-warning {
+            background-color: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-top: 32px;
+        }
+
+        .alert-icon {
+            color: #d97706;
+            flex-shrink: 0;
+        }
+
+        .alert-warning p {
+            color: #92400e;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 1024px) {
+            .payments-page .main-content {
+                padding: 24px 32px;
+            }
+
+            .payment-info {
+                gap: 40px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .payments-page .main-content {
+                padding: 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .next-payment-card {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .payment-card {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+
+            .payment-info {
+                flex-direction: column;
+                gap: 16px;
+                width: 100%;
+            }
+
+            .payment-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .payment-actions {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .btn-secondary, .btn-primary-small {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+}
+
+<div class="payments-page">
+    <div class="main-content">
+        
+        <div class="next-payment-card">
+            <div class="next-payment-info">
+                <div class="next-payment-label">Следующий платеж</div>
+                <div class="next-payment-date">15 октября 2025</div>
+            </div>
+            <div class="payment-warning">До оплаты осталось 3 дня</div>
+        </div>
+
+        <button class="btn-primary" onclick="paySubscription()">
+            <i class="fas fa-credit-card"></i>
+            Оплатить абонемент
+        </button>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('all')">Все платежи</button>
+            <button class="tab" onclick="switchTab('paid')">Оплаченные</button>
+            <button class="tab" onclick="switchTab('errors')">Ошибки</button>
+        </div>
+
+        <div class="payment-history">
+            <h2>История платежей</h2>
+
+            <div class="payment-card">
+                <div class="payment-info">
+                    <div class="payment-detail">
+                        <div class="payment-label">Дата</div>
+                        <div class="payment-value">05.10.2025</div>
+                    </div>
+                    <div class="payment-detail">
+                        <div class="payment-label">Описание</div>
+                        <div class="payment-value">Абонемент на 8 занятий</div>
+                    </div>
+                    <div class="payment-detail">
+                        <div class="payment-label">Сумма</div>
+                        <div class="payment-value">4 000 ₽</div>
+                    </div>
+                </div>
+                <div class="payment-actions">
+                    <span class="status-badge success">
+                        <i class="fas fa-check"></i>
+                        Оплачен
+                    </span>
+                    <button class="btn-secondary" onclick="downloadReceipt(1)">
+                        <i class="fas fa-download"></i>
+                        Скачать чек
+                    </button>
+                </div>
+            </div>
+
+            <div class="payment-card">
+                <div class="payment-info">
+                    <div class="payment-detail">
+                        <div class="payment-label">Дата</div>
+                        <div class="payment-value">01.09.2025</div>
+                    </div>
+                    <div class="payment-detail">
+                        <div class="payment-label">Описание</div>
+                        <div class="payment-value">Абонемент на 12 занятий</div>
+                    </div>
+                    <div class="payment-detail">
+                        <div class="payment-label">Сумма</div>
+                        <div class="payment-value">6 000 ₽</div>
+                    </div>
+                </div>
+                <div class="payment-actions">
+                    <span class="status-badge error">
+                        <i class="fas fa-times"></i>
+                        Ошибка
+                    </span>
+                    <button class="btn-primary-small" onclick="retryPayment(2)">
+                        <i class="fas fa-redo"></i>
+                        Повторить оплату
+                    </button>
+                </div>
+            </div>
+
+            <div class="payment-card">
+                <div class="payment-info">
+                    <div class="payment-detail">
+                        <div class="payment-label">Дата</div>
+                        <div class="payment-value">15.08.2025</div>
+                    </div>
+                    <div class="payment-detail">
+                        <div class="payment-label">Описание</div>
+                        <div class="payment-value">Абонемент на 4 занятия</div>
+                    </div>
+                    <div class="payment-detail">
+                        <div class="payment-label">Сумма</div>
+                        <div class="payment-value">2 000 ₽</div>
+                    </div>
+                </div>
+                <div class="payment-actions">
+                    <span class="status-badge success">
+                        <i class="fas fa-check"></i>
+                        Оплачен
+                    </span>
+                    <button class="btn-secondary" onclick="downloadReceipt(3)">
+                        <i class="fas fa-download"></i>
+                        Скачать чек
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert-warning">
+            <i class="fas fa-exclamation-triangle alert-icon"></i>
+            <p>Напоминаем, что срок вашего текущего абонемента истекает через 3 дня. Пожалуйста, продлите абонемент, чтобы сохранить место в группе.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tab) {
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+        // Add active class to clicked tab
+        event.target.classList.add('active');
+
+        // Here you would typically filter the payment cards based on the selected tab
+        console.log('Switched to tab:', tab);
+    }
+
+    function paySubscription() {
+        alert('Открытие формы оплаты абонемента');
+        // Here you would typically open a payment modal or redirect to payment page
+    }
+
+    function downloadReceipt(paymentId) {
+        alert(`Скачивание чека для платежа #${paymentId}`);
+        // Here you would typically generate and download the receipt
+    }
+
+    function retryPayment(paymentId) {
+        alert(`Повторная попытка оплаты для платежа #${paymentId}`);
+        // Here you would typically retry the failed payment
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Payments page loaded');
+    });
+</script>

@@ -1,0 +1,679 @@
+﻿@page
+@model FootballSchool.Pages.ScheduleModel
+@{
+    ViewData["Title"] = "Расписание тренировок";
+}
+
+@section Styles {
+    <style>
+        .schedule-page .main-content {
+            margin-left: 0 !important;
+            background: #fafafa;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #1a1a1a;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0;
+            background: #f5f5f5;
+            border-radius: 6px;
+            padding: 4px;
+        }
+
+        .toggle-btn {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+            .toggle-btn.active {
+                background: #2563eb;
+                color: white;
+            }
+
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .add-btn:hover {
+                background: #1d4ed8;
+            }
+
+        .filters {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .filter-select {
+            padding: 8px 32px 8px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        /* Week View Styles */
+        .calendar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: none;
+        }
+
+            .calendar.active {
+                display: block;
+            }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            border-bottom: 2px solid #e5e5e5;
+        }
+
+        .day-header {
+            padding: 16px 12px;
+            text-align: center;
+            border-left: 1px solid #e5e5e5;
+        }
+
+        .day-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .day-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .calendar-body {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            min-height: 800px;
+        }
+
+        .time-column {
+            border-right: 1px solid #e5e5e5;
+        }
+
+        .time-slot-week {
+            height: 100px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            position: relative;
+        }
+
+        .day-column {
+            border-left: 1px solid #e5e5e5;
+            position: relative;
+            min-height: 900px;
+        }
+
+            .day-column::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: repeating-linear-gradient( to bottom, transparent, transparent 99px, #f0f0f0 99px, #f0f0f0 100px );
+                pointer-events: none;
+            }
+
+        .event {
+            position: absolute;
+            left: 4px;
+            right: 4px;
+            border-radius: 6px;
+            padding: 8px;
+            color: white;
+            font-size: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .event:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+        .event-blue {
+            background: #3b82f6;
+        }
+
+        .event-green {
+            background: #10b981;
+        }
+
+        .event-purple {
+            background: #8b5cf6;
+        }
+
+        .event-red {
+            background: #ef4444;
+        }
+
+        .event-orange {
+            background: #f59e0b;
+        }
+
+        .event-time {
+            font-size: 11px;
+            margin-bottom: 4px;
+            opacity: 0.9;
+        }
+
+        .event-title {
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        /* Day View Styles */
+        .day-view {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+            .day-view.active {
+                display: block;
+            }
+
+        .date-header {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .time-slot-day {
+            display: flex;
+            min-height: 60px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .time-label {
+            width: 80px;
+            padding: 8px 16px 8px 0;
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .event-container {
+            flex: 1;
+            position: relative;
+            padding: 4px 0;
+        }
+
+        .event-day {
+            border-radius: 6px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 13px;
+            position: relative;
+            margin: 4px 0;
+        }
+
+        .legend {
+            margin-top: 24px;
+            padding: 20px 24px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .legend-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .legend-items {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot-blue {
+            background: #3b82f6;
+        }
+
+        .legend-dot-green {
+            background: #10b981;
+        }
+
+        .legend-dot-orange {
+            background: #f59e0b;
+        }
+
+        .legend-dot-purple {
+            background: #8b5cf6;
+        }
+
+        .legend-dot-red {
+            background: #ef4444;
+        }
+
+        @@media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filters {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+
+            .calendar-header {
+                grid-template-columns: 60px repeat(7, 1fr);
+                font-size: 12px;
+            }
+
+            .time-slot-week {
+                height: 80px;
+                font-size: 12px;
+            }
+
+            .legend-items {
+                gap: 16px;
+            }
+        }
+    </style>
+}
+
+<div class="schedule-page">
+    <div class="main-content">
+
+        <div class="controls">
+            <div class="view-toggle">
+                <button class="toggle-btn active" onclick="switchView('week')">Неделя</button>
+                <button class="toggle-btn" onclick="switchView('day')">День</button>
+            </div>
+            <button class="add-btn" onclick="addTraining()">
+                <i class="fas fa-plus"></i>
+                Добавить тренировку
+            </button>
+            <div class="filters">
+                <i class="fas fa-filter"></i>
+                <span>Фильтры:</span>
+                <select class="filter-select" onchange="updateSchedule()">
+                    <option>Все филиалы</option>
+                    <option>Филиал Центр</option>
+                    <option>Филиал Север</option>
+                    <option>Филиал Юг</option>
+                </select>
+                <select class="filter-select" onchange="updateSchedule()">
+                    <option>Все группы</option>
+                    <option>Юниоры (8-10 лет)</option>
+                    <option>Кадеты (11-13 лет)</option>
+                    <option>Юноши (14-16 лет)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Week View -->
+        <div class="calendar active" id="weekView">
+            <div class="calendar-header">
+                <div class="time-column"></div>
+                <div class="day-header">
+                    <div class="day-name">воскресенье, 5</div>
+                    <div class="day-date">октября</div>
+                </div>
+                <div class="day-header">
+                    <div class="day-name">понедельник, 6</div>
+                    <div class="day-date">октября</div>
+                </div>
+                <div class="day-header">
+                    <div class="day-name">вторник, 7</div>
+                    <div class="day-date">октября</div>
+                </div>
+                <div class="day-header">
+                    <div class="day-name">среда, 8</div>
+                    <div class="day-date">октября</div>
+                </div>
+                <div class="day-header">
+                    <div class="day-name">четверг, 9</div>
+                    <div class="day-date">октября</div>
+                </div>
+                <div class="day-header">
+                    <div class="day-name">пятница, 10</div>
+                    <div class="day-date">октября</div>
+                </div>
+                <div class="day-header">
+                    <div class="day-name">суббота, 11</div>
+                    <div class="day-date">октября</div>
+                </div>
+            </div>
+
+            <div class="calendar-body">
+                <div class="time-column">
+                    <div class="time-slot-week">09:00</div>
+                    <div class="time-slot-week">10:00</div>
+                    <div class="time-slot-week">11:00</div>
+                    <div class="time-slot-week">12:00</div>
+                    <div class="time-slot-week">13:00</div>
+                    <div class="time-slot-week">14:00</div>
+                    <div class="time-slot-week">15:00</div>
+                    <div class="time-slot-week">16:00</div>
+                    <div class="time-slot-week">17:00</div>
+                </div>
+
+                <div class="days-grid">
+                    <!-- Sunday -->
+                    <div class="day-column"></div>
+
+                    <!-- Monday -->
+                    <div class="day-column"></div>
+
+                    <!-- Tuesday -->
+                    <div class="day-column"></div>
+
+                    <!-- Wednesday -->
+                    <div class="day-column">
+                        <div class="event event-green" style="top: 0; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-title">Выносливость: бег - Петров П.П.</div>
+                            </div>
+                        </div>
+                        <div class="event event-blue" style="top: 200px; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-time">10:00 - 11:30</div>
+                                <div class="event-title">Футбол: базовые навыки - Иванов И.И.</div>
+                            </div>
+                        </div>
+                        <div class="event event-blue" style="top: 300px; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-time">12:00 - 13:30</div>
+                                <div class="event-title">Футбол: тактика игры - Иванов И.И.</div>
+                            </div>
+                        </div>
+                        <div class="event event-purple" style="top: 500px; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-time">14:00 - 15:30</div>
+                                <div class="event-title">Гимнастика - Смирнова А.А.</div>
+                            </div>
+                        </div>
+                        <div class="event event-green" style="top: 600px; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-time">16:00 - 16:30</div>
+                                <div class="event-title">Выносливость: бег - Петров П.П.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thursday -->
+                    <div class="day-column">
+                        <div class="event event-blue" style="top: 300px; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-time">12:00 - 13:30</div>
+                                <div class="event-title">Футбол: командная игра - Иванов И.И.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Friday -->
+                    <div class="day-column">
+                        <div class="event event-red" style="top: 200px; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-time">10:00 - 11:30</div>
+                                <div class="event-title">Футбол: индивидуальная техника - Козлов К.К.</div>
+                            </div>
+                        </div>
+                        <div class="event event-purple" style="top: 500px; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-time">14:00 - 15:30</div>
+                                <div class="event-title">Гимнастика: акробатика - Смирнова А.А.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saturday -->
+                    <div class="day-column">
+                        <div class="event event-orange" style="top: 800px; height: 100px;">
+                            <div class="event-content">
+                                <div class="event-time">17:00 - 18:00</div>
+                                <div class="event-title">Контроль мяча - Сидоров С.С.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day View -->
+        <div class="day-view" id="dayView">
+            <div class="date-header">среда, 8 октября</div>
+
+            <div class="timeline">
+                <div class="time-slot-day">
+                    <span class="time-label">08:00</span>
+                    <div class="event-container">
+                        <div class="event-day event-green">
+                            <div class="event-content">Ворота: броски - Петров П.П.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">09:00</span>
+                    <div class="event-container"></div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">10:00</span>
+                    <div class="event-container">
+                        <div class="event-day event-blue">
+                            <div class="event-time">10:00 - 11:30</div>
+                            <div class="event-content">Футбол: базовые навыки - Иванов И.И.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">11:00</span>
+                    <div class="event-container"></div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">12:00</span>
+                    <div class="event-container">
+                        <div class="event-day event-blue">
+                            <div class="event-time">12:00 - 13:30</div>
+                            <div class="event-content">Футбол: тактика игры - Иванов И.И.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">13:00</span>
+                    <div class="event-container"></div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">14:00</span>
+                    <div class="event-container">
+                        <div class="event-day event-purple">
+                            <div class="event-time">14:00 - 15:30</div>
+                            <div class="event-content">Гимнастика - Смирнова А.А.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">15:00</span>
+                    <div class="event-container"></div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">16:00</span>
+                    <div class="event-container">
+                        <div class="event-day event-orange">
+                            <div class="event-time">16:00 - 17:00</div>
+                            <div class="event-content">Контроль мяча: начальный уровень - Сидоров С.С.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="time-slot-day">
+                    <span class="time-label">17:00</span>
+                    <div class="event-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-title">Тренеры:</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="legend-dot legend-dot-blue"></span>
+                    <span>Иванов И.И.</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot legend-dot-green"></span>
+                    <span>Петров П.П.</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot legend-dot-orange"></span>
+                    <span>Сидоров С.С.</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot legend-dot-purple"></span>
+                    <span>Смирнова А.А.</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot legend-dot-red"></span>
+                    <span>Козлов К.К.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchView(viewType) {
+        // Update toggle buttons
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Show/hide views
+        if (viewType === 'week') {
+            document.getElementById('weekView').classList.add('active');
+            document.getElementById('dayView').classList.remove('active');
+        } else {
+            document.getElementById('weekView').classList.remove('active');
+            document.getElementById('dayView').classList.add('active');
+        }
+    }
+
+    function addTraining() {
+        // Здесь будет логика добавления новой тренировки
+        alert('Форма добавления тренировки будет открыта');
+    }
+
+    function updateSchedule() {
+        // Здесь будет логика обновления расписания по фильтрам
+        console.log('Расписание обновлено по выбранным фильтрам');
+    }
+
+    // Обработка кликов по событиям для просмотра деталей
+    document.querySelectorAll('.event').forEach(event => {
+        event.addEventListener('click', function() {
+            const eventTitle = this.querySelector('.event-title').textContent;
+            alert(`Детали тренировки: ${eventTitle}`);
+        });
+    });
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        // Устанавливаем текущую дату в заголовок дня
+        const today = new Date();
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        const dateString = today.toLocaleDateString('ru-RU', options);
+        document.querySelector('.date-header').textContent = dateString;
+    });
+</script>

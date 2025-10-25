@@ -1,0 +1,823 @@
+﻿@page
+@model FootballSchool.Pages.TrainingResultsModel
+@{
+    ViewData["Title"] = "Результаты тренировок";
+}
+
+@section Styles {
+    <style>
+        .training-results-page .main-content {
+            margin-left: 0 !important;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+            .header h1 {
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #e5e5e5;
+        }
+
+            .btn-secondary:hover {
+                background-color: #f5f5f7;
+            }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: #fff;
+        }
+
+            .btn-primary:hover {
+                background-color: #1d4ed8;
+            }
+
+        .table-container {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f5f5f7;
+        }
+
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .student-info h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .student-info p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .group-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .test-info h4 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .test-info .date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .test-info .result {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .progress-chart {
+            width: 120px;
+            height: 40px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #e5e5e5;
+            background-color: #fff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .icon-btn:hover {
+                background-color: #f5f5f7;
+            }
+
+        /* Стили для скрытой панели */
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+            .sidebar-header h2 {
+                font-size: 18px;
+                font-weight: 600;
+                color: #333;
+            }
+
+        .close-sidebar {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #666;
+        }
+
+            .close-sidebar:hover {
+                background-color: #f5f5f7;
+                color: #333;
+            }
+
+        .right-sidebar {
+            width: 400px;
+            background-color: #fff;
+            border-left: 1px solid #e5e5e5;
+            padding: 24px;
+            overflow-y: auto;
+            position: fixed;
+            right: -400px;
+            top: 0;
+            height: 100vh;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+            .right-sidebar.open {
+                right: 0;
+            }
+
+        .toggle-sidebar-btn {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px 0 0 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+
+            .toggle-sidebar-btn:hover {
+                background-color: #1d4ed8;
+            }
+
+            .toggle-sidebar-btn.open {
+                right: 400px;
+            }
+
+            .toggle-sidebar-btn i {
+                transition: transform 0.3s ease;
+            }
+
+            .toggle-sidebar-btn.open i {
+                transform: rotate(180deg);
+            }
+
+        .content-with-sidebar {
+            display: flex;
+            gap: 24px;
+        }
+
+        .main-content-area {
+            flex: 1;
+            width: 100%;
+        }
+
+        .chart-section {
+            margin-bottom: 32px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+            .chart-header h2 {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+        .chart-select {
+            padding: 6px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fff;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .form-section h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .add-link {
+            color: #2563eb;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 14px;
+                font-weight: 500;
+                margin-bottom: 8px;
+                color: #333;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #2563eb;
+            }
+
+        .result-input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+            .result-input-group input {
+                flex: 1;
+            }
+
+            .result-input-group select {
+                width: 100px;
+            }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .comments-section {
+            margin-top: 32px;
+        }
+
+            .comments-section textarea {
+                margin-bottom: 16px;
+            }
+
+        .save-btn {
+            width: 100%;
+        }
+
+        @@media (max-width: 1200px) {
+            .right-sidebar {
+                width: 350px;
+                right: -350px;
+            }
+
+            .toggle-sidebar-btn.open {
+                right: 350px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .result-input-group {
+                flex-direction: column;
+            }
+
+                .result-input-group select {
+                    width: 100%;
+                }
+
+            .right-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .toggle-sidebar-btn.open {
+                right: 100%;
+            }
+        }
+    </style>
+}
+
+<div class="training-results-page">
+    <div class="main-content">
+        <div class="header">
+            <div class="header-actions">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-filter"></i>
+                    Фильтры
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-download"></i>
+                    Экспорт
+                </button>
+                <button class="btn btn-primary" id="addResultBtn">
+                    <i class="fas fa-plus"></i>
+                    Добавить результат
+                </button>
+            </div>
+        </div>
+
+        <div class="content-with-sidebar">
+            <div class="main-content-area">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ученик</th>
+                                <th>Группа</th>
+                                <th>Последний тест</th>
+                                <th>Прогресс</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="student-cell">
+                                        <div class="avatar">И</div>
+                                        <div class="student-info">
+                                            <h3>Иван Петров</h3>
+                                            <p>12 лет</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="group-badge">Группа А</span>
+                                </td>
+                                <td>
+                                    <div class="test-info">
+                                        <h4>Скорость</h4>
+                                        <div class="date">2023-10-08</div>
+                                        <div class="result">9 сек</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <svg class="progress-chart" viewBox="0 0 120 40">
+                                        <polyline points="0,20 20,18 40,22 60,15 80,10 100,12 120,8" fill="none" stroke="#2563eb" stroke-width="2" />
+                                    </svg>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="icon-btn" onclick="addResult('Иван Петров')">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="icon-btn" onclick="toggleSidebar()">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="student-cell">
+                                        <div class="avatar">М</div>
+                                        <div class="student-info">
+                                            <h3>Мария Иванова</h3>
+                                            <p>11 лет</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="group-badge">Группа Б</span>
+                                </td>
+                                <td>
+                                    <div class="test-info">
+                                        <h4>Техника</h4>
+                                        <div class="date">2023-08-20</div>
+                                        <div class="result">8 балл</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <svg class="progress-chart" viewBox="0 0 120 40">
+                                        <polyline points="0,25 20,24 40,26 60,23 80,22 100,20 120,18" fill="none" stroke="#2563eb" stroke-width="2" />
+                                    </svg>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="icon-btn" onclick="addResult('Мария Иванова')">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="icon-btn" onclick="toggleSidebar()">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="student-cell">
+                                        <div class="avatar">А</div>
+                                        <div class="student-info">
+                                            <h3>Алексей Смирнов</h3>
+                                            <p>13 лет</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="group-badge">Группа А</span>
+                                </td>
+                                <td>
+                                    <div class="test-info">
+                                        <h4>Сила удара</h4>
+                                        <div class="date">2023-08-20</div>
+                                        <div class="result">68 км/ч</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <svg class="progress-chart" viewBox="0 0 120 40">
+                                        <polyline points="0,30 20,30 40,28 60,25 80,15 100,14 120,12" fill="none" stroke="#2563eb" stroke-width="2" />
+                                    </svg>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="icon-btn" onclick="addResult('Алексей Смирнов')">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="icon-btn" onclick="toggleSidebar()">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="student-cell">
+                                        <div class="avatar">Д</div>
+                                        <div class="student-info">
+                                            <h3>Дмитрий Козлов</h3>
+                                            <p>12 лет</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="group-badge">Группа В</span>
+                                </td>
+                                <td>
+                                    <div class="test-info">
+                                        <h4>Техника</h4>
+                                        <div class="date">2023-08-25</div>
+                                        <div class="result">7 балл</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <svg class="progress-chart" viewBox="0 0 120 40">
+                                        <polyline points="0,22 20,24 40,20 60,21 80,19 100,22 120,20" fill="none" stroke="#2563eb" stroke-width="2" />
+                                    </svg>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="icon-btn" onclick="addResult('Дмитрий Козлов')">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="icon-btn" onclick="toggleSidebar()">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="student-cell">
+                                        <div class="avatar">Е</div>
+                                        <div class="student-info">
+                                            <h3>Екатерина Новикова</h3>
+                                            <p>11 лет</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="group-badge">Группа Б</span>
+                                </td>
+                                <td>
+                                    <div class="test-info">
+                                        <h4>Точность</h4>
+                                        <div class="date">2023-08-20</div>
+                                        <div class="result">8 балл</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <svg class="progress-chart" viewBox="0 0 120 40">
+                                        <polyline points="0,26 20,25 40,27 60,24 80,23 100,25 120,22" fill="none" stroke="#2563eb" stroke-width="2" />
+                                    </svg>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="icon-btn" onclick="addResult('Екатерина Новикова')">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="icon-btn" onclick="toggleSidebar()">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая панель -->
+    <aside class="right-sidebar" id="rightSidebar">
+        <div class="chart-section">
+            <div class="chart-header">
+                <h2>Динамика прогресса</h2>
+                <button class="close-sidebar" onclick="toggleSidebar()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <select class="chart-select" id="chartType">
+                    <option>Все тесты</option>
+                    <option>Скорость</option>
+                    <option>Техника</option>
+                    <option>Сила удара</option>
+                    <option>Точность</option>
+                </select>
+            </div>
+            <div class="chart-canvas">
+                <svg viewBox="0 0 350 180">
+                    <polyline points="10,90 30,85 50,95 70,80 90,70 110,65 130,75 150,85 170,80 190,90 210,70 230,35 250,50 270,30 290,45 310,25 330,10 350,5" fill="none" stroke="#2563eb" stroke-width="2" />
+                    <line x1="0" y1="180" x2="350" y2="180" stroke="#e5e5e5" stroke-width="1" />
+                    <text x="10" y="195" font-size="10" fill="#999">20.10.23</text>
+                    <text x="100" y="195" font-size="10" fill="#999">22.10.23</text>
+                    <text x="190" y="195" font-size="10" fill="#999">24.10.23</text>
+                    <text x="280" y="195" font-size="10" fill="#999">26.10.23</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>
+                Последние результаты
+                <a href="#" class="add-link" onclick="clearForm()">+ Добавить</a>
+            </h2>
+
+            <div class="form-group">
+                <label>Тип теста</label>
+                <select class="form-control" id="testType">
+                    <option>Скорость</option>
+                    <option>Техника</option>
+                    <option>Сила удара</option>
+                    <option>Точность</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Дата</label>
+                <input type="date" class="form-control" id="testDate" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+            </div>
+
+            <div class="form-group">
+                <label>Результат</label>
+                <div class="result-input-group">
+                    <input type="text" class="form-control" id="testResult" placeholder="Введите результат">
+                    <select class="form-control" id="resultUnit">
+                        <option>сек</option>
+                        <option>балл</option>
+                        <option>км/ч</option>
+                        <option>%</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Примечания</label>
+                <textarea class="form-control" id="testNotes" placeholder="Добавьте примечания..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="clearForm()">Отмена</button>
+                <button class="btn btn-primary" onclick="saveResult()">Сохранить</button>
+            </div>
+        </div>
+
+        <div class="comments-section">
+            <h2>Комментарии тренера</h2>
+            <textarea class="form-control" id="coachComments" placeholder="Добавьте комментарий о прогрессе ученика..."></textarea>
+            <button class="btn btn-primary save-btn" onclick="saveComments()">Сохранить комментарий</button>
+        </div>
+    </aside>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('rightSidebar');
+        const toggleBtn = document.querySelector('.toggle-sidebar-btn');
+
+        sidebar.classList.toggle('open');
+        toggleBtn.classList.toggle('open');
+    }
+
+    function addResult(studentName) {
+        alert(`Добавление результата для ученика: ${studentName}`);
+        // Здесь можно добавить логику предзаполнения формы данными ученика
+    }
+
+    function saveResult() {
+        const testType = document.getElementById('testType').value;
+        const testDate = document.getElementById('testDate').value;
+        const testResult = document.getElementById('testResult').value;
+        const resultUnit = document.getElementById('resultUnit').value;
+        const testNotes = document.getElementById('testNotes').value;
+
+        if (!testResult) {
+            alert('Пожалуйста, введите результат теста');
+            return;
+        }
+
+        // Здесь будет логика сохранения результата
+        console.log('Сохранение результата:', {
+            testType,
+            testDate,
+            testResult,
+            resultUnit,
+            testNotes
+        });
+
+        alert('Результат успешно сохранен!');
+        clearForm();
+    }
+
+    function saveComments() {
+        const comments = document.getElementById('coachComments').value;
+
+        if (!comments) {
+            alert('Пожалуйста, введите комментарий');
+            return;
+        }
+
+        // Здесь будет логика сохранения комментария
+        console.log('Сохранение комментария:', comments);
+        alert('Комментарий успешно сохранен!');
+        document.getElementById('coachComments').value = '';
+    }
+
+    function clearForm() {
+        document.getElementById('testType').value = 'Скорость';
+        document.getElementById('testDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('testResult').value = '';
+        document.getElementById('resultUnit').value = 'сек';
+        document.getElementById('testNotes').value = '';
+    }
+
+    // Обработчик изменения типа графика
+    document.getElementById('chartType').addEventListener('change', function() {
+        const chartType = this.value;
+        console.log('Изменен тип графика:', chartType);
+        // Здесь можно обновить данные графика
+    });
+
+    // Обработчик кнопки добавления результата
+    document.getElementById('addResultBtn').addEventListener('click', function() {
+        clearForm();
+        // Открываем панель при нажатии на кнопку добавления
+        toggleSidebar();
+    });
+    function toggleSidebar() {
+        const sidebar = document.getElementById('rightSidebar');
+        const toggleBtn = document.querySelector('.toggle-sidebar-btn');
+
+        sidebar.classList.toggle('open');
+        toggleBtn.classList.toggle('open');
+    }
+
+    // Закрытие панели при нажатии на Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const sidebar = document.getElementById('rightSidebar');
+            if (sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        }
+    });
+</script>

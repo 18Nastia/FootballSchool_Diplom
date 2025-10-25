@@ -1,0 +1,696 @@
+﻿@page
+@model FootballSchool.Pages.CoachesModel
+@{
+    ViewData["Title"] = "Список тренеров";
+}
+
+@section Styles {
+    <style>
+        .coaches-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .coaches-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .filters-panel {
+            width: 300px;
+            padding: 24px;
+            overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .filter-section {
+            margin-bottom: 32px;
+        }
+
+            .filter-section h3 {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 16px;
+            }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+            .filter-option input[type="radio"] {
+                width: 18px;
+                height: 18px;
+                margin-right: 10px;
+                cursor: pointer;
+            }
+
+            .filter-option label {
+                font-size: 14px;
+                color: #666;
+                cursor: pointer;
+            }
+
+        .trainers-list {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .list-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .trainer-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+            .trainer-card:hover {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                border-color: #e5e7eb;
+            }
+
+            .trainer-card.selected {
+                border-color: #2563eb;
+                background-color: #eff6ff;
+            }
+
+        .trainer-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin-right: 16px;
+            background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #2563EB;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .trainer-info {
+            flex: 1;
+        }
+
+        .trainer-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .trainer-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-free {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-busy {
+            background-color: #f3e8ff;
+            color: #9333ea;
+        }
+
+        .experience {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .profile-panel {
+            width: 360px;
+            background-color: #fff;
+            padding: 24px;
+            overflow-y: auto;
+            border-left: 1px solid #e0e0e0;
+            display: none;
+            position: relative;
+        }
+
+            .profile-panel.active {
+                display: block;
+            }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+            .close-btn:hover {
+                background: #e5e7eb;
+                color: #374151;
+            }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-right: 40px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 16px;
+            background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #2563EB;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .profile-section {
+            margin-bottom: 24px;
+        }
+
+            .profile-section h4 {
+                font-size: 14px;
+                font-weight: 600;
+                color: #666;
+                margin-bottom: 8px;
+            }
+
+            .profile-section p {
+                font-size: 14px;
+                color: #333;
+                line-height: 1.5;
+                margin: 0;
+            }
+
+        .group-item {
+            background-color: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .group-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+
+        .group-details {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: #fff;
+        }
+
+            .btn-primary:hover {
+                background-color: #1d4ed8;
+            }
+
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #333;
+        }
+
+            .btn-secondary:hover {
+                background-color: #e5e7eb;
+            }
+
+        .no-selection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6b7280;
+            font-size: 16px;
+            text-align: center;
+            padding: 40px;
+        }
+
+            .no-selection i {
+                font-size: 48px;
+                margin-bottom: 16px;
+                color: #d1d5db;
+            }
+
+        /* Адаптивность */
+        @@media (max-width: 1024px) {
+            .filters-panel {
+                width: 250px;
+            }
+
+            .profile-panel {
+                width: 300px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .coaches-content {
+                flex-direction: column;
+            }
+
+            .filters-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .profile-panel {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #e0e0e0;
+            }
+
+            .trainer-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .trainer-avatar {
+                margin-right: 0;
+                margin-bottom: 12px;
+            }
+
+            .trainer-meta {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+}
+
+<div class="coaches-container">
+    <div class="coaches-content">
+        <div class="filters-panel">
+            <div class="filter-section">
+                <h3>Фильтры</h3>
+            </div>
+            <div class="filter-section">
+                <h4 style="font-size: 14px; margin-bottom: 12px;">Специализация</h4>
+                <div class="filter-option">
+                    <input type="radio" id="all-spec" name="specialization" checked>
+                    <label for="all-spec">Все специализации</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="strength" name="specialization">
+                    <label for="strength">Силовые тренировки</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="crossfit" name="specialization">
+                    <label for="crossfit">Кроссфит</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="throws" name="specialization">
+                    <label for="throws">Броски</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="running" name="specialization">
+                    <label for="running">Бег</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="ball-control" name="specialization">
+                    <label for="ball-control">Контроль мяча</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="endurance" name="specialization">
+                    <label for="endurance">Выносливость</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="penalties" name="specialization">
+                    <label for="penalties">Пенальти</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="stretching" name="specialization">
+                    <label for="stretching">Стретчинг</label>
+                </div>
+            </div>
+            <div class="filter-section">
+                <h4 style="font-size: 14px; margin-bottom: 12px;">Статус</h4>
+                <div class="filter-option">
+                    <input type="radio" id="all-status" name="status" checked>
+                    <label for="all-status">Все</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="free" name="status">
+                    <label for="free">Свободен</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="busy" name="status">
+                    <label for="busy">Занят</label>
+                </div>
+            </div>
+            <div class="filter-section">
+                <h4 style="font-size: 14px; margin-bottom: 12px;">Опыт работы</h4>
+                <div class="filter-option">
+                    <input type="radio" id="any-exp" name="experience" checked>
+                    <label for="any-exp">Любой опыт</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="under-5" name="experience">
+                    <label for="under-5">До 5 лет</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="over-5" name="experience">
+                    <label for="over-5">Более 5 лет</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainers-list">
+            <div class="list-header">Список тренеров</div>
+
+            <div class="trainer-card" data-coach-id="1">
+                <div class="trainer-avatar">АС</div>
+                <div class="trainer-info">
+                    <div class="trainer-name">Алексей Смирнов</div>
+                    <div class="trainer-meta">
+                        <span class="status-badge status-free">Свободен</span>
+                        <span class="experience">Опыт: 7 лет</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trainer-card" data-coach-id="2">
+                <div class="trainer-avatar">ЕП</div>
+                <div class="trainer-info">
+                    <div class="trainer-name">Елена Петрова</div>
+                    <div class="trainer-meta">
+                        <span class="status-badge status-busy">Занят</span>
+                        <span class="experience">Опыт: 5 лет</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trainer-card" data-coach-id="3">
+                <div class="trainer-avatar">НВ</div>
+                <div class="trainer-info">
+                    <div class="trainer-name">Николай Волков</div>
+                    <div class="trainer-meta">
+                        <span class="status-badge status-free">Свободен</span>
+                        <span class="experience">Опыт: 10 лет</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trainer-card" data-coach-id="4">
+                <div class="trainer-avatar">МС</div>
+                <div class="trainer-info">
+                    <div class="trainer-name">Мария Соколова</div>
+                    <div class="trainer-meta">
+                        <span class="status-badge status-busy">Занят</span>
+                        <span class="experience">Опыт: 8 лет</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-panel" id="profile-panel">
+            <button class="close-btn" id="close-profile">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="no-selection" id="no-selection">
+                <div>
+                    <i class="fas fa-user-circle"></i>
+                    <p>Выберите тренера для просмотра профиля</p>
+                </div>
+            </div>
+
+            <div id="coach-profile" style="display: none;">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profile-avatar">АС</div>
+                    <div>
+                        <div class="profile-name" id="profile-name">Алексей Смирнов</div>
+                        <span class="status-badge" id="profile-status">Свободен</span>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h4>Квалификация</h4>
+                    <p id="profile-qualification">Мастер спорта, сертифицированный тренер</p>
+                </div>
+
+                <div class="profile-section">
+                    <h4>Опыт работы</h4>
+                    <p id="profile-experience">7 лет</p>
+                </div>
+
+                <div class="profile-section">
+                    <h4>Контакты</h4>
+                    <p id="profile-email">Email: alexey@example.com</p>
+                    <p id="profile-phone">Телефон: +7 (999) 123-45-67</p>
+                </div>
+
+                <div class="profile-section">
+                    <h4>Группы</h4>
+                    <div id="profile-groups">
+                        <div class="group-item">
+                            <div class="group-name">Кроссфит начинающие</div>
+                            <div class="group-details">12 участников • Пн,Ср, Пт 18:00</div>
+                        </div>
+                        <div class="group-item">
+                            <div class="group-name">Силовые тренировки</div>
+                            <div class="group-details">8 участников • Вт, Чт 19:30</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary">Просмотр профиля</button>
+                    <button class="btn btn-secondary">Назначить группу</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Данные тренеров (в реальном приложении эти данные будут приходить с сервера)
+        const coachesData = {
+            1: {
+                name: "Алексей Смирнов",
+                initials: "АС",
+                status: "free",
+                statusText: "Свободен",
+                experience: "7 лет",
+                qualification: "Мастер спорта, сертифицированный тренер",
+                email: "alexey@example.com",
+                phone: "+7 (999) 123-45-67",
+                groups: [
+                    { name: "Кроссфит начинающие", details: "12 участников • Пн,Ср, Пт 18:00" },
+                    { name: "Силовые тренировки", details: "8 участников • Вт, Чт 19:30" }
+                ]
+            },
+            2: {
+                name: "Елена Петрова",
+                initials: "ЕП",
+                status: "busy",
+                statusText: "Занят",
+                experience: "5 лет",
+                qualification: "Кандидат в мастера спорта, специалист по детскому футболу",
+                email: "elena@example.com",
+                phone: "+7 (999) 234-56-78",
+                groups: [
+                    { name: "Детская группа U10", details: "15 участников • Пн,Ср, Пт 16:00" },
+                    { name: "Техника владения мячом", details: "10 участников • Вт, Чт 17:30" }
+                ]
+            },
+            3: {
+                name: "Николай Волков",
+                initials: "НВ",
+                status: "free",
+                statusText: "Свободен",
+                experience: "10 лет",
+                qualification: "Заслуженный тренер, эксперт по тактике",
+                email: "nikolay@example.com",
+                phone: "+7 (999) 345-67-89",
+                groups: [
+                    { name: "Тактическая подготовка", details: "6 участников • Пн,Чт 19:00" },
+                    { name: "Вратарское искусство", details: "4 участника • Ср, Пт 18:30" }
+                ]
+            },
+            4: {
+                name: "Мария Соколова",
+                initials: "МС",
+                status: "busy",
+                statusText: "Занят",
+                experience: "8 лет",
+                qualification: "Специалист по физической подготовке, нутрициолог",
+                email: "maria@example.com",
+                phone: "+7 (999) 456-78-90",
+                groups: [
+                    { name: "Функциональный тренинг", details: "14 участников • Пн,Ср, Пт 19:00" },
+                    { name: "Йога для футболистов", details: "8 участников • Вт, Чт 18:00" }
+                ]
+            }
+        };
+
+        // Обработчик выбора тренера
+        document.querySelectorAll('.trainer-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const coachId = this.getAttribute('data-coach-id');
+
+                // Убираем выделение у всех карточек
+                document.querySelectorAll('.trainer-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+
+                // Добавляем выделение текущей карточке
+                this.classList.add('selected');
+
+                // Показываем панель профиля
+                const profilePanel = document.getElementById('profile-panel');
+                profilePanel.classList.add('active');
+
+                // Загружаем данные тренера
+                loadCoachProfile(coachId);
+            });
+        });
+
+        // Обработчик закрытия панели профиля
+        document.getElementById('close-profile').addEventListener('click', function(e) {
+            e.stopPropagation(); // Предотвращаем всплытие события
+
+            // Скрываем панель профиля
+            const profilePanel = document.getElementById('profile-panel');
+            profilePanel.classList.remove('active');
+
+            // Снимаем выделение со всех тренеров
+            document.querySelectorAll('.trainer-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+
+            // Сбрасываем состояние панели
+            resetProfilePanel();
+        });
+
+        // Функция загрузки профиля тренера
+        function loadCoachProfile(coachId) {
+            const coach = coachesData[coachId];
+            if (!coach) return;
+
+            // Скрываем сообщение "Выберите тренера"
+            document.getElementById('no-selection').style.display = 'none';
+
+            // Показываем профиль
+            const coachProfile = document.getElementById('coach-profile');
+            coachProfile.style.display = 'block';
+
+            // Заполняем данные
+            document.getElementById('profile-avatar').textContent = coach.initials;
+            document.getElementById('profile-name').textContent = coach.name;
+
+            const statusBadge = document.getElementById('profile-status');
+            statusBadge.textContent = coach.statusText;
+            statusBadge.className = `status-badge status-${coach.status}`;
+
+            document.getElementById('profile-qualification').textContent = coach.qualification;
+            document.getElementById('profile-experience').textContent = coach.experience;
+            document.getElementById('profile-email').textContent = `Email: ${coach.email}`;
+            document.getElementById('profile-phone').textContent = `Телефон: ${coach.phone}`;
+
+            // Заполняем группы
+            const groupsContainer = document.getElementById('profile-groups');
+            groupsContainer.innerHTML = '';
+
+            coach.groups.forEach(group => {
+                const groupElement = document.createElement('div');
+                groupElement.className = 'group-item';
+                groupElement.innerHTML = `
+                    <div class="group-name">${group.name}</div>
+                    <div class="group-details">${group.details}</div>
+                `;
+                groupsContainer.appendChild(groupElement);
+            });
+        }
+
+        // Функция сброса состояния панели профиля
+        function resetProfilePanel() {
+            // Показываем сообщение "Выберите тренера"
+            document.getElementById('no-selection').style.display = 'flex';
+
+            // Скрываем профиль
+            document.getElementById('coach-profile').style.display = 'none';
+        }
+
+        // Обработчики фильтров
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                filterCoaches();
+            });
+        });
+
+        // Функция фильтрации тренеров
+        function filterCoaches() {
+            // Здесь можно добавить логику фильтрации списка тренеров
+            // на основе выбранных фильтров
+            console.log('Применение фильтров...');
+        }
+    </script>
+}

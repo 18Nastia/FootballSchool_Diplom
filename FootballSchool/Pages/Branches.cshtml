@@ -1,0 +1,1022 @@
+﻿@page
+@model FootballSchool.Pages.BranchesModel
+@{
+    ViewData["Title"] = "Филиалы и площадки";
+}
+
+@section Styles {
+    <style>
+        .branches-page .main-content {
+            margin-left: 0 !important;
+            transition: margin-right 0.3s ease;
+        }
+
+            .branches-page .main-content.with-sidebar {
+                margin-right: 380px;
+            }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+            .header h1 {
+                font-size: 24px;
+                font-weight: 600;
+                color: #111827;
+            }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-secondary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-secondary:hover {
+                background: #F9FAFB;
+            }
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #4285F4;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-primary:hover {
+                background: #3367D6;
+            }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            color: #6B7280;
+            margin-bottom: 6px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #111827;
+            cursor: pointer;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+            .card:hover {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .card.active {
+                border: 2px solid #4CAF50;
+            }
+
+        .card-image {
+            position: relative;
+            height: 180px;
+            overflow: hidden;
+        }
+
+            .card-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .favorite-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+            .card-content h3 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #111827;
+                margin-bottom: 12px;
+            }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+            .info-item i {
+                width: 14px;
+                text-align: center;
+            }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .pagination-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #D1D5DB;
+        }
+
+            .dot.active {
+                background: #4285F4;
+            }
+
+        .details-link {
+            font-size: 13px;
+            color: #4285F4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .details-link:hover {
+                text-decoration: underline;
+            }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            width: 380px;
+            background: white;
+            border-left: 1px solid #E5E7EB;
+            overflow-y: auto;
+            padding: 24px;
+            position: fixed;
+            top: 0;
+            right: -380px;
+            height: 100vh;
+            transition: right 0.3s ease;
+            z-index: 1000;
+        }
+
+            .right-sidebar.active {
+                right: 0;
+            }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .sidebar-header h2 {
+                font-size: 18px;
+                font-weight: 600;
+                color: #111827;
+            }
+
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #6B7280;
+        }
+
+        .branch-preview {
+            width: 100%;
+            height: 160px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+            .branch-preview img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .branch-details h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #6B7280;
+            margin-bottom: 8px;
+        }
+
+            .detail-item i {
+                width: 16px;
+                text-align: center;
+            }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin: 24px 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #6B7280;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+            .tab.active {
+                color: #4285F4;
+                border-bottom-color: #4285F4;
+            }
+
+        .halls-section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+            .section-header h4 {
+                font-size: 15px;
+                font-weight: 600;
+                color: #111827;
+            }
+
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #4285F4;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .hall-card {
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .hall-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+            .hall-header h5 {
+                font-size: 14px;
+                font-weight: 600;
+                color: #111827;
+            }
+
+        .hall-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .active-status {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .new-status {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .hall-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 13px;
+            color: #6B7280;
+            margin-bottom: 10px;
+        }
+
+        .hall-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .action-link {
+            font-size: 13px;
+            color: #4285F4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .action-link.delete {
+                color: #DC2626;
+            }
+
+        .map-section {
+            margin-bottom: 24px;
+        }
+
+            .map-section h4 {
+                font-size: 15px;
+                font-weight: 600;
+                color: #111827;
+                margin-bottom: 12px;
+            }
+
+        .map-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #F3F4F6;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .map-content {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6B7280;
+            font-size: 14px;
+        }
+
+        .map-link {
+            font-size: 13px;
+            color: #4285F4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-section {
+            margin-bottom: 24px;
+        }
+
+            .contact-section h4 {
+                font-size: 15px;
+                font-weight: 600;
+                color: #111827;
+                margin-bottom: 12px;
+            }
+
+        .contact-info {
+            font-size: 13px;
+            color: #6B7280;
+            line-height: 1.6;
+        }
+
+            .contact-info p {
+                margin-bottom: 8px;
+            }
+
+        .sidebar-actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .btn-edit {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-edit:hover {
+                background: #F9FAFB;
+            }
+
+        .btn-delete {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #FCA5A5;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #DC2626;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-delete:hover {
+                background: #FEF2F2;
+            }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+            .overlay.active {
+                display: block;
+            }
+
+        @@media (max-width: 1200px) {
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+
+            .branches-page .main-content.with-sidebar {
+                margin-right: 0;
+            }
+
+            .right-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+                .right-sidebar.active {
+                    right: 0;
+                }
+        }
+
+        @@media (max-width: 768px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+}
+
+<div class="branches-page">
+    <div class="overlay" id="overlay"></div>
+
+    <div class="main-content" id="mainContent">
+        <header class="header">
+            <div class="header-actions">
+                <button class="btn-secondary">
+                    <i class="fas fa-filter"></i>
+                    Фильтры
+                </button>
+                <button class="btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Добавить филиал
+                </button>
+            </div>
+        </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Город</label>
+                <select class="filter-select">
+                    <option>Все города</option>
+                    <option>Москва</option>
+                    <option>Санкт-Петербург</option>
+                    <option>Казань</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Тип зала</label>
+                <select class="filter-select">
+                    <option>Все типы</option>
+                    <option>Универсальный зал</option>
+                    <option>Футбольное поле</option>
+                    <option>Спортивный комплекс</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Статус</label>
+                <select class="filter-select">
+                    <option>Все статусы</option>
+                    <option>Активен</option>
+                    <option>Неактивен</option>
+                    <option>На ремонте</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="cards-grid">
+            <!-- Card 1 -->
+            <div class="card" onclick="openBranchDetails(1)">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=400&h=250&fit=crop" alt="Football boots">
+                    <button class="favorite-btn">
+                        <i class="fas fa-heart" style="color: #4285F4;"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <h3>Футбольная школа "Чемпион" - Центр</h3>
+                    <div class="card-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>ул. Спортивная, 10 · Москва</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Александр Петров</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>3 группы</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="pagination-dots">
+                            <span class="dot active"></span>
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <a href="#" class="details-link">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card" onclick="openBranchDetails(2)">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1543353072-8e5ffb15ba5c?w=400&h=250&fit=crop" alt="Football field">
+                    <button class="favorite-btn">
+                        <i class="fas fa-heart" style="color: #4285F4;"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <h3>Футбольная школа "Чемпион" - Запад</h3>
+                    <div class="card-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>ул. Футбольная, 25 · Москва</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Сергей Иванов</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>2 группы</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="pagination-dots">
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <a href="#" class="details-link">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card" onclick="openBranchDetails(3)">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=250&fit=crop" alt="Football on grass">
+                    <button class="favorite-btn">
+                        <i class="fas fa-heart" style="color: #4CAF50;"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <h3>Футбольная школа "Чемпион" - Юг</h3>
+                    <div class="card-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>проспект Спортивная, 15 · Москва</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Дмитрий Соколов</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>1 группа</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="pagination-dots">
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <a href="#" class="details-link">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="card" onclick="openBranchDetails(4)">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=400&h=250&fit=crop" alt="Football stadium">
+                    <button class="favorite-btn">
+                        <i class="fas fa-heart" style="color: #4285F4;"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <h3>Футбольная школа "Чемпион" - Север</h3>
+                    <div class="card-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>ул. Тренерская, 8 · Санкт-Петербург</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Игорь Николаев</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>2 группы</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="pagination-dots">
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <a href="#" class="details-link">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="card" onclick="openBranchDetails(5)">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=250&fit=crop" alt="Football balls">
+                    <button class="favorite-btn">
+                        <i class="fas fa-heart" style="color: #4285F4;"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <h3>Футбольная школа "Чемпион" - Восток</h3>
+                    <div class="card-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>проспект Чемпионов, 42 · Казань</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Алексей Морозов</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>2 группы</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="pagination-dots">
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <a href="#" class="details-link">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="card" onclick="openBranchDetails(6)">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=250&fit=crop" alt="Football training">
+                    <button class="favorite-btn">
+                        <i class="fas fa-heart" style="color: #4285F4;"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <h3>Футбольная школа "Чемпион" - Олимпийский</h3>
+                    <div class="card-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>ул. Олимпийская, 5 · Москва</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Михаил Волков</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>4 группы</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="pagination-dots">
+                            <span class="dot active"></span>
+                            <span class="dot active"></span>
+                            <span class="dot active"></span>
+                        </div>
+                        <a href="#" class="details-link">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <aside class="right-sidebar" id="branchSidebar">
+        <div class="sidebar-header">
+            <h2>Информация о филиале</h2>
+            <button class="close-btn" onclick="closeBranchDetails()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="branch-preview">
+            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=250&fit=crop" alt="Branch preview">
+        </div>
+
+        <div class="branch-details">
+            <h3>Футбольная школа "Чемпион" - Юг</h3>
+            <div class="detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>проспект Спортивная, 15 · Москва</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-user-tie"></i>
+                <span>Дмитрий Соколов</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-phone"></i>
+                <span>+7 (495) 456-78-90</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-envelope"></i>
+                <span>south@football-school.ru</span>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active">Информация</button>
+            <button class="tab">Расписание</button>
+            <button class="tab">Группы</button>
+        </div>
+
+        <div class="halls-section">
+            <div class="section-header">
+                <h4>Залы и площадки</h4>
+                <button class="add-btn">
+                    <i class="fas fa-plus"></i>
+                    Добавить зал
+                </button>
+            </div>
+
+            <div class="hall-card">
+                <div class="hall-header">
+                    <h5>Универсальный зал</h5>
+                    <span class="hall-status active-status">Активен</span>
+                </div>
+                <div class="hall-info">
+                    <span>Тип: Универсальный зал</span>
+                    <span>Вместимость: 25 человек</span>
+                    <span>Размер: 20x40 м</span>
+                </div>
+                <div class="hall-actions">
+                    <a href="#" class="action-link">Редактировать</a>
+                    <a href="#" class="action-link delete">Удалить</a>
+                </div>
+            </div>
+
+            <div class="hall-card">
+                <div class="hall-header">
+                    <h5>Новое поле</h5>
+                    <span class="hall-status new-status">новый</span>
+                </div>
+                <div class="hall-info">
+                    <span>Тип: Футбольное поле</span>
+                    <span>Вместимость: 22 человек</span>
+                    <span>Размер: 60x90 м</span>
+                </div>
+                <div class="hall-actions">
+                    <a href="#" class="action-link">Редактировать</a>
+                    <a href="#" class="action-link delete">Удалить</a>
+                </div>
+            </div>
+
+            <div class="hall-card">
+                <div class="hall-header">
+                    <h5>Тренажерный зал</h5>
+                    <span class="hall-status active-status">Активен</span>
+                </div>
+                <div class="hall-info">
+                    <span>Тип: Тренажерный зал</span>
+                    <span>Вместимость: 15 человек</span>
+                    <span>Размер: 15x20 м</span>
+                </div>
+                <div class="hall-actions">
+                    <a href="#" class="action-link">Редактировать</a>
+                    <a href="#" class="action-link delete">Удалить</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-section">
+            <h4>Карта</h4>
+            <div class="map-placeholder">
+                <div class="map-content">
+                    <i class="fas fa-map" style="font-size: 48px; opacity: 0.5;"></i>
+                    <div style="margin-top: 10px;">Карта расположения филиала</div>
+                </div>
+            </div>
+            <a href="#" class="map-link">Открыть на карте</a>
+        </div>
+
+        <div class="contact-section">
+            <h4>Контактная информация</h4>
+            <div class="contact-info">
+                <p><strong>Телефон:</strong> +7 (495) 456-78-90</p>
+                <p><strong>Email:</strong> south@football-school.ru</p>
+                <p><strong>Адрес:</strong> проспект Спортивная, 15, Москва</p>
+                <p><strong>Часы работы:</strong> Пн-Пт: 9:00-20:00, Сб: 10:00-18:00, Вс: выходной</p>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h4>Статистика</h4>
+            <div class="contact-info">
+                <p><strong>Количество групп:</strong> 3</p>
+                <p><strong>Общее количество учеников:</strong> 45</p>
+                <p><strong>Тренеров:</strong> 2</p>
+                <p><strong>Занятий в неделю:</strong> 12</p>
+            </div>
+        </div>
+
+        <div class="sidebar-actions">
+            <button class="btn-edit">
+                <i class="fas fa-edit"></i>
+                Редактировать
+            </button>
+            <button class="btn-delete">
+                <i class="fas fa-trash"></i>
+                Удалить
+            </button>
+        </div>
+    </aside>
+</div>
+
+<script>
+    function openBranchDetails(branchId) {
+        const sidebar = document.getElementById('branchSidebar');
+        const mainContent = document.getElementById('mainContent');
+        const overlay = document.getElementById('overlay');
+
+        sidebar.classList.add('active');
+        mainContent.classList.add('with-sidebar');
+        overlay.classList.add('active');
+
+        // Здесь можно загрузить данные филиала по branchId
+        console.log('Opening branch details for ID:', branchId);
+
+        // Обновляем информацию в сайдбаре в зависимости от выбранного филиала
+        updateBranchInfo(branchId);
+    }
+
+    function updateBranchInfo(branchId) {
+        // В реальном приложении здесь был бы AJAX запрос для загрузки данных
+        const branchTitles = {
+            1: 'Футбольная школа "Чемпион" - Центр',
+            2: 'Футбольная школа "Чемпион" - Запад',
+            3: 'Футбольная школа "Чемпион" - Юг',
+            4: 'Футбольная школа "Чемпион" - Север',
+            5: 'Футбольная школа "Чемпион" - Восток',
+            6: 'Футбольная школа "Чемпион" - Олимпийский'
+        };
+
+        const branchDetails = document.querySelector('.branch-details h3');
+        if (branchDetails && branchTitles[branchId]) {
+            branchDetails.textContent = branchTitles[branchId];
+        }
+    }
+
+    function closeBranchDetails() {
+        const sidebar = document.getElementById('branchSidebar');
+        const mainContent = document.getElementById('mainContent');
+        const overlay = document.getElementById('overlay');
+
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('with-sidebar');
+        overlay.classList.remove('active');
+    }
+
+    // Закрытие по клику на overlay
+    document.getElementById('overlay').addEventListener('click', closeBranchDetails);
+
+    // Закрытие по ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeBranchDetails();
+        }
+    });
+
+    // Обработка кликов по табам
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+</script>

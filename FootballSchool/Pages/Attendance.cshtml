@@ -1,0 +1,536 @@
+﻿@page
+@model FootballSchool.Pages.AttendanceModel
+@{
+    ViewData["Title"] = "Учет посещаемости";
+}
+
+@section Styles {
+    <style>
+        .attendance-page .main-content {
+            margin-left: 0 !important;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 32px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .filter-group {
+            flex: 1;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .select-input, .date-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        .stats-box {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stats-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .stats-text {
+            font-size: 14px;
+            color: #1e40af;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .btn-mark-all {
+            padding: 10px 20px;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+
+            .btn-mark-all:hover {
+                background-color: #16a34a;
+            }
+
+        .btn-mark-none {
+            padding: 10px 20px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+
+            .btn-mark-none:hover {
+                background-color: #dc2626;
+            }
+
+        .hint-text {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background-color: #f8fafc;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .attendance-table {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 2fr 3fr;
+            padding: 16px 24px;
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 2fr 3fr;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+            .table-row:hover {
+                background-color: #f9fafb;
+            }
+
+            .table-row:last-child {
+                border-bottom: none;
+            }
+
+        .student-name {
+            font-size: 15px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .status-group {
+            display: flex;
+            gap: 24px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+            .radio-option:hover {
+                background-color: #f3f4f6;
+            }
+
+            .radio-option input[type="radio"] {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+                accent-color: #2563eb;
+            }
+
+            .radio-option label {
+                font-size: 14px;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .radio-option.absent label {
+                color: #ef4444;
+            }
+
+        .comment-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #374151;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+            .comment-input:focus {
+                outline: none;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+
+            .comment-input::placeholder {
+                color: #9ca3af;
+            }
+
+        .bottom-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-export {
+            padding: 12px 24px;
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+            .btn-export:hover {
+                background-color: #f9fafb;
+                border-color: #9ca3af;
+            }
+
+        .btn-save {
+            padding: 12px 32px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+            .btn-save:hover {
+                background-color: #1d4ed8;
+            }
+
+        .keyboard-shortcuts {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .shortcut-key {
+            background-color: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        @@media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .table-header {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .table-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .status-group {
+                justify-content: flex-start;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .bottom-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<div class="attendance-page">
+    <div class="main-content">
+
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">Выберите группу</label>
+                <select class="select-input">
+                    <option>Юниоры (8-10 лет)</option>
+                    <option>Кадеты (11-13 лет)</option>
+                    <option>Юноши (14-16 лет)</option>
+                    <option>Младшая группа (6-7 лет)</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Дата</label>
+                <input type="date" class="date-input" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+            </div>
+        </div>
+
+        <div class="stats-box">
+            <div class="stats-title">Статистика посещаемости</div>
+            <div class="stats-text">Присутствует: <strong>3 из 5 учеников (60%)</strong></div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-mark-all" onclick="markAllPresent()">
+                <i class="fas fa-check-circle"></i>
+                Отметить всех
+            </button>
+            <button class="btn-mark-none" onclick="markAllAbsent()">
+                <i class="fas fa-times-circle"></i>
+                Никого нет
+            </button>
+        </div>
+
+        <div class="hint-text">
+            <div>Подсказка: Используйте клавиши для быстрой отметки посещаемости</div>
+            <div class="keyboard-shortcuts">
+                <div class="shortcut-item">
+                    <span class="shortcut-key">У</span>
+                    <span>или</span>
+                    <span class="shortcut-key">Л</span>
+                    <span>- присутствует</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">N</span>
+                    <span>или</span>
+                    <span class="shortcut-key">О</span>
+                    <span>- отсутствует</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="attendance-table">
+            <div class="table-header">
+                <div>Ученик</div>
+                <div>Статус</div>
+                <div>Комментарий</div>
+            </div>
+
+            <div class="table-row">
+                <div class="student-name">Иванов Алексей</div>
+                <div class="status-group">
+                    <label class="radio-option">
+                        <input type="radio" name="student1" checked onchange="updateStatistics()">
+                        <span>Был</span>
+                    </label>
+                    <label class="radio-option absent">
+                        <input type="radio" name="student1" onchange="updateStatistics()">
+                        <span>Не был</span>
+                    </label>
+                </div>
+                <div>
+                    <input type="text" class="comment-input" placeholder="Комментарий (необязательно)">
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="student-name">Петрова Анна</div>
+                <div class="status-group">
+                    <label class="radio-option">
+                        <input type="radio" name="student2" onchange="updateStatistics()">
+                        <span>Был</span>
+                    </label>
+                    <label class="radio-option absent">
+                        <input type="radio" name="student2" checked onchange="updateStatistics()">
+                        <span>Не был</span>
+                    </label>
+                </div>
+                <div>
+                    <input type="text" class="comment-input" placeholder="Болеет">
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="student-name">Сидоров Дмитрий</div>
+                <div class="status-group">
+                    <label class="radio-option">
+                        <input type="radio" name="student3" checked onchange="updateStatistics()">
+                        <span>Был</span>
+                    </label>
+                    <label class="radio-option absent">
+                        <input type="radio" name="student3" onchange="updateStatistics()">
+                        <span>Не был</span>
+                    </label>
+                </div>
+                <div>
+                    <input type="text" class="comment-input" placeholder="Комментарий (необязательно)">
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="student-name">Козлова София</div>
+                <div class="status-group">
+                    <label class="radio-option">
+                        <input type="radio" name="student4" checked onchange="updateStatistics()">
+                        <span>Был</span>
+                    </label>
+                    <label class="radio-option absent">
+                        <input type="radio" name="student4" onchange="updateStatistics()">
+                        <span>Не был</span>
+                    </label>
+                </div>
+                <div>
+                    <input type="text" class="comment-input" placeholder="Комментарий (необязательно)">
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="student-name">Новиков Кирилл</div>
+                <div class="status-group">
+                    <label class="radio-option">
+                        <input type="radio" name="student5" onchange="updateStatistics()">
+                        <span>Был</span>
+                    </label>
+                    <label class="radio-option absent">
+                        <input type="radio" name="student5" checked onchange="updateStatistics()">
+                        <span>Не был</span>
+                    </label>
+                </div>
+                <div>
+                    <input type="text" class="comment-input" placeholder="Отпуск">
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-actions">
+            <button class="btn-export" onclick="exportAttendance()">
+                <i class="fas fa-download"></i>
+                Экспорт
+            </button>
+            <button class="btn-save" onclick="saveAttendance()">
+                <i class="fas fa-save"></i>
+                Сохранить
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateStatistics() {
+        const totalStudents = 5;
+        let presentCount = 0;
+
+        // Считаем количество присутствующих
+        for (let i = 1; i <= totalStudents; i++) {
+            const presentRadio = document.querySelector(`input[name="student${i}"]`);
+            if (presentRadio.checked) {
+                presentCount++;
+            }
+        }
+
+        const percentage = Math.round((presentCount / totalStudents) * 100);
+        document.querySelector('.stats-text').innerHTML =
+            `Присутствует: <strong>${presentCount} из ${totalStudents} учеников (${percentage}%)</strong>`;
+    }
+
+    function markAllPresent() {
+        for (let i = 1; i <= 5; i++) {
+            const presentRadio = document.querySelector(`input[name="student${i}"]`);
+            presentRadio.checked = true;
+        }
+        updateStatistics();
+    }
+
+    function markAllAbsent() {
+        for (let i = 1; i <= 5; i++) {
+            const absentRadio = document.querySelectorAll(`input[name="student${i}"]`)[1];
+            absentRadio.checked = true;
+        }
+        updateStatistics();
+    }
+
+    function saveAttendance() {
+        // Здесь будет логика сохранения данных
+        alert('Посещаемость успешно сохранена!');
+    }
+
+    function exportAttendance() {
+        // Здесь будет логика экспорта данных
+        alert('Данные экспортированы в Excel!');
+    }
+
+    // Обработка горячих клавиш
+    document.addEventListener('keydown', function(event) {
+        const key = event.key.toLowerCase();
+
+        // У/Л - присутствует, N/О - отсутствует
+        if (key === 'у' || key === 'l' || key === 'n' || key === 'о') {
+            event.preventDefault();
+
+            // В реальном приложении здесь была бы логика определения активного ряда
+            // и установки соответствующего статуса
+            console.log(`Нажата клавиша: ${key}`);
+        }
+    });
+
+    // Инициализация статистики при загрузке
+    document.addEventListener('DOMContentLoaded', updateStatistics);
+</script>

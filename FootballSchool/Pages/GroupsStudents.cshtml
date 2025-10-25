@@ -1,0 +1,690 @@
+﻿@page
+@model FootballSchool.Pages.GroupsStudentsModel
+@{
+    ViewData["Title"] = "Группы и ученики";
+}
+
+@section Styles {
+    <style>
+        .groups-students-page .main-content {
+            margin-left: 0 !important;
+            padding: 0px 0px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+            .page-header h1 {
+                font-size: 32px;
+                font-weight: 700;
+                color: #1d1d1f;
+            }
+
+        .btn-primary {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+            .btn-primary:hover {
+                background-color: #1d4ed8;
+            }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            border-bottom: 2px solid #e5e5e7;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6e6e73;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+            .tab:hover {
+                color: #1d1d1f;
+            }
+
+            .tab.active {
+                color: #2563eb;
+                border-bottom-color: #2563eb;
+            }
+
+        .tab-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .filter-group {
+            flex: 1;
+            max-width: 400px;
+        }
+
+            .filter-group label {
+                display: block;
+                font-size: 13px;
+                font-weight: 500;
+                color: #6e6e73;
+                margin-bottom: 8px;
+            }
+
+        .search-input,
+        .select-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+            .search-input:focus,
+            .select-input:focus {
+                outline: none;
+                border-color: #2563eb;
+            }
+
+            .search-input::placeholder {
+                color: #a1a1a6;
+            }
+
+        /* Groups View */
+        .groups-view {
+            display: block;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s;
+        }
+
+            .card:hover {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .edit-button {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: #6e6e73;
+            transition: color 0.2s;
+        }
+
+            .edit-button:hover {
+                color: #1d1d1f;
+            }
+
+            .edit-button svg {
+                width: 18px;
+                height: 18px;
+            }
+
+        .card-age {
+            font-size: 13px;
+            color: #6e6e73;
+            margin-bottom: 16px;
+        }
+
+        .card-students {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1d1d1f;
+        }
+
+        .students-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .card-info {
+            font-size: 13px;
+            color: #6e6e73;
+            margin-bottom: 8px;
+        }
+
+        .view-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #eff6ff;
+            color: #2563eb;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background-color 0.2s;
+        }
+
+            .view-button:hover {
+                background-color: #dbeafe;
+            }
+
+        /* Students View */
+        .students-view {
+            display: none;
+        }
+
+        .section-header {
+            margin-bottom: 24px;
+        }
+
+            .section-header h2 {
+                font-size: 24px;
+                font-weight: 600;
+                color: #1d1d1f;
+                margin-bottom: 4px;
+            }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #6e6e73;
+        }
+
+        .search-bar {
+            margin-bottom: 24px;
+        }
+
+        .search-input-large {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+            .search-input-large:focus {
+                outline: none;
+                border-color: #2563eb;
+            }
+
+            .search-input-large::placeholder {
+                color: #a1a1a6;
+            }
+
+        .student-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 16px;
+            transition: box-shadow 0.2s;
+        }
+
+            .student-card:hover {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .student-header h3 {
+                font-size: 18px;
+                font-weight: 600;
+                color: #1d1d1f;
+            }
+
+        .age {
+            font-size: 14px;
+            color: #6e6e73;
+            background: #f5f5f7;
+            padding: 4px 12px;
+            border-radius: 16px;
+        }
+
+        .progress-section {
+            margin-bottom: 20px;
+        }
+
+        .progress-label {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+            .progress-label span {
+                font-size: 14px;
+                font-weight: 500;
+                color: #1d1d1f;
+            }
+
+        .details-link {
+            font-size: 13px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .details-link:hover {
+                text-decoration: underline;
+            }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: #6e6e73;
+            margin-left: auto;
+            transition: color 0.2s;
+        }
+
+            .edit-btn:hover {
+                color: #1d1d1f;
+            }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f5f5f7;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #2563eb;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .rating-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e5e5e7;
+        }
+
+            .dot.filled {
+                background: #2563eb;
+            }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #6e6e73;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #1d1d1f;
+        }
+
+        /* Responsive */
+        @@media (max-width: 1024px) {
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                max-width: 100%;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .student-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<div class="groups-students-page">
+    <div class="main-content">
+        <button class="btn-primary" id="addButton">
+            <i class="fas fa-plus"></i>
+            Добавить ученика
+        </button>
+        <div class="tabs">
+            <button class="tab active" data-view="groups">
+                <i class="fas fa-users tab-icon"></i>
+                Группы
+            </button>
+            <button class="tab" data-view="students">
+                <i class="fas fa-user tab-icon"></i>
+                Индивидуальные ученики
+            </button>
+        </div>
+
+        <!-- Groups View -->
+        <div class="groups-view" id="groupsView">
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>Поиск по группе</label>
+                    <input type="text" class="search-input" placeholder="Введите название группы">
+                </div>
+                <div class="filter-group">
+                    <label>Возрастная группа</label>
+                    <select class="select-input">
+                        <option>Все возрасты</option>
+                        <option>5-7 лет</option>
+                        <option>8-10 лет</option>
+                        <option>11-13 лет</option>
+                        <option>14-16 лет</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Юниоры</h3>
+                        <button class="edit-button">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <p class="card-age">Возраст: 8-10 лет</p>
+                    <div class="card-students">
+                        <i class="fas fa-users students-icon"></i>
+                        <span>12 учеников</span>
+                    </div>
+                    <p class="card-info">Тренер: Иванов И.И.</p>
+                    <p class="card-info">Расписание: Пн, Ср, Пт 16:00-17:30</p>
+                    <button class="view-button">Просмотреть учеников</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Старшая группа</h3>
+                        <button class="edit-button">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <p class="card-age">Возраст: 14-16 лет</p>
+                    <div class="card-students">
+                        <i class="fas fa-users students-icon"></i>
+                        <span>8 учеников</span>
+                    </div>
+                    <p class="card-info">Тренер: Петров П.П.</p>
+                    <p class="card-info">Расписание: Вт, Чт 18:00-20:00, Сб 10:00-12:00</p>
+                    <button class="view-button">Просмотреть учеников</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Начинающие</h3>
+                        <button class="edit-button">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <p class="card-age">Возраст: 5-7 лет</p>
+                    <div class="card-students">
+                        <i class="fas fa-users students-icon"></i>
+                        <span>15 учеников</span>
+                    </div>
+                    <p class="card-info">Тренер: Сидорова А.В.</p>
+                    <p class="card-info">Расписание: Пн, Ср 15:00-16:00</p>
+                    <button class="view-button">Просмотреть учеников</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Продвинутые</h3>
+                        <button class="edit-button">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <p class="card-age">Возраст: 11-13 лет</p>
+                    <div class="card-students">
+                        <i class="fas fa-users students-icon"></i>
+                        <span>10 учеников</span>
+                    </div>
+                    <p class="card-info">Тренер: Иванов И.И.</p>
+                    <p class="card-info">Расписание: Вт, Чт, Сб 17:00-18:30</p>
+                    <button class="view-button">Просмотреть учеников</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students View -->
+        <div class="students-view" id="studentsView">
+            <div class="section-header">
+                <h2>Индивидуальные ученики</h2>
+                <p class="section-subtitle">Ученики, не привязанные к группам</p>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" class="search-input-large" placeholder="Поиск по имени или родителю">
+            </div>
+
+            <div class="student-card">
+                <div class="student-header">
+                    <h3>Смирнов Михаил</h3>
+                    <span class="age">12 лет</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-label">
+                        <span>Прогресс</span>
+                        <a href="#" class="details-link">Подробнее</a>
+                        <button class="edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                    <div class="rating-dots">
+                        <span class="dot filled"></span>
+                        <span class="dot filled"></span>
+                        <span class="dot filled"></span>
+                        <span class="dot filled"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+                <div class="student-info">
+                    <div class="info-item">
+                        <span class="info-label">Родитель</span>
+                        <span class="info-value">Смирнова Татьяна</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Телефон</span>
+                        <span class="info-value">+7 (999) 111-22-33</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">smirnova@example.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="student-card">
+                <div class="student-header">
+                    <h3>Кузнецова Елена</h3>
+                    <span class="age">8 лет</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-label">
+                        <span>Прогресс</span>
+                        <a href="#" class="details-link">Подробнее</a>
+                        <button class="edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%"></div>
+                    </div>
+                    <div class="rating-dots">
+                        <span class="dot filled"></span>
+                        <span class="dot filled"></span>
+                        <span class="dot filled"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+                <div class="student-info">
+                    <div class="info-item">
+                        <span class="info-label">Родитель</span>
+                        <span class="info-value">Кузнецов Игорь</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Телефон</span>
+                        <span class="info-value">+7 (999) 222-33-44</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">kuznetsov@example.com</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.tab');
+        const groupsView = document.getElementById('groupsView');
+        const studentsView = document.getElementById('studentsView');
+        const addButton = document.getElementById('addButton');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+
+                // Add active class to clicked tab
+                this.classList.add('active');
+
+                // Show/hide views based on data-view attribute
+                const view = this.getAttribute('data-view');
+                if (view === 'groups') {
+                    groupsView.style.display = 'block';
+                    studentsView.style.display = 'none';
+                    addButton.innerHTML = '<i class="fas fa-plus"></i> Добавить группу';
+                } else {
+                    groupsView.style.display = 'none';
+                    studentsView.style.display = 'block';
+                    addButton.innerHTML = '<i class="fas fa-plus"></i> Добавить ученика';
+                }
+            });
+        });
+
+        // Add button functionality
+        addButton.addEventListener('click', function() {
+            const activeTab = document.querySelector('.tab.active');
+            if (activeTab.getAttribute('data-view') === 'groups') {
+                alert('Добавление новой группы');
+            } else {
+                alert('Добавление нового ученика');
+            }
+        });
+
+        // Edit button functionality
+        document.querySelectorAll('.edit-button, .edit-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                alert('Редактирование');
+            });
+        });
+
+        // View button functionality
+        document.querySelectorAll('.view-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const card = this.closest('.card');
+                const groupName = card.querySelector('.card-title').textContent;
+                alert(`Просмотр учеников группы: ${groupName}`);
+            });
+        });
+    });
+</script>
