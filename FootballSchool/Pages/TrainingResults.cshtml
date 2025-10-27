@@ -150,6 +150,11 @@
         .progress-chart {
             width: 120px;
             height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2563eb;
+            font-size: 20px;
         }
 
         .action-buttons {
@@ -168,10 +173,12 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
+            color: #666;
         }
 
             .icon-btn:hover {
                 background-color: #f5f5f7;
+                color: #2563eb;
             }
 
         /* Стили для скрытой панели */
@@ -303,6 +310,12 @@
             border: 1px solid #e5e5e5;
             border-radius: 8px;
             padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+            background-color: #f9fafb;
         }
 
         .form-section h2 {
@@ -482,9 +495,9 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <svg class="progress-chart" viewBox="0 0 120 40">
-                                        <polyline points="0,20 20,18 40,22 60,15 80,10 100,12 120,8" fill="none" stroke="#2563eb" stroke-width="2" />
-                                    </svg>
+                                    <div class="progress-chart">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
@@ -518,9 +531,9 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <svg class="progress-chart" viewBox="0 0 120 40">
-                                        <polyline points="0,25 20,24 40,26 60,23 80,22 100,20 120,18" fill="none" stroke="#2563eb" stroke-width="2" />
-                                    </svg>
+                                    <div class="progress-chart">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
@@ -554,9 +567,9 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <svg class="progress-chart" viewBox="0 0 120 40">
-                                        <polyline points="0,30 20,30 40,28 60,25 80,15 100,14 120,12" fill="none" stroke="#2563eb" stroke-width="2" />
-                                    </svg>
+                                    <div class="progress-chart">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
@@ -590,9 +603,9 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <svg class="progress-chart" viewBox="0 0 120 40">
-                                        <polyline points="0,22 20,24 40,20 60,21 80,19 100,22 120,20" fill="none" stroke="#2563eb" stroke-width="2" />
-                                    </svg>
+                                    <div class="progress-chart">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
@@ -626,9 +639,9 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <svg class="progress-chart" viewBox="0 0 120 40">
-                                        <polyline points="0,26 20,25 40,27 60,24 80,23 100,25 120,22" fill="none" stroke="#2563eb" stroke-width="2" />
-                                    </svg>
+                                    <div class="progress-chart">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
@@ -665,21 +678,17 @@
                 </select>
             </div>
             <div class="chart-canvas">
-                <svg viewBox="0 0 350 180">
-                    <polyline points="10,90 30,85 50,95 70,80 90,70 110,65 130,75 150,85 170,80 190,90 210,70 230,35 250,50 270,30 290,45 310,25 330,10 350,5" fill="none" stroke="#2563eb" stroke-width="2" />
-                    <line x1="0" y1="180" x2="350" y2="180" stroke="#e5e5e5" stroke-width="1" />
-                    <text x="10" y="195" font-size="10" fill="#999">20.10.23</text>
-                    <text x="100" y="195" font-size="10" fill="#999">22.10.23</text>
-                    <text x="190" y="195" font-size="10" fill="#999">24.10.23</text>
-                    <text x="280" y="195" font-size="10" fill="#999">26.10.23</text>
-                </svg>
+                <i class="fas fa-chart-line" style="font-size: 48px; color: #2563eb; margin-bottom: 10px;"></i>
+                <div>График прогресса ученика</div>
             </div>
         </div>
 
         <div class="form-section">
             <h2>
                 Последние результаты
-                <a href="#" class="add-link" onclick="clearForm()">+ Добавить</a>
+                <a href="#" class="add-link" onclick="clearForm()">
+                    <i class="fas fa-plus"></i> Добавить
+                </a>
             </h2>
 
             <div class="form-group">
@@ -716,15 +725,21 @@
             </div>
 
             <div class="form-actions">
-                <button class="btn btn-secondary" onclick="clearForm()">Отмена</button>
-                <button class="btn btn-primary" onclick="saveResult()">Сохранить</button>
+                <button class="btn btn-secondary" onclick="clearForm()">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+                <button class="btn btn-primary" onclick="saveResult()">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
             </div>
         </div>
 
         <div class="comments-section">
             <h2>Комментарии тренера</h2>
             <textarea class="form-control" id="coachComments" placeholder="Добавьте комментарий о прогрессе ученика..."></textarea>
-            <button class="btn btn-primary save-btn" onclick="saveComments()">Сохранить комментарий</button>
+            <button class="btn btn-primary save-btn" onclick="saveComments()">
+                <i class="fas fa-save"></i> Сохранить комментарий
+            </button>
         </div>
     </aside>
 </div>
@@ -803,13 +818,6 @@
         // Открываем панель при нажатии на кнопку добавления
         toggleSidebar();
     });
-    function toggleSidebar() {
-        const sidebar = document.getElementById('rightSidebar');
-        const toggleBtn = document.querySelector('.toggle-sidebar-btn');
-
-        sidebar.classList.toggle('open');
-        toggleBtn.classList.toggle('open');
-    }
 
     // Закрытие панели при нажатии на Escape
     document.addEventListener('keydown', function(event) {

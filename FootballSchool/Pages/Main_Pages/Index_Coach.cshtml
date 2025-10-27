@@ -1,0 +1,406 @@
+﻿@page
+@model FootballSchool.Pages.Main_Pages.Index_CoachModel
+@{
+    ViewData["Title"] = "Главная страница тренера";
+}
+
+@section Styles {
+    <style>
+        .coach-page .page-content {
+            padding: 0 !important;
+        }
+
+        .coach-content {
+            padding: 32px;
+            min-height: calc(100vh - 75px - 120px);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .welcome-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .welcome-subtitle {
+            font-size: 14px;
+            color: #6e6e73;
+        }
+
+        .trainings-card,
+        .statistics-card,
+        .news-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #1d1d1f;
+        }
+
+        .trainings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+            .trainings-table thead th {
+                text-align: left;
+                padding: 12px 16px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #6e6e73;
+                border-bottom: 1px solid #e5e5e7;
+            }
+
+            .trainings-table tbody td {
+                padding: 16px;
+                font-size: 14px;
+                color: #1d1d1f;
+                border-bottom: 1px solid #f5f5f7;
+            }
+
+            .trainings-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .trainings-table tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .btn-primary {
+            background-color: #0066cc;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .btn-primary:hover {
+                background-color: #0055b3;
+            }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f5f5f7;
+        }
+
+            .stat-row:last-child {
+                border-bottom: none;
+            }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6e6e73;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+            .stat-value.positive {
+                color: #34c759;
+            }
+
+        .news-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .news-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background-color: #f5f5f7;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+            .news-item:hover {
+                background-color: #e9ecef;
+            }
+
+        .news-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 16px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e5e5e7;
+            border-radius: 50%;
+            font-size: 18px;
+        }
+
+            .news-icon.trophy {
+                background-color: #fff3cd;
+                color: #f59e0b;
+            }
+
+        .news-text {
+            font-size: 14px;
+            color: #1d1d1f;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .action-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e5e5e7;
+        }
+
+            .action-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                border-color: #0066cc;
+            }
+
+        .action-icon {
+            font-size: 24px;
+            margin: 0 auto 12px;
+            color: #0066cc;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 4px;
+        }
+
+        .action-desc {
+            font-size: 12px;
+            color: #6e6e73;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 1200px) {
+            .news-items {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .coach-content {
+                padding: 20px;
+            }
+
+            .welcome-card,
+            .trainings-card,
+            .statistics-card,
+            .news-card {
+                padding: 24px;
+            }
+
+            .trainings-table {
+                font-size: 13px;
+            }
+
+                .trainings-table thead th,
+                .trainings-table tbody td {
+                    padding: 12px 8px;
+                }
+
+            .news-item {
+                padding: 16px;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .coach-content {
+                padding: 16px;
+            }
+
+            .welcome-title {
+                font-size: 20px;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .news-items {
+                gap: 16px;
+            }
+
+            .news-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .news-icon {
+                margin-right: 0;
+                margin-bottom: 12px;
+            }
+        }
+    </style>
+}
+
+<div class="coach-page">
+    <div class="coach-content">
+        <!-- Welcome Section -->
+        <div class="welcome-card">
+            <h1 class="welcome-title">Добрый день, тренер Сергей!</h1>
+            <p class="welcome-subtitle">Сегодня у вас 3 тренировки и 2 новых сообщения от родителей.</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-card">
+                <i class="fas fa-calendar-check action-icon"></i>
+                <div class="action-title">Посещаемость</div>
+                <div class="action-desc">Отметить присутствующих</div>
+            </div>
+
+            <div class="action-card">
+                <i class="fas fa-chart-line action-icon"></i>
+                <div class="action-title">Результаты</div>
+                <div class="action-desc">Внести показатели</div>
+            </div>
+
+            <div class="action-card">
+                <i class="fas fa-file-alt action-icon"></i>
+                <div class="action-title">Отчёты</div>
+                <div class="action-desc">Создать отчёт</div>
+            </div>
+        </div>
+
+        <!-- Trainings Card -->
+        <div class="trainings-card">
+            <h2 class="section-title">Ближайшие тренировки</h2>
+
+            <table class="trainings-table">
+                <thead>
+                    <tr>
+                        <th>Время</th>
+                        <th>Группа</th>
+                        <th>Место</th>
+                        <th>Кол-во учеников</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10:00</td>
+                        <td>U8</td>
+                        <td>Площадка №1</td>
+                        <td>12</td>
+                    </tr>
+                    <tr>
+                        <td>12:00</td>
+                        <td>U10</td>
+                        <td>Зал №3</td>
+                        <td>14</td>
+                    </tr>
+                    <tr>
+                        <td>16:00</td>
+                        <td>U12</td>
+                        <td>Площадка №2</td>
+                        <td>10</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn-primary">
+                <i class="fas fa-calendar-check"></i>
+                Открыть посещаемость
+            </button>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="statistics-card">
+            <h2 class="section-title">Статистика</h2>
+
+            <div class="stat-row">
+                <span class="stat-label">Средняя посещаемость групп</span>
+                <span class="stat-value">85%</span>
+            </div>
+
+            <div class="stat-row">
+                <span class="stat-label">Средний прогресс учеников</span>
+                <span class="stat-value positive">+7%</span>
+            </div>
+
+            <div class="stat-row">
+                <span class="stat-label">Последний отчёт обновлён</span>
+                <span class="stat-value">2 дня назад</span>
+            </div>
+        </div>
+
+        <!-- News Card -->
+        <div class="news-card">
+            <h2 class="section-title">Новости и события</h2>
+
+            <div class="news-items">
+                <div class="news-item">
+                    <div class="news-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <span class="news-text">Матч-тренировка U10 в субботу</span>
+                </div>
+
+                <div class="news-item">
+                    <div class="news-icon trophy">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <span class="news-text">Результаты тестирования скорости опубликованы</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

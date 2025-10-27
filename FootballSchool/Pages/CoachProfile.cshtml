@@ -494,29 +494,23 @@
 
 @section Scripts {
     <script>
-        // Переключение между вкладками
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', function() {
-                // Убираем активный класс у всех вкладок
                 document.querySelectorAll('.tab').forEach(t => {
                     t.classList.remove('active');
                 });
 
-                // Добавляем активный класс текущей вкладке
                 this.classList.add('active');
 
-                // Скрываем все секции
                 document.querySelectorAll('.content-section').forEach(section => {
                     section.style.display = 'none';
                 });
 
-                // Показываем нужную секцию
                 const tabName = this.getAttribute('data-tab');
                 document.getElementById(tabName + '-section').style.display = 'block';
             });
         });
 
-        // Инициализация - показываем секцию групп по умолчанию
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('groups-section').style.display = 'block';
         });

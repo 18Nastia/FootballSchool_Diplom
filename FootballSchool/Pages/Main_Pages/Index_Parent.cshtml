@@ -1,0 +1,468 @@
+﻿@page
+@model FootballSchool.Pages.Main_Pages.Index_ParentModel
+@{
+    ViewData["Title"] = "Главная страница родителя";
+}
+
+@section Styles {
+    <style>
+        .parent-page .page-content {
+            padding: 0 !important;
+        }
+
+        .parent-content {
+            padding: 32px;
+            min-height: calc(100vh - 75px - 120px);
+            background-color: #f5f5f7;
+        }
+
+        .welcome-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .welcome-text {
+            font-size: 15px;
+            color: #6e6e73;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #1d1d1f;
+        }
+
+        /* Profile Card */
+        .profile-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 3px solid #f0f0f0;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .profile-info {
+            font-size: 14px;
+            color: #6e6e73;
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
+            background-color: #4169E1;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+            .btn-primary:hover {
+                background-color: #3154c4;
+            }
+
+        /* Training Table */
+        .training-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .training-table th {
+                text-align: left;
+                font-size: 13px;
+                font-weight: 500;
+                color: #6e6e73;
+                padding-bottom: 16px;
+                border-bottom: 1px solid #e5e5e7;
+            }
+
+            .training-table td {
+                padding: 16px 0;
+                font-size: 14px;
+                color: #1d1d1f;
+                border-bottom: 1px solid #f5f5f7;
+            }
+
+            .training-table tr:last-child td {
+                border-bottom: none;
+            }
+
+        /* Subscription Card */
+        .subscription-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .subscription-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .subscription-label {
+            font-size: 14px;
+            color: #6e6e73;
+        }
+
+        .subscription-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subscription-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1d1d1f;
+        }
+
+        .subscription-status {
+            color: #34c759;
+            font-size: 16px;
+        }
+
+        .subscription-date {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1d1d1f;
+        }
+
+        .btn-payment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Notifications Card */
+        .notifications-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+            .notification-item:hover {
+                background-color: #e9ecef;
+            }
+
+        .notification-icon {
+            font-size: 16px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            border-radius: 6px;
+            color: #4169E1;
+        }
+
+        .notification-text {
+            font-size: 14px;
+            color: #1d1d1f;
+            flex: 1;
+        }
+
+        /* News Card */
+        .news-content {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .news-image {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .news-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .news-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1d1d1f;
+        }
+
+        .news-link {
+            color: #4169E1;
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .news-link:hover {
+                text-decoration: underline;
+            }
+
+        /* Responsive Design */
+        @@media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .parent-content {
+                padding: 20px;
+            }
+
+            .welcome-card {
+                padding: 24px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .news-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .news-image {
+                width: 100%;
+                max-width: 200px;
+                margin-bottom: 16px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .parent-content {
+                padding: 16px;
+            }
+
+            .welcome-title {
+                font-size: 24px;
+            }
+
+            .profile-photo {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+}
+
+<div class="parent-page">
+    <div class="parent-content">
+        <div class="welcome-card">
+            <h1 class="welcome-title">Здравствуйте, Анна!</h1>
+            <p class="welcome-text">Сегодня у вашего сына Даниила тренировка в 18:00.</p>
+        </div>
+
+        <div class="content-grid">
+            <div class="card profile-card">
+                <h2 class="card-title">Профиль ребёнка</h2>
+                <div class="profile-content">
+                    <img src="https://avatars.mds.yandex.net/i?id=138abfd17b45619c2a67d8daaf4600176f8c54b4-12991402-images-thumbs&n=13" alt="Даниил" class="profile-photo">
+                    <h3 class="profile-name">Даниил, 10 лет</h3>
+                    <p class="profile-info">Группа U10, тренер Иванов</p>
+                    <button class="btn-primary">
+                        <i class="fas fa-child"></i>
+                        Профиль ребёнка
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upcoming Training Sessions -->
+            <div class="card training-card">
+                <h2 class="card-title">Ближайшие тренировки</h2>
+                <table class="training-table">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Время</th>
+                            <th>Место</th>
+                            <th>Тренер</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>09.10</td>
+                            <td>18:00</td>
+                            <td>Площадка №1</td>
+                            <td>Иванов</td>
+                        </tr>
+                        <tr>
+                            <td>11.10</td>
+                            <td>18:00</td>
+                            <td>Площадка №1</td>
+                            <td>Иванов</td>
+                        </tr>
+                        <tr>
+                            <td>13.10</td>
+                            <td>17:30</td>
+                            <td>Площадка №2</td>
+                            <td>Петров</td>
+                        </tr>
+                        <tr>
+                            <td>16.10</td>
+                            <td>18:00</td>
+                            <td>Площадка №1</td>
+                            <td>Иванов</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bottom Grid -->
+        <div class="bottom-grid">
+            <!-- Subscription Card -->
+            <div class="card subscription-card">
+                <h2 class="card-title">Абонемент и оплата</h2>
+                <div class="subscription-content">
+                    <div class="subscription-row">
+                        <span class="subscription-label">Абонемент:</span>
+                        <div class="subscription-value">
+                            <span class="subscription-name">"Октябрь 2025" — активен</span>
+                            <span class="subscription-status">✓</span>
+                        </div>
+                    </div>
+                    <div class="subscription-row">
+                        <span class="subscription-label">Следующий платёж:</span>
+                        <span class="subscription-date">15 октября</span>
+                    </div>
+                    <div class="subscription-row">
+                        <span class="subscription-label">Сумма:</span>
+                        <span class="subscription-date">8 000 ₽</span>
+                    </div>
+                    <button class="btn-primary btn-payment">
+                        <i class="fas fa-credit-card"></i>
+                        Оплатить онлайн
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notifications Card -->
+            <div class="card notifications-card">
+                <h2 class="card-title">Уведомления</h2>
+                <div class="notifications-content">
+                    <div class="notification-item">
+                        <div class="notification-icon">
+                            <i class="fas fa-campground"></i>
+                        </div>
+                        <span class="notification-text">Открыта регистрация на зимний лагерь</span>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-icon">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <span class="notification-text">Поступил новый счёт на оплату</span>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-icon">
+                            <i class="fas fa-futbol"></i>
+                        </div>
+                        <span class="notification-text">Турнир среди младших групп 25 октября</span>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <span class="notification-text">Расписание на ноябрь уже доступно</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- School News -->
+        <div class="card news-card">
+            <h2 class="card-title">Новости школы</h2>
+            <div class="news-content">
+                <div class="news-image">
+                    <i class="fas fa-newspaper" style="font-size: 32px;"></i>
+                </div>
+                <div class="news-text">
+                    <h3 class="news-title">Турнир среди младших групп — итоги и награждение победителей</h3>
+                    <p style="font-size: 14px; color: #6e6e73; margin-bottom: 12px;">В минувшие выходные состоялся традиционный осенний турнир среди групп U10 и U12.</p>
+                    <a href="#" class="news-link">Читать больше →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
