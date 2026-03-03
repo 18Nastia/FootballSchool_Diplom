@@ -2,38 +2,86 @@
 @model FootballSchool.Pages.ScheduleModel
 @{
     ViewData["Title"] = "Расписание тренировок";
+
+    var daysOfWeek = new[] {
+        DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday,
+        DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
+    };
+
+    var safeCurrentDate = Model.CurrentDate ?? DateTime.Today;
+    var safeStartOfWeek = Model.StartOfWeek != default ? Model.StartOfWeek : safeCurrentDate.AddDays(-1 * ((7 + (safeCurrentDate.DayOfWeek - DayOfWeek.Monday)) % 7));
+    var safeEndOfWeek = Model.EndOfWeek != default ? Model.EndOfWeek : safeStartOfWeek.AddDays(6);
+
+    var currentWeekTrainings = Model.Trainings?
+        .Where(t =>
+        {
+            var dt = t.DateTraining.ToDateTime(TimeOnly.MinValue);
+            return dt >= safeStartOfWeek && dt <= safeEndOfWeek;
+        })
+        .GroupBy(t => t.DateTraining.DayOfWeek)
+        .ToDictionary(g => g.Key, g => g.ToList()) ?? new Dictionary<DayOfWeek, List<FootballSchool.Models.Training>>();
+
+    var currentDayTrainings = Model.Trainings?
+        .Where(t => t.DateTraining == DateOnly.FromDateTime(safeCurrentDate))
+        .OrderBy(t => t.TimeTraining)
+        .ToList() ?? new List<FootballSchool.Models.Training>();
+
+    var uniqueCoaches = Model.Trainings?
+        .Where(t => t.Coach != null)
+        .Select(t => t.Coach)
+        .GroupBy(c => c.CoachId)
+        .Select(g => g.First())
+        .ToList() ?? new List<FootballSchool.Models.Coach>();
+}
+
+@functions {
+    public string GetEventColorClass(int id)
+    {
+        var colors = new[] { "border-blue", "border-green", "border-orange", "border-purple", "border-red" };
+        return colors[id % colors.Length];
+    }
+    public string GetLegendDot(int id)
+    {
+        var colors = new[] { "bg-blue", "bg-green", "bg-orange", "bg-purple", "bg-red" };
+        return colors[id % colors.Length];
+    }
 }
 
 @section Styles {
     <style>
         .schedule-page .main-content {
             margin-left: 0 !important;
-            background: #fafafa;
+            background: #f4f7f6;
+            min-height: 100vh;
+            padding-bottom: 40px;
         }
 
         .header h1 {
             font-size: 28px;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 24px;
-            color: #1a1a1a;
+            color: #2c3e50;
         }
 
-        .controls {
+        /* Панель управления */
+        .controls-wrapper {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
+            justify-content: space-between;
             gap: 16px;
             margin-bottom: 24px;
             background: white;
             padding: 16px 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
         }
 
         .view-toggle {
             display: flex;
-            gap: 0;
-            background: #f5f5f5;
-            border-radius: 6px;
+            gap: 4px;
+            background: #edf2f7;
+            border-radius: 8px;
             padding: 4px;
         }
 
@@ -41,17 +89,51 @@
             padding: 8px 20px;
             border: none;
             background: transparent;
-            color: #666;
+            color: #7f8c8d;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
 
             .toggle-btn.active {
-                background: #2563eb;
-                color: white;
+                background: white;
+                color: #2980b9;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+
+        .date-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .current-date-display {
+            min-width: 190px;
+            text-align: center;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .btn-nav {
+            background: #fff;
+            border: 1px solid #dfe6e9;
+            color: #34495e;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-nav:hover {
+                background: #f1f2f6;
+                color: #2980b9;
             }
 
         .add-btn {
@@ -59,48 +141,46 @@
             align-items: center;
             gap: 8px;
             padding: 10px 20px;
-            background: #2563eb;
+            background: #2980b9;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.2s;
         }
 
             .add-btn:hover {
-                background: #1d4ed8;
+                background: #2471a3;
             }
 
         .filters {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-left: auto;
-            color: #666;
             font-size: 14px;
         }
 
         .filter-select {
             padding: 8px 32px 8px 12px;
-            border: 1px solid #e5e5e5;
-            border-radius: 6px;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
             font-size: 14px;
-            color: #333;
+            color: #2c3e50;
             background: white;
             cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237f8c8d' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 12px center;
         }
 
-        /* Week View Styles */
+        /* --- WEEK VIEW - LIST STYLE --- */
         .calendar {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             overflow: hidden;
             display: none;
         }
@@ -111,124 +191,161 @@
 
         .calendar-header {
             display: grid;
-            grid-template-columns: 80px repeat(7, 1fr);
-            border-bottom: 2px solid #e5e5e5;
+            grid-template-columns: repeat(7, 1fr);
+            border-bottom: 2px solid #edf2f7;
+            background: #fafbfc;
         }
 
         .day-header {
             padding: 16px 12px;
             text-align: center;
-            border-left: 1px solid #e5e5e5;
+            border-right: 1px solid #edf2f7;
         }
+
+            .day-header:last-child {
+                border-right: none;
+            }
 
         .day-name {
             font-size: 13px;
-            font-weight: 600;
-            color: #1a1a1a;
+            font-weight: 700;
+            color: #34495e;
             margin-bottom: 4px;
+            text-transform: uppercase;
         }
 
         .day-date {
             font-size: 12px;
-            color: #666;
-        }
-
-        .calendar-body {
-            display: grid;
-            grid-template-columns: 80px 1fr;
-            min-height: 800px;
-        }
-
-        .time-column {
-            border-right: 1px solid #e5e5e5;
-        }
-
-        .time-slot-week {
-            height: 100px;
-            padding: 8px 12px;
-            font-size: 13px;
-            color: #666;
-            border-bottom: 1px solid #f0f0f0;
+            color: #7f8c8d;
         }
 
         .days-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            position: relative;
         }
 
         .day-column {
-            border-left: 1px solid #e5e5e5;
-            position: relative;
-            min-height: 900px;
+            border-right: 1px solid #edf2f7;
+            min-height: 400px; /* Минимальная высота, чтобы не казалось пустым */
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Расстояние между карточками */
+            background: #ffffff;
         }
 
-            .day-column::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: repeating-linear-gradient( to bottom, transparent, transparent 99px, #f0f0f0 99px, #f0f0f0 100px );
-                pointer-events: none;
+            .day-column:last-child {
+                border-right: none;
             }
 
+        /* --- CARDS IN GRID (NO ABSOLUTE POSITIONING) --- */
         .event {
-            position: absolute;
-            left: 4px;
-            right: 4px;
-            border-radius: 6px;
-            padding: 8px;
-            color: white;
+            position: relative; /* Убрано абсолютное позиционирование */
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+            color: #2c3e50;
             font-size: 12px;
-            overflow: hidden;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #edf2f7;
+            border-left-width: 4px;
+            border-left-style: solid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
         }
 
             .event:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             }
 
-        .event-blue {
-            background: #3b82f6;
+        .border-blue {
+            border-left-color: #3498db !important;
         }
 
-        .event-green {
-            background: #10b981;
+        .border-green {
+            border-left-color: #2ecc71 !important;
         }
 
-        .event-purple {
-            background: #8b5cf6;
+        .border-orange {
+            border-left-color: #f39c12 !important;
         }
 
-        .event-red {
-            background: #ef4444;
+        .border-purple {
+            border-left-color: #9b59b6 !important;
         }
 
-        .event-orange {
-            background: #f59e0b;
+        .border-red {
+            border-left-color: #e74c3c !important;
         }
 
-        .event-time {
-            font-size: 11px;
-            margin-bottom: 4px;
-            opacity: 0.9;
+        .bg-blue {
+            background-color: #3498db !important;
         }
 
-        .event-title {
-            font-weight: 500;
-            line-height: 1.3;
+        .bg-green {
+            background-color: #2ecc71 !important;
         }
 
-        /* Day View Styles */
+        .bg-orange {
+            background-color: #f39c12 !important;
+        }
+
+        .bg-purple {
+            background-color: #9b59b6 !important;
+        }
+
+        .bg-red {
+            background-color: #e74c3c !important;
+        }
+
+        .event-icon {
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+            margin-right: 4px;
+            opacity: 0.7;
+        }
+
+        /* Кнопки действий */
+        .event-actions {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            display: none;
+            gap: 4px;
+            z-index: 10;
+        }
+
+        .event:hover .event-actions,
+        .event-day:hover .event-actions {
+            display: flex;
+        }
+
+        .btn-icon {
+            background: #f1f2f6;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 6px;
+            color: #7f8c8d;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-icon:hover {
+                background: #e0e6ed;
+                color: #2c3e50;
+            }
+
+        /* --- DAY VIEW - CLASSIC TIME SLOTS --- */
         .day-view {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             display: none;
         }
 
@@ -238,12 +355,13 @@
 
         .date-header {
             text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: #666;
-            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 24px;
             padding-bottom: 16px;
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid #edf2f7;
+            text-transform: capitalize;
         }
 
         .timeline {
@@ -253,52 +371,71 @@
 
         .time-slot-day {
             display: flex;
-            min-height: 60px;
-            border-bottom: 1px solid #f0f0f0;
+            min-height: 80px;
+            border-bottom: 1px solid #f1f2f6;
+            padding: 12px 0;
         }
 
         .time-label {
             width: 80px;
-            padding: 8px 16px 8px 0;
+            padding: 0 16px 0 0;
             font-size: 14px;
-            color: #666;
-            font-weight: 500;
+            color: #7f8c8d;
+            font-weight: 600;
             flex-shrink: 0;
+            text-align: right;
         }
 
         .event-container {
             flex: 1;
-            position: relative;
-            padding: 4px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-left: 16px;
+            border-left: 2px solid #edf2f7;
         }
 
         .event-day {
-            border-radius: 6px;
+            border-radius: 8px;
             padding: 12px 16px;
-            color: white;
+            background: white;
+            color: #2c3e50;
             font-size: 13px;
             position: relative;
-            margin: 4px 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border: 1px solid #edf2f7;
+            border-left-width: 4px;
+            border-left-style: solid;
+            transition: transform 0.2s;
         }
 
+            .event-day:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            }
+
+        /* --- LEGEND --- */
         .legend {
-            margin-top: 24px;
-            padding: 20px 24px;
+            margin-top: 32px;
+            padding: 20px;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
         .legend-title {
             font-size: 14px;
-            font-weight: 600;
-            color: #666;
-            margin-bottom: 12px;
+            font-weight: 700;
+            color: #2c3e50;
         }
 
         .legend-items {
             display: flex;
-            gap: 24px;
+            gap: 20px;
             flex-wrap: wrap;
         }
 
@@ -306,59 +443,49 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
-            color: #333;
+            font-size: 13px;
+            font-weight: 500;
+            color: #34495e;
         }
 
         .legend-dot {
             width: 12px;
             height: 12px;
-            border-radius: 50%;
-        }
-
-        .legend-dot-blue {
-            background: #3b82f6;
-        }
-
-        .legend-dot-green {
-            background: #10b981;
-        }
-
-        .legend-dot-orange {
-            background: #f59e0b;
-        }
-
-        .legend-dot-purple {
-            background: #8b5cf6;
-        }
-
-        .legend-dot-red {
-            background: #ef4444;
+            border-radius: 3px;
         }
 
         @@media (max-width: 768px) {
-            .controls {
+            .controls-wrapper {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .filters {
-                margin-left: 0;
-                justify-content: space-between;
+            .date-navigation {
+                order: -1;
+                margin-bottom: 10px;
             }
 
             .calendar-header {
-                grid-template-columns: 60px repeat(7, 1fr);
-                font-size: 12px;
+                grid-template-columns: repeat(7, 1fr);
             }
 
-            .time-slot-week {
-                height: 80px;
-                font-size: 12px;
+            .days-grid {
+                grid-template-columns: 1fr; /* На мобильных днях идут друг под другом */
             }
 
-            .legend-items {
-                gap: 16px;
+            .day-column {
+                border-right: none;
+                border-bottom: 2px solid #edf2f7;
+                min-height: auto;
+            }
+
+            .day-header {
+                font-size: 10px;
+                padding: 10px 4px;
+            }
+
+            .day-name {
+                font-size: 11px;
             }
         }
     </style>
@@ -367,313 +494,333 @@
 <div class="schedule-page">
     <div class="main-content">
 
-        <div class="controls">
-            <div class="view-toggle">
-                <button class="toggle-btn active" onclick="switchView('week')">Неделя</button>
-                <button class="toggle-btn" onclick="switchView('day')">День</button>
+        <form method="get" id="filterForm" class="controls-wrapper">
+            <input type="hidden" asp-for="CurrentDate" id="CurrentDate" value="@(safeCurrentDate.ToString("yyyy-MM-dd"))" />
+            <input type="hidden" asp-for="ViewType" id="ViewType" />
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="view-toggle">
+                    <button type="button" class="toggle-btn @(Model.ViewType == "week" ? "active" : "")" onclick="setView('week')">Неделя</button>
+                    <button type="button" class="toggle-btn @(Model.ViewType == "day" ? "active" : "")" onclick="setView('day')">День</button>
+                </div>
+
+                <button type="button" class="add-btn d-none d-md-flex" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="prepareAddModal()">
+                    <i class="fas fa-plus"></i> Добавить
+                </button>
             </div>
-            <button class="add-btn" onclick="addTraining()">
-                <i class="fas fa-plus"></i>
-                Добавить тренировку
-            </button>
+
+            <div class="date-navigation">
+                <button type="button" class="btn-nav" onclick="changeDate(-1)"><i class="fas fa-chevron-left"></i></button>
+
+                <div class="current-date-display fw-bold mx-3">
+                    @if (Model.ViewType == "week")
+                    {
+                        @($"{safeStartOfWeek:dd MMM} - {safeEndOfWeek:dd MMM yyyy}")
+                    }
+                    else
+                    {
+                        @safeCurrentDate.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("ru-RU"))
+                    }
+                </div>
+
+                <button type="button" class="btn-nav" onclick="changeDate(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
             <div class="filters">
-                <i class="fas fa-filter"></i>
-                <span>Фильтры:</span>
-                <select class="filter-select" onchange="updateSchedule()">
-                    <option>Все филиалы</option>
-                    <option>Филиал Центр</option>
-                    <option>Филиал Север</option>
-                    <option>Филиал Юг</option>
+                <i class="fas fa-filter" style="color: #bdc3c7;"></i>
+                <select class="filter-select" asp-for="FilterBranchId" asp-items="Model.BranchList" onchange="this.form.submit()">
+                    <option value="">Все филиалы</option>
                 </select>
-                <select class="filter-select" onchange="updateSchedule()">
-                    <option>Все группы</option>
-                    <option>Юниоры (8-10 лет)</option>
-                    <option>Кадеты (11-13 лет)</option>
-                    <option>Юноши (14-16 лет)</option>
+                <select class="filter-select" asp-for="FilterTeamId" asp-items="Model.TeamList" onchange="this.form.submit()">
+                    <option value="">Все группы</option>
                 </select>
             </div>
-        </div>
 
-        <!-- Week View -->
-        <div class="calendar active" id="weekView">
+            <button type="button" class="add-btn d-md-none w-100 justify-content-center mt-2" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="prepareAddModal()">
+                <i class="fas fa-plus"></i> Добавить тренировку
+            </button>
+        </form>
+
+        <!-- WEEK VIEW (GRID - LIST STYLE) -->
+        <div class="calendar @(Model.ViewType == "week" ? "active" : "")">
             <div class="calendar-header">
-                <div class="time-column"></div>
-                <div class="day-header">
-                    <div class="day-name">воскресенье, 5</div>
-                    <div class="day-date">октября</div>
-                </div>
-                <div class="day-header">
-                    <div class="day-name">понедельник, 6</div>
-                    <div class="day-date">октября</div>
-                </div>
-                <div class="day-header">
-                    <div class="day-name">вторник, 7</div>
-                    <div class="day-date">октября</div>
-                </div>
-                <div class="day-header">
-                    <div class="day-name">среда, 8</div>
-                    <div class="day-date">октября</div>
-                </div>
-                <div class="day-header">
-                    <div class="day-name">четверг, 9</div>
-                    <div class="day-date">октября</div>
-                </div>
-                <div class="day-header">
-                    <div class="day-name">пятница, 10</div>
-                    <div class="day-date">октября</div>
-                </div>
-                <div class="day-header">
-                    <div class="day-name">суббота, 11</div>
-                    <div class="day-date">октября</div>
-                </div>
+                @for (int i = 0; i < 7; i++)
+                {
+                    var dayDate = safeStartOfWeek.AddDays(i);
+                    <div class="day-header">
+                        <div class="day-name">@dayDate.ToString("ddd", new System.Globalization.CultureInfo("ru-RU"))</div>
+                        <div class="day-date">@dayDate.ToString("dd MMM")</div>
+                    </div>
+                }
             </div>
 
-            <div class="calendar-body">
-                <div class="time-column">
-                    <div class="time-slot-week">09:00</div>
-                    <div class="time-slot-week">10:00</div>
-                    <div class="time-slot-week">11:00</div>
-                    <div class="time-slot-week">12:00</div>
-                    <div class="time-slot-week">13:00</div>
-                    <div class="time-slot-week">14:00</div>
-                    <div class="time-slot-week">15:00</div>
-                    <div class="time-slot-week">16:00</div>
-                    <div class="time-slot-week">17:00</div>
-                </div>
-
-                <div class="days-grid">
-                    <!-- Sunday -->
-                    <div class="day-column"></div>
-
-                    <!-- Monday -->
-                    <div class="day-column"></div>
-
-                    <!-- Tuesday -->
-                    <div class="day-column"></div>
-
-                    <!-- Wednesday -->
+            <div class="days-grid">
+                @for (int i = 0; i < 7; i++)
+                {
+                    var currentDayOfWeek = daysOfWeek[i];
                     <div class="day-column">
-                        <div class="event event-green" style="top: 0; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-title">Выносливость: бег - Петров П.П.</div>
-                            </div>
-                        </div>
-                        <div class="event event-blue" style="top: 200px; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-time">10:00 - 11:30</div>
-                                <div class="event-title">Футбол: базовые навыки - Иванов И.И.</div>
-                            </div>
-                        </div>
-                        <div class="event event-blue" style="top: 300px; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-time">12:00 - 13:30</div>
-                                <div class="event-title">Футбол: тактика игры - Иванов И.И.</div>
-                            </div>
-                        </div>
-                        <div class="event event-purple" style="top: 500px; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-time">14:00 - 15:30</div>
-                                <div class="event-title">Гимнастика - Смирнова А.А.</div>
-                            </div>
-                        </div>
-                        <div class="event event-green" style="top: 600px; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-time">16:00 - 16:30</div>
-                                <div class="event-title">Выносливость: бег - Петров П.П.</div>
-                            </div>
-                        </div>
-                    </div>
+                        @if (currentWeekTrainings.ContainsKey(currentDayOfWeek))
+                        {
+                            var dayTrainings = currentWeekTrainings[currentDayOfWeek].OrderBy(t => t.TimeTraining).ToList();
 
-                    <!-- Thursday -->
-                    <div class="day-column">
-                        <div class="event event-blue" style="top: 300px; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-time">12:00 - 13:30</div>
-                                <div class="event-title">Футбол: командная игра - Иванов И.И.</div>
-                            </div>
-                        </div>
-                    </div>
+                            foreach (var training in dayTrainings)
+                            {
+                                var startTime = training.TimeTraining;
+                                var endTime = startTime.AddHours(1).AddMinutes(30);
 
-                    <!-- Friday -->
-                    <div class="day-column">
-                        <div class="event event-red" style="top: 200px; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-time">10:00 - 11:30</div>
-                                <div class="event-title">Футбол: индивидуальная техника - Козлов К.К.</div>
-                            </div>
-                        </div>
-                        <div class="event event-purple" style="top: 500px; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-time">14:00 - 15:30</div>
-                                <div class="event-title">Гимнастика: акробатика - Смирнова А.А.</div>
-                            </div>
-                        </div>
-                    </div>
+                                var coach = training.Coach;
+                                var coachId = coach?.CoachId ?? 0;
+                                var coachName = coach != null ? $"{coach.SurnameCoach} {coach.NameCoach[0]}." : "Не назначен";
+                                var facilityName = training.Facility?.NameFacility ?? "Зал не указан";
+                                var teamName = training.Team?.CategoryTeam ?? "Без группы";
+                                var title = !string.IsNullOrEmpty(training.PlanTraining) ? training.PlanTraining : "Тренировка";
+                                var safeTitle = title.Replace("'", "\\'");
 
-                    <!-- Saturday -->
-                    <div class="day-column">
-                        <div class="event event-orange" style="top: 800px; height: 100px;">
-                            <div class="event-content">
-                                <div class="event-time">17:00 - 18:00</div>
-                                <div class="event-title">Контроль мяча - Сидоров С.С.</div>
+                                string colorClass = GetEventColorClass(coachId);
+
+                                <div class="event @colorClass">
+                                    <div class="event-actions">
+                                        <button type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="event.stopPropagation(); prepareEditModal(@training.TrainingId, '@training.DateTraining.ToString("yyyy-MM-dd")', '@training.TimeTraining.ToString("HH:mm")', @(training.CoachId), @(training.TeamId), @(training.FacilityId), '@safeTitle')">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@training.TrainingId" style="display:inline;" onsubmit="event.stopPropagation(); return confirm('Удалить эту тренировку?');">
+                                            <button type="submit" class="btn-icon">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <div class="fw-bold" style="font-size: 13px; color: #2980b9; margin-bottom: 4px;">
+                                        @startTime.ToString("HH:mm") - @endTime.ToString("HH:mm")
+                                    </div>
+                                    <div class="fw-bold mb-2" style="font-size: 12px; line-height: 1.3; padding-right: 20px;">@title</div>
+
+                                    <div style="font-size: 11px; line-height: 1.4; color: #7f8c8d; display: flex; flex-direction: column; gap: 3px;">
+                                        <div title="@facilityName"><i class="fas fa-map-marker-alt event-icon"></i>@facilityName</div>
+                                        <div title="@coachName"><i class="fas fa-user event-icon"></i>@coachName</div>
+                                        <div title="@teamName"><i class="fas fa-users event-icon"></i>@teamName</div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted" style="font-size: 11px; margin-top: 10px; opacity: 0.6;">
+                                Нет занятий
                             </div>
-                        </div>
+                        }
                     </div>
-                </div>
+                }
             </div>
         </div>
 
-        <!-- Day View -->
-        <div class="day-view" id="dayView">
-            <div class="date-header">среда, 8 октября</div>
+        <!-- DAY VIEW (CLASSIC TIMELINE SLOTS) -->
+        <div class="day-view @(Model.ViewType == "day" ? "active" : "")">
+            <div class="date-header">@safeCurrentDate.ToString("dd MMMM, dddd", new System.Globalization.CultureInfo("ru-RU"))</div>
 
             <div class="timeline">
-                <div class="time-slot-day">
-                    <span class="time-label">08:00</span>
-                    <div class="event-container">
-                        <div class="event-day event-green">
-                            <div class="event-content">Ворота: броски - Петров П.П.</div>
+                @for (int hour = 8; hour <= 22; hour++)
+                {
+                    var hourTrainings = currentDayTrainings.Where(t => t.TimeTraining.Hour == hour).ToList();
+
+                    <div class="time-slot-day">
+                        <span class="time-label">@hour.ToString("00"):00</span>
+                        <div class="event-container">
+                            @if (!hourTrainings.Any())
+                            {
+                                <!-- Пустой блок, чтобы сетка сохраняла структуру, если нет тренировок -->
+                            }
+                            else
+                            {
+                                @foreach (var training in hourTrainings)
+                                {
+                                    var startTime = training.TimeTraining;
+                                    var endTime = startTime.AddHours(1).AddMinutes(30);
+                                    var coachId = training.Coach?.CoachId ?? 0;
+                                    var coachName = training.Coach != null ? $"{training.Coach.SurnameCoach} {training.Coach.NameCoach[0]}." : "Не назначен";
+                                    var facilityName = training.Facility?.NameFacility ?? "Зал не указан";
+                                    var teamName = training.Team?.CategoryTeam ?? "Без группы";
+                                    var title = !string.IsNullOrEmpty(training.PlanTraining) ? training.PlanTraining : "Тренировка";
+                                    var safeTitle = title.Replace("'", "\\'");
+                                    var colorClass = GetEventColorClass(coachId);
+
+                                    <div class="event-day @colorClass">
+                                        <div class="event-actions">
+                                            <button type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="event.stopPropagation(); prepareEditModal(@training.TrainingId, '@training.DateTraining.ToString("yyyy-MM-dd")', '@training.TimeTraining.ToString("HH:mm")', @(training.CoachId), @(training.TeamId), @(training.FacilityId), '@safeTitle')">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                            <form method="post" asp-page-handler="Delete" asp-route-id="@training.TrainingId" style="display:inline;" onsubmit="event.stopPropagation(); return confirm('Удалить тренировку?');">
+                                                <button type="submit" class="btn-icon"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
+
+                                        <div class="fw-bold text-muted mb-1" style="font-size: 11px;">@startTime.ToString("HH:mm") - @endTime.ToString("HH:mm")</div>
+                                        <div class="fw-bold mb-2" style="font-size: 14px;">@title</div>
+
+                                        <div class="d-flex flex-wrap gap-3" style="font-size: 12px; color: #7f8c8d;">
+                                            <div><i class="fas fa-users"></i> @teamName</div>
+                                            <div><i class="fas fa-map-marker-alt"></i> @facilityName</div>
+                                            <div><i class="fas fa-whistle"></i> @coachName</div>
+                                        </div>
+                                    </div>
+                                }
+                            }
                         </div>
                     </div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">09:00</span>
-                    <div class="event-container"></div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">10:00</span>
-                    <div class="event-container">
-                        <div class="event-day event-blue">
-                            <div class="event-time">10:00 - 11:30</div>
-                            <div class="event-content">Футбол: базовые навыки - Иванов И.И.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">11:00</span>
-                    <div class="event-container"></div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">12:00</span>
-                    <div class="event-container">
-                        <div class="event-day event-blue">
-                            <div class="event-time">12:00 - 13:30</div>
-                            <div class="event-content">Футбол: тактика игры - Иванов И.И.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">13:00</span>
-                    <div class="event-container"></div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">14:00</span>
-                    <div class="event-container">
-                        <div class="event-day event-purple">
-                            <div class="event-time">14:00 - 15:30</div>
-                            <div class="event-content">Гимнастика - Смирнова А.А.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">15:00</span>
-                    <div class="event-container"></div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">16:00</span>
-                    <div class="event-container">
-                        <div class="event-day event-orange">
-                            <div class="event-time">16:00 - 17:00</div>
-                            <div class="event-content">Контроль мяча: начальный уровень - Сидоров С.С.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="time-slot-day">
-                    <span class="time-label">17:00</span>
-                    <div class="event-container"></div>
-                </div>
+                }
             </div>
         </div>
 
         <div class="legend">
-            <div class="legend-title">Тренеры:</div>
+            <div class="legend-title">Тренеры (на экране):</div>
             <div class="legend-items">
-                <div class="legend-item">
-                    <span class="legend-dot legend-dot-blue"></span>
-                    <span>Иванов И.И.</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot legend-dot-green"></span>
-                    <span>Петров П.П.</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot legend-dot-orange"></span>
-                    <span>Сидоров С.С.</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot legend-dot-purple"></span>
-                    <span>Смирнова А.А.</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot legend-dot-red"></span>
-                    <span>Козлов К.К.</span>
-                </div>
+                @if (uniqueCoaches.Any())
+                {
+                    foreach (var coach in uniqueCoaches)
+                    {
+                        var coachId = coach.CoachId;
+                        var coachName = $"{coach.SurnameCoach} {coach.NameCoach[0]}.";
+                        <div class="legend-item">
+                            <span class="legend-dot @GetLegendDot(coachId)"></span>
+                            <span>@coachName</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted" style="font-size: 13px;">Нет данных для отображения</span>
+                }
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function switchView(viewType) {
-        // Update toggle buttons
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
+<!-- Модальное окно создания / редактирования (Bootstrap Modal) -->
+<div class="modal fade" id="trainingModal" tabindex="-1" aria-labelledby="trainingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Save" id="trainingForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trainingModalLabel">Новая тренировка</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="ModalTraining.TrainingId" id="ModalTraining_TrainingId" />
 
-        // Show/hide views
-        if (viewType === 'week') {
-            document.getElementById('weekView').classList.add('active');
-            document.getElementById('dayView').classList.remove('active');
-        } else {
-            document.getElementById('weekView').classList.remove('active');
-            document.getElementById('dayView').classList.add('active');
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ModalTraining.DateTraining" class="form-label">Дата</label>
+                            <input asp-for="ModalTraining.DateTraining" type="date" class="form-control" required id="ModalTraining_DateTraining" value="@(safeCurrentDate.ToString("yyyy-MM-dd"))" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ModalTraining.TimeTraining" class="form-label">Время начала</label>
+                            <input asp-for="ModalTraining.TimeTraining" type="time" class="form-control" required id="ModalTraining_TimeTraining" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ModalTraining.CoachId" class="form-label">Тренер</label>
+                        <select asp-for="ModalTraining.CoachId" asp-items="Model.CoachList" class="form-select" required id="ModalTraining_CoachId">
+                            <option value="">-- Выберите тренера --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ModalTraining.TeamId" class="form-label">Группа (Команда)</label>
+                        <select asp-for="ModalTraining.TeamId" asp-items="Model.TeamList" class="form-select" required id="ModalTraining_TeamId">
+                            <option value="">-- Выберите группу --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ModalTraining.FacilityId" class="form-label">Помещение (Зал)</label>
+                        <select asp-for="ModalTraining.FacilityId" asp-items="Model.FacilityList" class="form-select" required id="ModalTraining_FacilityId">
+                            <option value="">-- Выберите помещение --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ModalTraining.PlanTraining" class="form-label">Тема / План тренировки</label>
+                        <input asp-for="ModalTraining.PlanTraining" class="form-control" id="ModalTraining_PlanTraining" placeholder="Например: Отработка пасов" />
+                    </div>
+
+                    <input type="hidden" name="isBulkAdd" id="isBulkAdd" value="false" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary" onclick="document.getElementById('isBulkAdd').value='false';">Сохранить</button>
+                    <button type="submit" class="btn btn-success" id="bulkAddBtn" onclick="document.getElementById('isBulkAdd').value='true';">Сохранить и добавить еще</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function setView(viewType) {
+            document.getElementById('ViewType').value = viewType;
+            document.getElementById('filterForm').submit();
         }
+
+        function changeDate(direction) {
+            let currentDateInput = document.getElementById('CurrentDate');
+            let date = new Date(currentDateInput.value);
+            let viewType = document.getElementById('ViewType').value;
+
+            let daysToAdd = (viewType === 'week' ? 7 : 1) * direction;
+            date.setDate(date.getDate() + daysToAdd);
+
+            let year = date.getFullYear();
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let day = String(date.getDate()).padStart(2, '0');
+
+            currentDateInput.value = `${year}-${month}-${day}`;
+            document.getElementById('filterForm').submit();
+        }
+
+        function prepareAddModal() {
+            document.getElementById('trainingForm').reset();
+            document.getElementById('ModalTraining_TrainingId').value = 0;
+            document.getElementById('ModalTraining_DateTraining').value = document.getElementById('CurrentDate').value;
+            document.getElementById('trainingModalLabel').innerText = 'Новая тренировка';
+            document.getElementById('bulkAddBtn').style.display = 'inline-block';
+        }
+
+        function prepareEditModal(id, date, time, coachId, teamId, facilityId, plan) {
+            document.getElementById('ModalTraining_TrainingId').value = id;
+            document.getElementById('ModalTraining_DateTraining').value = date;
+            document.getElementById('ModalTraining_TimeTraining').value = time;
+            document.getElementById('ModalTraining_CoachId').value = coachId;
+            document.getElementById('ModalTraining_TeamId').value = teamId;
+            document.getElementById('ModalTraining_FacilityId').value = facilityId;
+            document.getElementById('ModalTraining_PlanTraining').value = plan;
+
+            document.getElementById('trainingModalLabel').innerText = 'Редактировать тренировку';
+            document.getElementById('bulkAddBtn').style.display = 'none';
+        }
+    </script>
+
+    @if (TempData["ShowAddModal"] as bool? == true)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                prepareAddModal();
+
+                document.getElementById('ModalTraining_DateTraining').value = '@TempData["BulkDate"]';
+                document.getElementById('ModalTraining_TeamId').value = '@TempData["BulkTeamId"]';
+                document.getElementById('ModalTraining_FacilityId').value = '@TempData["BulkFacilityId"]';
+                document.getElementById('ModalTraining_CoachId').value = '@TempData["BulkCoachId"]';
+                document.getElementById('ModalTraining_TimeTraining').value = '';
+
+                let btn = document.createElement('button');
+                btn.setAttribute('data-bs-toggle', 'modal');
+                btn.setAttribute('data-bs-target', '#trainingModal');
+                btn.style.display = 'none';
+                document.body.appendChild(btn);
+                btn.click();
+                btn.remove();
+            });
+        </script>
     }
-
-    function addTraining() {
-        // Здесь будет логика добавления новой тренировки
-        alert('Форма добавления тренировки будет открыта');
-    }
-
-    function updateSchedule() {
-        // Здесь будет логика обновления расписания по фильтрам
-        console.log('Расписание обновлено по выбранным фильтрам');
-    }
-
-    // Обработка кликов по событиям для просмотра деталей
-    document.querySelectorAll('.event').forEach(event => {
-        event.addEventListener('click', function() {
-            const eventTitle = this.querySelector('.event-title').textContent;
-            alert(`Детали тренировки: ${eventTitle}`);
-        });
-    });
-
-    // Инициализация при загрузке
-    document.addEventListener('DOMContentLoaded', function() {
-        // Устанавливаем текущую дату в заголовок дня
-        const today = new Date();
-        const options = { weekday: 'long', day: 'numeric', month: 'long' };
-        const dateString = today.toLocaleDateString('ru-RU', options);
-        document.querySelector('.date-header').textContent = dateString;
-    });
-</script>
+}

@@ -1,16 +1,23 @@
+using FootballSchool.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем сервисы Razor Pages
+// Добавляем поддержку Razor Pages
 builder.Services.AddRazorPages();
+
+// РЕГИСТРАЦИЯ БАЗЫ ДАННЫХ (Это главное для функциональности!)
+// Сообщаем приложению, что нужно использовать SQL Server
+builder.Services.AddDbContext<FootballSchoolContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Настройка конвейера HTTP-запросов.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");

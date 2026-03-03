@@ -4,6 +4,22 @@
     ViewData["Title"] = "Филиалы и площадки";
 }
 
+@functions {
+    // Картинки по умолчанию, если пользователь не загрузил фото филиала
+    public string GetRandomImage(int id)
+    {
+        var images = new[]
+        {
+            "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=400&h=250&fit=crop",
+            "https://images.unsplash.com/photo-1543353072-8e5ffb15ba5c?w=400&h=250&fit=crop",
+            "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=250&fit=crop",
+            "https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=400&h=250&fit=crop",
+            "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=250&fit=crop"
+        };
+        return images[id % images.Length];
+    }
+}
+
 @section Styles {
     <style>
         .branches-page .main-content {
@@ -12,7 +28,7 @@
         }
 
             .branches-page .main-content.with-sidebar {
-                margin-right: 380px;
+                margin-right: 420px;
             }
 
         .header {
@@ -33,40 +49,23 @@
             gap: 12px;
         }
 
-        .btn-secondary {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: white;
-            border: 1px solid #D1D5DB;
-            border-radius: 6px;
-            font-size: 14px;
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-            .btn-secondary:hover {
-                background: #F9FAFB;
-            }
-
         .btn-primary {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            background: #4285F4;
+            padding: 10px 18px;
+            background: #2563eb;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
+            font-weight: 500;
             color: white;
             cursor: pointer;
             transition: all 0.2s;
         }
 
             .btn-primary:hover {
-                background: #3367D6;
+                background: #1d4ed8;
             }
 
         .filters {
@@ -74,48 +73,58 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 24px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .filter-group label {
             display: block;
             font-size: 13px;
+            font-weight: 500;
             color: #6B7280;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .filter-select {
             width: 100%;
-            padding: 10px 12px;
-            background: white;
+            padding: 10px 14px;
+            background: #F9FAFB;
             border: 1px solid #D1D5DB;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
             color: #111827;
             cursor: pointer;
+            transition: border-color 0.2s;
         }
+
+            .filter-select:focus {
+                outline: none;
+                border-color: #2563eb;
+            }
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
         }
 
         .card {
             background: white;
             border: 1px solid #E5E7EB;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             transition: all 0.3s;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
         }
 
             .card:hover {
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                transform: translateY(-2px);
-            }
-
-            .card.active {
-                border: 2px solid #4CAF50;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+                transform: translateY(-4px);
+                border-color: #D1D5DB;
             }
 
         .card-image {
@@ -128,31 +137,23 @@
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
+                transition: transform 0.5s ease;
             }
 
-        .favorite-btn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        .card:hover .card-image img {
+            transform: scale(1.05);
         }
 
         .card-content {
-            padding: 16px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
             .card-content h3 {
-                font-size: 16px;
-                font-weight: 600;
+                font-size: 18px;
+                font-weight: 700;
                 color: #111827;
                 margin-bottom: 12px;
             }
@@ -160,71 +161,68 @@
         .card-info {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex: 1;
         }
 
         .info-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #6B7280;
+            gap: 10px;
+            font-size: 14px;
+            color: #4B5563;
         }
 
             .info-item i {
-                width: 14px;
+                width: 16px;
                 text-align: center;
+                color: #9CA3AF;
             }
 
         .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 12px;
-            border-top: 1px solid #E5E7EB;
+            padding-top: 16px;
+            border-top: 1px solid #F3F4F6;
         }
 
-        .pagination-dots {
+        .details-link {
+            font-size: 14px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
             display: flex;
+            align-items: center;
             gap: 6px;
         }
 
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #D1D5DB;
-        }
-
-            .dot.active {
-                background: #4285F4;
+            .details-link i {
+                font-size: 12px;
+                transition: transform 0.2s;
             }
 
-        .details-link {
-            font-size: 13px;
-            color: #4285F4;
-            text-decoration: none;
-            font-weight: 500;
+        .card:hover .details-link i {
+            transform: translateX(4px);
         }
 
-            .details-link:hover {
-                text-decoration: underline;
-            }
-
-        /* Right Sidebar */
+        /* === Right Sidebar === */
         .right-sidebar {
-            width: 380px;
+            width: 420px;
             background: white;
             border-left: 1px solid #E5E7EB;
             overflow-y: auto;
-            padding: 24px;
+            padding: 0;
             position: fixed;
             top: 0;
-            right: -380px;
+            right: -420px;
             height: 100vh;
-            transition: right 0.3s ease;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
         }
 
             .right-sidebar.active {
@@ -235,29 +233,52 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            padding: 20px 24px;
+            border-bottom: 1px solid #E5E7EB;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
         }
 
             .sidebar-header h2 {
                 font-size: 18px;
-                font-weight: 600;
+                font-weight: 700;
                 color: #111827;
+                margin: 0;
             }
 
         .close-btn {
-            background: none;
+            background: #F3F4F6;
             border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            padding: 4px;
-            color: #6B7280;
+            color: #4B5563;
+            transition: all 0.2s;
+        }
+
+            .close-btn:hover {
+                background: #E5E7EB;
+                color: #111827;
+            }
+
+        .sidebar-body {
+            padding: 24px;
+            flex: 1;
         }
 
         .branch-preview {
             width: 100%;
-            height: 160px;
+            height: 180px;
             border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
             .branch-preview img {
@@ -267,50 +288,66 @@
             }
 
         .branch-details h3 {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 700;
             color: #111827;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            color: #6B7280;
-            margin-bottom: 8px;
-        }
-
-            .detail-item i {
-                width: 16px;
-                text-align: center;
-            }
 
         .tabs {
             display: flex;
-            gap: 8px;
+            gap: 4px;
             margin: 24px 0;
-            border-bottom: 1px solid #E5E7EB;
+            background: #F3F4F6;
+            padding: 4px;
+            border-radius: 8px;
         }
 
         .tab {
-            padding: 10px 16px;
-            background: none;
+            flex: 1;
+            padding: 8px 12px;
+            background: transparent;
             border: none;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
             color: #6B7280;
             cursor: pointer;
-            border-bottom: 2px solid transparent;
             transition: all 0.2s;
+            text-align: center;
         }
 
             .tab.active {
-                color: #4285F4;
-                border-bottom-color: #4285F4;
+                background: white;
+                color: #2563eb;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             }
 
-        .halls-section {
+        .sidebar-tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+            .sidebar-tab-content.active {
+                display: block;
+            }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        .halls-section, .contact-section {
             margin-bottom: 24px;
         }
 
@@ -322,49 +359,61 @@
         }
 
             .section-header h4 {
-                font-size: 15px;
-                font-weight: 600;
+                font-size: 16px;
+                font-weight: 700;
                 color: #111827;
+                margin: 0;
             }
 
-        .add-btn {
+        .add-btn-small {
             display: flex;
             align-items: center;
             gap: 6px;
-            background: none;
+            background: #EFF6FF;
+            padding: 6px 12px;
+            border-radius: 6px;
             border: none;
-            color: #4285F4;
-            font-size: 13px;
+            color: #2563eb;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: 500;
+            transition: background 0.2s;
         }
 
+            .add-btn-small:hover {
+                background: #DBEAFE;
+            }
+
         .hall-card {
-            background: #F9FAFB;
+            background: white;
             border: 1px solid #E5E7EB;
-            border-radius: 8px;
-            padding: 14px;
+            border-radius: 10px;
+            padding: 16px;
             margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
 
         .hall-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+            align-items: flex-start;
+            margin-bottom: 12px;
         }
 
             .hall-header h5 {
-                font-size: 14px;
+                font-size: 15px;
                 font-weight: 600;
                 color: #111827;
+                margin: 0 0 4px 0;
             }
 
         .hall-status {
             padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .active-status {
@@ -377,98 +426,60 @@
             color: #1E40AF;
         }
 
+        .repair-status {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
         .hall-info {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
             font-size: 13px;
-            color: #6B7280;
-            margin-bottom: 10px;
+            color: #4B5563;
+            margin-bottom: 12px;
         }
 
         .hall-actions {
             display: flex;
-            gap: 16px;
+            gap: 12px;
+            border-top: 1px solid #F3F4F6;
+            padding-top: 12px;
         }
 
         .action-link {
-            font-size: 13px;
-            color: #4285F4;
+            font-size: 12px;
+            color: #2563eb;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
         }
+
+            .action-link:hover {
+                text-decoration: underline;
+            }
 
             .action-link.delete {
                 color: #DC2626;
             }
 
-        .map-section {
-            margin-bottom: 24px;
-        }
-
-            .map-section h4 {
-                font-size: 15px;
-                font-weight: 600;
-                color: #111827;
-                margin-bottom: 12px;
-            }
-
-        .map-placeholder {
-            width: 100%;
-            height: 200px;
-            background: #F3F4F6;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            overflow: hidden;
-        }
-
-        .map-content {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6B7280;
-            font-size: 14px;
-        }
-
-        .map-link {
-            font-size: 13px;
-            color: #4285F4;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .contact-section {
-            margin-bottom: 24px;
-        }
-
-            .contact-section h4 {
-                font-size: 15px;
-                font-weight: 600;
-                color: #111827;
-                margin-bottom: 12px;
-            }
-
-        .contact-info {
-            font-size: 13px;
-            color: #6B7280;
-            line-height: 1.6;
-        }
-
-            .contact-info p {
-                margin-bottom: 8px;
-            }
-
         .sidebar-actions {
             display: flex;
             gap: 12px;
-            padding-top: 20px;
+            padding: 20px 24px;
             border-top: 1px solid #E5E7EB;
+            background: #F9FAFB;
+            position: sticky;
+            bottom: 0;
         }
 
-        .btn-edit {
+        .btn-edit, .btn-delete {
             flex: 1;
             display: flex;
             align-items: center;
@@ -477,31 +488,24 @@
             padding: 10px;
             background: white;
             border: 1px solid #D1D5DB;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
-            color: #374151;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
         }
 
+        .btn-edit {
+            color: #374151;
+        }
+
             .btn-edit:hover {
-                background: #F9FAFB;
+                background: #F3F4F6;
             }
 
         .btn-delete {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px;
-            background: white;
-            border: 1px solid #FCA5A5;
-            border-radius: 6px;
-            font-size: 14px;
+            border-color: #FCA5A5;
             color: #DC2626;
-            cursor: pointer;
-            transition: all 0.2s;
         }
 
             .btn-delete:hover {
@@ -515,19 +519,40 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(2px);
             z-index: 999;
+            transition: opacity 0.3s;
         }
 
             .overlay.active {
                 display: block;
             }
 
-        @@media (max-width: 1200px) {
-            .cards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        .list-item-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2563eb;
+        }
+
+            .list-item-card h6 {
+                font-size: 14px;
+                font-weight: 600;
+                margin: 0 0 6px 0;
+                color: #111827;
             }
 
+            .list-item-card p {
+                font-size: 12px;
+                color: #6B7280;
+                margin: 0;
+                line-height: 1.4;
+            }
+
+        @@media (max-width: 1200px) {
             .branches-page .main-content.with-sidebar {
                 margin-right: 0;
             }
@@ -536,10 +561,6 @@
                 width: 100%;
                 right: -100%;
             }
-
-                .right-sidebar.active {
-                    right: 0;
-                }
         }
 
         @@media (max-width: 768px) {
@@ -550,12 +571,11 @@
             .header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 16px;
             }
 
             .header-actions {
                 width: 100%;
-                justify-content: space-between;
+                justify-content: flex-end;
             }
         }
     </style>
@@ -565,458 +585,423 @@
     <div class="overlay" id="overlay"></div>
 
     <div class="main-content" id="mainContent">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success mb-4"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger mb-4"><i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]</div>
+        }
+
         <header class="header">
+            <h1>Филиалы и площадки</h1>
             <div class="header-actions">
-                <button class="btn-secondary">
-                    <i class="fas fa-filter"></i>
-                    Фильтры
-                </button>
-                <button class="btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Добавить филиал
+                <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#branchModal" onclick="prepareAddBranchModal()">
+                    <i class="fas fa-plus"></i> Добавить филиал
                 </button>
             </div>
         </header>
 
-        <div class="filters">
+        <form method="get" class="filters w-100" id="filterForm">
             <div class="filter-group">
                 <label>Город</label>
-                <select class="filter-select">
-                    <option>Все города</option>
-                    <option>Москва</option>
-                    <option>Санкт-Петербург</option>
-                    <option>Казань</option>
+                <select asp-for="FilterCity" asp-items="Model.CityList" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Все города</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label>Тип зала</label>
-                <select class="filter-select">
-                    <option>Все типы</option>
-                    <option>Универсальный зал</option>
-                    <option>Футбольное поле</option>
-                    <option>Спортивный комплекс</option>
+                <select asp-for="FilterType" asp-items="Model.TypeList" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Все типы</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label>Статус</label>
-                <select class="filter-select">
-                    <option>Все статусы</option>
-                    <option>Активен</option>
-                    <option>Неактивен</option>
-                    <option>На ремонте</option>
+                <label>Статус площадки</label>
+                <select asp-for="FilterStatus" asp-items="Model.StatusList" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Все статусы</option>
                 </select>
             </div>
-        </div>
+        </form>
 
-        <div class="cards-grid">
-            <!-- Card 1 -->
-            <div class="card" onclick="openBranchDetails(1)">
-                <div class="card-image">
-                    <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=400&h=250&fit=crop" alt="Football boots">
-                    <button class="favorite-btn">
-                        <i class="fas fa-heart" style="color: #4285F4;"></i>
-                    </button>
-                </div>
-                <div class="card-content">
-                    <h3>Футбольная школа "Чемпион" - Центр</h3>
-                    <div class="card-info">
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>ул. Спортивная, 10 · Москва</span>
+        @if (!Model.Branches.Any())
+        {
+            <div class="alert alert-info">По вашему запросу филиалов не найдено.</div>
+        }
+        else
+        {
+            <div class="cards-grid">
+                @foreach (var branch in Model.Branches)
+                {
+                    <div class="card" onclick="openBranchDetails(@branch.BranchId)">
+                        <div class="card-image">
+                            <!-- Вывод Base64 из БД, либо заглушки -->
+                            <img src="@(branch.PhotoBase64 != null ? $"data:image/jpeg;base64,{branch.PhotoBase64}" : GetRandomImage(branch.BranchId))" alt="Branch Image">
                         </div>
-                        <div class="info-item">
-                            <i class="fas fa-user-tie"></i>
-                            <span>Александр Петров</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <span>3 группы</span>
+                        <div class="card-content">
+                            <h3 class="text-truncate" title="@branch.Name">@branch.Name</h3>
+                            <div class="card-info">
+                                <div class="info-item text-truncate" title="@branch.Address · @branch.City">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>@branch.Address · @branch.City</span>
+                                </div>
+                                <div class="info-item text-truncate" title="@branch.MainCoachName">
+                                    <i class="fas fa-user-tie"></i>
+                                    <span>@branch.MainCoachName</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>Площадок: @branch.Facilities.Count</span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <span class="details-link">Открыть профиль <i class="fas fa-arrow-right"></i></span>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <div class="pagination-dots">
-                            <span class="dot active"></span>
-                            <span class="dot active"></span>
-                            <span class="dot"></span>
-                        </div>
-                        <a href="#" class="details-link">Подробнее</a>
-                    </div>
-                </div>
+                }
             </div>
-
-            <!-- Card 2 -->
-            <div class="card" onclick="openBranchDetails(2)">
-                <div class="card-image">
-                    <img src="https://images.unsplash.com/photo-1543353072-8e5ffb15ba5c?w=400&h=250&fit=crop" alt="Football field">
-                    <button class="favorite-btn">
-                        <i class="fas fa-heart" style="color: #4285F4;"></i>
-                    </button>
-                </div>
-                <div class="card-content">
-                    <h3>Футбольная школа "Чемпион" - Запад</h3>
-                    <div class="card-info">
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>ул. Футбольная, 25 · Москва</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-user-tie"></i>
-                            <span>Сергей Иванов</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <span>2 группы</span>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="pagination-dots">
-                            <span class="dot active"></span>
-                            <span class="dot"></span>
-                        </div>
-                        <a href="#" class="details-link">Подробнее</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="card" onclick="openBranchDetails(3)">
-                <div class="card-image">
-                    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=250&fit=crop" alt="Football on grass">
-                    <button class="favorite-btn">
-                        <i class="fas fa-heart" style="color: #4CAF50;"></i>
-                    </button>
-                </div>
-                <div class="card-content">
-                    <h3>Футбольная школа "Чемпион" - Юг</h3>
-                    <div class="card-info">
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>проспект Спортивная, 15 · Москва</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-user-tie"></i>
-                            <span>Дмитрий Соколов</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <span>1 группа</span>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="pagination-dots">
-                            <span class="dot active"></span>
-                            <span class="dot"></span>
-                        </div>
-                        <a href="#" class="details-link">Подробнее</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="card" onclick="openBranchDetails(4)">
-                <div class="card-image">
-                    <img src="https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=400&h=250&fit=crop" alt="Football stadium">
-                    <button class="favorite-btn">
-                        <i class="fas fa-heart" style="color: #4285F4;"></i>
-                    </button>
-                </div>
-                <div class="card-content">
-                    <h3>Футбольная школа "Чемпион" - Север</h3>
-                    <div class="card-info">
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>ул. Тренерская, 8 · Санкт-Петербург</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-user-tie"></i>
-                            <span>Игорь Николаев</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <span>2 группы</span>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="pagination-dots">
-                            <span class="dot active"></span>
-                            <span class="dot"></span>
-                        </div>
-                        <a href="#" class="details-link">Подробнее</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 5 -->
-            <div class="card" onclick="openBranchDetails(5)">
-                <div class="card-image">
-                    <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=250&fit=crop" alt="Football balls">
-                    <button class="favorite-btn">
-                        <i class="fas fa-heart" style="color: #4285F4;"></i>
-                    </button>
-                </div>
-                <div class="card-content">
-                    <h3>Футбольная школа "Чемпион" - Восток</h3>
-                    <div class="card-info">
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>проспект Чемпионов, 42 · Казань</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-user-tie"></i>
-                            <span>Алексей Морозов</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <span>2 группы</span>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="pagination-dots">
-                            <span class="dot active"></span>
-                            <span class="dot"></span>
-                        </div>
-                        <a href="#" class="details-link">Подробнее</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 6 -->
-            <div class="card" onclick="openBranchDetails(6)">
-                <div class="card-image">
-                    <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=250&fit=crop" alt="Football training">
-                    <button class="favorite-btn">
-                        <i class="fas fa-heart" style="color: #4285F4;"></i>
-                    </button>
-                </div>
-                <div class="card-content">
-                    <h3>Футбольная школа "Чемпион" - Олимпийский</h3>
-                    <div class="card-info">
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>ул. Олимпийская, 5 · Москва</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-user-tie"></i>
-                            <span>Михаил Волков</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <span>4 группы</span>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="pagination-dots">
-                            <span class="dot active"></span>
-                            <span class="dot active"></span>
-                            <span class="dot active"></span>
-                        </div>
-                        <a href="#" class="details-link">Подробнее</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 
-    <!-- Right Sidebar -->
+    <!-- Right Sidebar container -->
     <aside class="right-sidebar" id="branchSidebar">
         <div class="sidebar-header">
-            <h2>Информация о филиале</h2>
+            <h2>Профиль филиала</h2>
             <button class="close-btn" onclick="closeBranchDetails()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-
-        <div class="branch-preview">
-            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=250&fit=crop" alt="Branch preview">
-        </div>
-
-        <div class="branch-details">
-            <h3>Футбольная школа "Чемпион" - Юг</h3>
-            <div class="detail-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>проспект Спортивная, 15 · Москва</span>
-            </div>
-            <div class="detail-item">
-                <i class="fas fa-user-tie"></i>
-                <span>Дмитрий Соколов</span>
-            </div>
-            <div class="detail-item">
-                <i class="fas fa-phone"></i>
-                <span>+7 (495) 456-78-90</span>
-            </div>
-            <div class="detail-item">
-                <i class="fas fa-envelope"></i>
-                <span>south@football-school.ru</span>
-            </div>
-        </div>
-
-        <div class="tabs">
-            <button class="tab active">Информация</button>
-            <button class="tab">Расписание</button>
-            <button class="tab">Группы</button>
-        </div>
-
-        <div class="halls-section">
-            <div class="section-header">
-                <h4>Залы и площадки</h4>
-                <button class="add-btn">
-                    <i class="fas fa-plus"></i>
-                    Добавить зал
-                </button>
-            </div>
-
-            <div class="hall-card">
-                <div class="hall-header">
-                    <h5>Универсальный зал</h5>
-                    <span class="hall-status active-status">Активен</span>
-                </div>
-                <div class="hall-info">
-                    <span>Тип: Универсальный зал</span>
-                    <span>Вместимость: 25 человек</span>
-                    <span>Размер: 20x40 м</span>
-                </div>
-                <div class="hall-actions">
-                    <a href="#" class="action-link">Редактировать</a>
-                    <a href="#" class="action-link delete">Удалить</a>
-                </div>
-            </div>
-
-            <div class="hall-card">
-                <div class="hall-header">
-                    <h5>Новое поле</h5>
-                    <span class="hall-status new-status">новый</span>
-                </div>
-                <div class="hall-info">
-                    <span>Тип: Футбольное поле</span>
-                    <span>Вместимость: 22 человек</span>
-                    <span>Размер: 60x90 м</span>
-                </div>
-                <div class="hall-actions">
-                    <a href="#" class="action-link">Редактировать</a>
-                    <a href="#" class="action-link delete">Удалить</a>
-                </div>
-            </div>
-
-            <div class="hall-card">
-                <div class="hall-header">
-                    <h5>Тренажерный зал</h5>
-                    <span class="hall-status active-status">Активен</span>
-                </div>
-                <div class="hall-info">
-                    <span>Тип: Тренажерный зал</span>
-                    <span>Вместимость: 15 человек</span>
-                    <span>Размер: 15x20 м</span>
-                </div>
-                <div class="hall-actions">
-                    <a href="#" class="action-link">Редактировать</a>
-                    <a href="#" class="action-link delete">Удалить</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="map-section">
-            <h4>Карта</h4>
-            <div class="map-placeholder">
-                <div class="map-content">
-                    <i class="fas fa-map" style="font-size: 48px; opacity: 0.5;"></i>
-                    <div style="margin-top: 10px;">Карта расположения филиала</div>
-                </div>
-            </div>
-            <a href="#" class="map-link">Открыть на карте</a>
-        </div>
-
-        <div class="contact-section">
-            <h4>Контактная информация</h4>
-            <div class="contact-info">
-                <p><strong>Телефон:</strong> +7 (495) 456-78-90</p>
-                <p><strong>Email:</strong> south@football-school.ru</p>
-                <p><strong>Адрес:</strong> проспект Спортивная, 15, Москва</p>
-                <p><strong>Часы работы:</strong> Пн-Пт: 9:00-20:00, Сб: 10:00-18:00, Вс: выходной</p>
-            </div>
-        </div>
-
-        <div class="stats-section">
-            <h4>Статистика</h4>
-            <div class="contact-info">
-                <p><strong>Количество групп:</strong> 3</p>
-                <p><strong>Общее количество учеников:</strong> 45</p>
-                <p><strong>Тренеров:</strong> 2</p>
-                <p><strong>Занятий в неделю:</strong> 12</p>
-            </div>
-        </div>
-
-        <div class="sidebar-actions">
-            <button class="btn-edit">
-                <i class="fas fa-edit"></i>
-                Редактировать
-            </button>
-            <button class="btn-delete">
-                <i class="fas fa-trash"></i>
-                Удалить
-            </button>
+        <div id="sidebarDynamicContent" class="d-flex flex-column h-100">
+            <!-- Динамическое содержимое сайдбара будет вставлено сюда через JS -->
         </div>
     </aside>
 </div>
 
-<script>
-    function openBranchDetails(branchId) {
-        const sidebar = document.getElementById('branchSidebar');
-        const mainContent = document.getElementById('mainContent');
-        const overlay = document.getElementById('overlay');
+<!-- Скрытый контейнер с шаблонами данных для сайдбара -->
+<div id="sidebar-data-store" style="display: none;">
+    @foreach (var branch in Model.Branches)
+    {
+        var safeName = branch.Name.Replace("'", "\\'");
+        var safeCity = branch.City.Replace("'", "\\'");
+        var safeStreet = branch.Street.Replace("'", "\\'");
+        var safeHouse = branch.House.Replace("'", "\\'");
+        var safePhone = branch.Phone?.Replace("'", "\\'") ?? "";
 
-        sidebar.classList.add('active');
-        mainContent.classList.add('with-sidebar');
-        overlay.classList.add('active');
+        <div id="branch-content-@branch.BranchId" class="d-flex flex-column h-100">
+            <div class="sidebar-body">
+                <div class="branch-preview">
+                    <!-- Фото для сайдбара -->
+                    <img src="@(branch.PhotoBase64 != null ? $"data:image/jpeg;base64,{branch.PhotoBase64}" : GetRandomImage(branch.BranchId))" alt="Branch preview">
+                </div>
 
-        // Здесь можно загрузить данные филиала по branchId
-        console.log('Opening branch details for ID:', branchId);
+                <div class="branch-details">
+                    <h3>@branch.Name</h3>
+                    <div class="detail-item"><i class="fas fa-map-marker-alt"></i> <span>@branch.Address, @branch.City</span></div>
+                    <div class="detail-item"><i class="fas fa-phone"></i> <span>@(string.IsNullOrEmpty(branch.Phone) ? "Не указан" : branch.Phone)</span></div>
+                </div>
 
-        // Обновляем информацию в сайдбаре в зависимости от выбранного филиала
-        updateBranchInfo(branchId);
+                <div class="tabs">
+                    <button class="tab active" onclick="switchSidebarTab(event, 'info')">Площадки</button>
+                    <button class="tab" onclick="switchSidebarTab(event, 'schedule')">Расписание</button>
+                    <button class="tab" onclick="switchSidebarTab(event, 'groups')">Группы</button>
+                </div>
+
+                <!-- Вкладка: Информация и Площадки -->
+                <div class="sidebar-tab-content active" data-tab="info">
+                    <div class="halls-section">
+                        <div class="section-header">
+                            <h4>Залы и площадки (@branch.Facilities.Count)</h4>
+                            <button class="add-btn-small" data-bs-toggle="modal" data-bs-target="#facilityModal" onclick="prepareAddFacilityModal(@branch.BranchId)">
+                                <i class="fas fa-plus"></i> Добавить зал
+                            </button>
+                        </div>
+
+                        @if (!branch.Facilities.Any())
+                        {
+                            <div class="text-muted" style="font-size: 13px;">В этом филиале пока нет залов.</div>
+                        }
+
+                        @foreach (var facility in branch.Facilities)
+                        {
+                            var statusClass = facility.StatusFacility == "Активен" ? "active-status" : facility.StatusFacility == "На ремонте" ? "repair-status" : "new-status";
+                            var safeFacName = facility.NameFacility.Replace("'", "\\'");
+                            var safeFacType = facility.TypeFacility.Replace("'", "\\'");
+                            var safeFacStatus = facility.StatusFacility.Replace("'", "\\'");
+                            var safeFacNum = facility.NumberFacility?.Replace("'", "\\'") ?? "";
+                            var facCost = facility.CostFacility?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0";
+
+                            <div class="hall-card">
+                                <div class="hall-header">
+                                    <h5>@facility.NameFacility</h5>
+                                    <span class="hall-status @statusClass">@facility.StatusFacility</span>
+                                </div>
+                                <div class="hall-info">
+                                    <span><i class="fas fa-tag fa-fw text-muted"></i> Тип: @facility.TypeFacility</span>
+                                    <span><i class="fas fa-users fa-fw text-muted"></i> Вместимость: @facility.CapacityFacility чел.</span>
+                                    @if (!string.IsNullOrEmpty(facility.NumberFacility))
+                                    {
+                                        <span><i class="fas fa-door-open fa-fw text-muted"></i> Кабинет: @facility.NumberFacility</span>
+                                    }
+                                </div>
+                                <div class="hall-actions">
+                                    <button class="action-link" data-bs-toggle="modal" data-bs-target="#facilityModal"
+                                            onclick="prepareEditFacilityModal(@facility.FacilityId, @branch.BranchId, '@safeFacName', '@safeFacType', @facility.CapacityFacility, '@safeFacStatus', @facCost, '@safeFacNum')">
+                                        <i class="fas fa-edit"></i> Изменить
+                                    </button>
+                                    <form method="post" asp-page-handler="DeleteFacility" asp-route-id="@facility.FacilityId" onsubmit="return confirm('Удалить площадку?');" style="display:inline;">
+                                        <button type="submit" class="action-link delete"><i class="fas fa-trash"></i> Удалить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="contact-section mt-4 pt-4 border-top">
+                        <h4>Статистика по филиалу</h4>
+                        <div class="detail-item"><i class="fas fa-users"></i> Тренируется групп: <strong>@branch.GroupsCount</strong></div>
+                        <div class="detail-item"><i class="fas fa-user-tie"></i> Работает тренеров: <strong>@branch.CoachesCount</strong></div>
+                        <div class="detail-item"><i class="fas fa-calendar-check"></i> Запланировано тренировок: <strong>@branch.UpcomingTrainings.Count</strong></div>
+                    </div>
+                </div>
+
+                <!-- Вкладка: Расписание -->
+                <div class="sidebar-tab-content" data-tab="schedule">
+                    <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">Ближайшие тренировки</h4>
+                    @if (!branch.UpcomingTrainings.Any())
+                    {
+                        <p class="text-muted" style="font-size: 13px;">В ближайшее время тренировок нет.</p>
+                    }
+                    @foreach (var t in branch.UpcomingTrainings)
+                    {
+                        <div class="list-item-card" style="border-left-color: #10B981;">
+                            <h6>@t.DateTraining.ToString("dd MMM (ddd)") в @t.TimeTraining.ToString("HH:mm")</h6>
+                            <p><i class="fas fa-bullseye fa-fw"></i> @(string.IsNullOrEmpty(t.PlanTraining) ? "Плановая тренировка" : t.PlanTraining)</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Вкладка: Группы -->
+                <div class="sidebar-tab-content" data-tab="groups">
+                    <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">Группы филиала</h4>
+                    @if (!branch.BranchTeams.Any())
+                    {
+                        <p class="text-muted" style="font-size: 13px;">За филиалом пока не закреплено ни одной группы.</p>
+                    }
+                    @foreach (var t in branch.BranchTeams)
+                    {
+                        <div class="list-item-card" style="border-left-color: #8B5CF6;">
+                            <h6>@t.CategoryTeam</h6>
+                            <p><i class="fas fa-info-circle fa-fw"></i> Статус: @t.StatusTeam</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Подвал сайдбара с кнопками -->
+            <div class="sidebar-actions mt-auto">
+                <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#branchModal"
+                        onclick="prepareEditBranchModal(@branch.BranchId, '@safeName', '@safeCity', '@safeStreet', '@safeHouse', '@safePhone')">
+                    <i class="fas fa-edit"></i> Редактировать
+                </button>
+                <form method="post" asp-page-handler="DeleteBranch" asp-route-id="@branch.BranchId" onsubmit="return confirm('Внимание! Будут удалены все площадки и привязанные к ним тренировки. Вы уверены?');" style="display: flex; flex: 1;">
+                    <button type="submit" class="btn-delete w-100">
+                        <i class="fas fa-trash"></i> Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
     }
+</div>
 
-    function updateBranchInfo(branchId) {
-        // В реальном приложении здесь был бы AJAX запрос для загрузки данных
-        const branchTitles = {
-            1: 'Футбольная школа "Чемпион" - Центр',
-            2: 'Футбольная школа "Чемпион" - Запад',
-            3: 'Футбольная школа "Чемпион" - Юг',
-            4: 'Футбольная школа "Чемпион" - Север',
-            5: 'Футбольная школа "Чемпион" - Восток',
-            6: 'Футбольная школа "Чемпион" - Олимпийский'
-        };
+<!-- ================= МОДАЛЬНЫЕ ОКНА ================= -->
+<!-- Модальное окно: Филиал -->
+<div class="modal fade" id="branchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- enctype="multipart/form-data" обязательно для загрузки файлов -->
+            <form method="post" asp-page-handler="SaveBranch" id="branchForm" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="branchModalLabel">Новый филиал</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="ModalBranch.BranchId" id="ModalBranch_BranchId" />
 
-        const branchDetails = document.querySelector('.branch-details h3');
-        if (branchDetails && branchTitles[branchId]) {
-            branchDetails.textContent = branchTitles[branchId];
+                    <div class="mb-3">
+                        <label asp-for="ModalBranch.NameBranch" class="form-label">Название филиала</label>
+                        <input asp-for="ModalBranch.NameBranch" class="form-control" required id="ModalBranch_NameBranch" placeholder='Например: Футбольная школа "Чемпион" - Центр' />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ModalBranch.CityBranch" class="form-label">Город</label>
+                        <input asp-for="ModalBranch.CityBranch" class="form-control" required id="ModalBranch_CityBranch" placeholder="Москва" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label asp-for="ModalBranch.StreetBranch" class="form-label">Улица</label>
+                            <input asp-for="ModalBranch.StreetBranch" class="form-control" required id="ModalBranch_StreetBranch" placeholder="ул. Ленина" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="ModalBranch.HouseBranch" class="form-label">Дом</label>
+                            <input asp-for="ModalBranch.HouseBranch" class="form-control" required id="ModalBranch_HouseBranch" placeholder="10А" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ModalBranch.PhoneBranch" class="form-label">Телефон для связи</label>
+                        <input asp-for="ModalBranch.PhoneBranch" class="form-control" required id="ModalBranch_PhoneBranch" placeholder="+7 (999) 000-00-00" />
+                    </div>
+
+                    <!-- Поле загрузки фотографии -->
+                    <div class="mb-3">
+                        <label class="form-label">Фотография (необязательно)</label>
+                        <input type="file" name="BranchPhoto" class="form-control" accept="image/jpeg, image/png" />
+                        <small class="text-muted">Загрузите JPG или PNG изображение для карточки филиала</small>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно: Площадка (Facility) -->
+<div class="modal fade" id="facilityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="SaveFacility" id="facilityForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="facilityModalLabel">Новая площадка</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="ModalFacility.FacilityId" id="ModalFacility_FacilityId" />
+                    <input type="hidden" asp-for="ModalFacility.BranchId" id="ModalFacility_BranchId" />
+
+                    <div class="mb-3">
+                        <label asp-for="ModalFacility.NameFacility" class="form-label">Название площадки / зала</label>
+                        <input asp-for="ModalFacility.NameFacility" class="form-control" required id="ModalFacility_NameFacility" placeholder='Например: Главное поле' />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ModalFacility.TypeFacility" class="form-label">Тип</label>
+                            <select asp-for="ModalFacility.TypeFacility" class="form-select" required id="ModalFacility_TypeFacility">
+                                <option value="Футбольное поле">Футбольное поле</option>
+                                <option value="Манеж">Крытый манеж</option>
+                                <option value="Универсальный зал">Универсальный зал</option>
+                                <option value="Тренажерный">Тренажерный зал</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ModalFacility.CapacityFacility" class="form-label">Вместимость (чел.)</label>
+                            <input asp-for="ModalFacility.CapacityFacility" type="number" class="form-control" required id="ModalFacility_CapacityFacility" min="1" value="20" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ModalFacility.StatusFacility" class="form-label">Статус</label>
+                            <select asp-for="ModalFacility.StatusFacility" class="form-select" required id="ModalFacility_StatusFacility">
+                                <option value="Активен">Активен</option>
+                                <option value="На ремонте">На ремонте</option>
+                                <option value="Неактивен">Неактивен</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ModalFacility.NumberFacility" class="form-label">Номер (если есть)</label>
+                            <input asp-for="ModalFacility.NumberFacility" class="form-control" id="ModalFacility_NumberFacility" placeholder="F-101" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ModalFacility.CostFacility" class="form-label">Стоимость аренды (руб/час)</label>
+                        <input asp-for="ModalFacility.CostFacility" type="number" step="0.01" class="form-control" id="ModalFacility_CostFacility" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openBranchDetails(branchId) {
+            const sidebar = document.getElementById('branchSidebar');
+            const mainContent = document.getElementById('mainContent');
+            const overlay = document.getElementById('overlay');
+            const dynamicContent = document.getElementById('sidebarDynamicContent');
+
+            const sourceContent = document.getElementById('branch-content-' + branchId);
+            if (sourceContent) {
+                dynamicContent.innerHTML = sourceContent.innerHTML;
+            }
+
+            sidebar.classList.add('active');
+            mainContent.classList.add('with-sidebar');
+            overlay.classList.add('active');
         }
-    }
 
-    function closeBranchDetails() {
-        const sidebar = document.getElementById('branchSidebar');
-        const mainContent = document.getElementById('mainContent');
-        const overlay = document.getElementById('overlay');
-
-        sidebar.classList.remove('active');
-        mainContent.classList.remove('with-sidebar');
-        overlay.classList.remove('active');
-    }
-
-    // Закрытие по клику на overlay
-    document.getElementById('overlay').addEventListener('click', closeBranchDetails);
-
-    // Закрытие по ESC
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeBranchDetails();
+        function closeBranchDetails() {
+            document.getElementById('branchSidebar').classList.remove('active');
+            document.getElementById('mainContent').classList.remove('with-sidebar');
+            document.getElementById('overlay').classList.remove('active');
         }
-    });
 
-    // Обработка кликов по табам
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-</script>
+        document.getElementById('overlay').addEventListener('click', closeBranchDetails);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBranchDetails(); });
+
+        function switchSidebarTab(event, tabName) {
+            const container = document.getElementById('sidebarDynamicContent');
+            container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            container.querySelectorAll('.sidebar-tab-content').forEach(c => c.classList.remove('active'));
+            container.querySelector(`.sidebar-tab-content[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        function prepareAddBranchModal() {
+            document.getElementById('branchForm').reset();
+            document.getElementById('ModalBranch_BranchId').value = 0;
+            document.getElementById('branchModalLabel').innerText = 'Новый филиал';
+        }
+
+        function prepareEditBranchModal(id, name, city, street, house, phone) {
+            document.getElementById('branchForm').reset();
+            document.getElementById('ModalBranch_BranchId').value = id;
+            document.getElementById('ModalBranch_NameBranch').value = name;
+            document.getElementById('ModalBranch_CityBranch').value = city;
+            document.getElementById('ModalBranch_StreetBranch').value = street;
+            document.getElementById('ModalBranch_HouseBranch').value = house;
+            document.getElementById('ModalBranch_PhoneBranch').value = phone;
+            document.getElementById('branchModalLabel').innerText = 'Редактировать филиал';
+        }
+
+        function prepareAddFacilityModal(branchId) {
+            document.getElementById('facilityForm').reset();
+            document.getElementById('ModalFacility_FacilityId').value = 0;
+            document.getElementById('ModalFacility_BranchId').value = branchId;
+            document.getElementById('facilityModalLabel').innerText = 'Новая площадка';
+        }
+
+        function prepareEditFacilityModal(id, branchId, name, type, capacity, status, cost, number) {
+            document.getElementById('facilityForm').reset();
+            document.getElementById('ModalFacility_FacilityId').value = id;
+            document.getElementById('ModalFacility_BranchId').value = branchId;
+            document.getElementById('ModalFacility_NameFacility').value = name;
+            document.getElementById('ModalFacility_TypeFacility').value = type;
+            document.getElementById('ModalFacility_CapacityFacility').value = capacity;
+            document.getElementById('ModalFacility_StatusFacility').value = status;
+
+            // Форматируем стоимость для правильного отображения в input type="number"
+            document.getElementById('ModalFacility_CostFacility').value = cost ? cost.toString().replace(',', '.') : '';
+
+            document.getElementById('ModalFacility_NumberFacility').value = number;
+            document.getElementById('facilityModalLabel').innerText = 'Редактировать площадку';
+        }
+    </script>
+}

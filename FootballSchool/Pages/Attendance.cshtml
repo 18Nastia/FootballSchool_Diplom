@@ -21,10 +21,12 @@
             display: flex;
             gap: 24px;
             margin-bottom: 24px;
+            flex-wrap: wrap; /* Добавлено для адаптивности 3 полей */
         }
 
         .filter-group {
             flex: 1;
+            min-width: 200px; /* Чтобы поля не сжимались слишком сильно */
         }
 
         .filter-label {
@@ -32,6 +34,7 @@
             font-size: 14px;
             color: #666;
             margin-bottom: 8px;
+            font-weight: 500;
         }
 
         .select-input, .date-input {
@@ -41,6 +44,7 @@
             border-radius: 6px;
             font-size: 14px;
             background-color: white;
+            color: #1a1a1a;
         }
 
         .stats-box {
@@ -212,35 +216,11 @@
                 box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             }
 
-            .comment-input::placeholder {
-                color: #9ca3af;
-            }
-
         .bottom-actions {
             display: flex;
             justify-content: flex-end;
             gap: 12px;
         }
-
-        .btn-export {
-            padding: 12px 24px;
-            background-color: white;
-            color: #374151;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-            .btn-export:hover {
-                background-color: #f9fafb;
-                border-color: #9ca3af;
-            }
 
         .btn-save {
             padding: 12px 32px;
@@ -261,26 +241,24 @@
                 background-color: #1d4ed8;
             }
 
-        .keyboard-shortcuts {
-            display: flex;
-            gap: 16px;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #6b7280;
+        .no-data-alert {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 24px;
         }
 
-        .shortcut-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .shortcut-key {
-            background-color: #e5e7eb;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 11px;
+        .info-alert {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 24px;
         }
 
         @@media (max-width: 768px) {
@@ -290,24 +268,20 @@
             }
 
             .table-header {
-                grid-template-columns: 1fr;
-                gap: 8px;
+                display: none; /* Скрываем заголовки на мобилке */
             }
 
             .table-row {
                 grid-template-columns: 1fr;
                 gap: 12px;
+                padding: 16px;
             }
 
             .status-group {
                 justify-content: flex-start;
             }
 
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .bottom-actions {
+            .action-buttons, .bottom-actions {
                 flex-direction: column;
             }
         }
@@ -317,220 +291,165 @@
 <div class="attendance-page">
     <div class="main-content">
 
-        <div class="filters">
+        <!-- Вывод сообщения об успешном сохранении -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success mb-4" style="background-color: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 16px; border-radius: 8px;">
+                <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+
+        <!-- Форма фильтров (отправляется GET запросом при изменении) -->
+        <form method="get" class="filters">
             <div class="filter-group">
                 <label class="filter-label">Выберите группу</label>
-                <select class="select-input">
-                    <option>Юниоры (8-10 лет)</option>
-                    <option>Кадеты (11-13 лет)</option>
-                    <option>Юноши (14-16 лет)</option>
-                    <option>Младшая группа (6-7 лет)</option>
-                </select>
+                <select asp-for="FilterTeamId" asp-items="Model.TeamList" class="select-input" onchange="this.form.submit()"></select>
             </div>
+            
             <div class="filter-group">
                 <label class="filter-label">Дата</label>
-                <input type="date" class="date-input" value="@DateTime.Now.ToString("yyyy-MM-dd")">
-            </div>
-        </div>
-
-        <div class="stats-box">
-            <div class="stats-title">Статистика посещаемости</div>
-            <div class="stats-text">Присутствует: <strong>3 из 5 учеников (60%)</strong></div>
-        </div>
-
-        <div class="action-buttons">
-            <button class="btn-mark-all" onclick="markAllPresent()">
-                <i class="fas fa-check-circle"></i>
-                Отметить всех
-            </button>
-            <button class="btn-mark-none" onclick="markAllAbsent()">
-                <i class="fas fa-times-circle"></i>
-                Никого нет
-            </button>
-        </div>
-
-        <div class="hint-text">
-            <div>Подсказка: Используйте клавиши для быстрой отметки посещаемости</div>
-            <div class="keyboard-shortcuts">
-                <div class="shortcut-item">
-                    <span class="shortcut-key">У</span>
-                    <span>или</span>
-                    <span class="shortcut-key">Л</span>
-                    <span>- присутствует</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="shortcut-key">N</span>
-                    <span>или</span>
-                    <span class="shortcut-key">О</span>
-                    <span>- отсутствует</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="attendance-table">
-            <div class="table-header">
-                <div>Ученик</div>
-                <div>Статус</div>
-                <div>Комментарий</div>
+                <input type="date" asp-for="FilterDate" class="date-input" onchange="this.form.submit()">
             </div>
 
-            <div class="table-row">
-                <div class="student-name">Иванов Алексей</div>
-                <div class="status-group">
-                    <label class="radio-option">
-                        <input type="radio" name="student1" checked onchange="updateStatistics()">
-                        <span>Был</span>
-                    </label>
-                    <label class="radio-option absent">
-                        <input type="radio" name="student1" onchange="updateStatistics()">
-                        <span>Не был</span>
-                    </label>
+            <!-- Блок выбора конкретной тренировки (если они есть) -->
+            @if (Model.AvailableTrainings != null && Model.AvailableTrainings.Any())
+            {
+                <div class="filter-group">
+                    <label class="filter-label">Выберите занятие</label>
+                    <select asp-for="SelectedTrainingId" class="select-input" onchange="this.form.submit()">
+                        <option value="">-- Выберите тренировку --</option>
+                        @foreach(var t in Model.AvailableTrainings)
+                        {
+                            var time = t.TimeTraining.ToString("HH:mm");
+                            var plan = string.IsNullOrEmpty(t.PlanTraining) ? "Тренировка" : t.PlanTraining;
+                            <option value="@t.TrainingId">@time - @plan</option>
+                        }
+                    </select>
                 </div>
-                <div>
-                    <input type="text" class="comment-input" placeholder="Комментарий (необязательно)">
-                </div>
+            }
+        </form>
+
+        @if (Model.AvailableTrainings == null || !Model.AvailableTrainings.Any())
+        {
+            <div class="no-data-alert">
+                <i class="fas fa-calendar-times" style="font-size: 24px; margin-bottom: 12px; display: block;"></i>
+                <strong>Тренировок не найдено.</strong><br/>
+                На выбранную дату для данной группы тренировки не запланированы.
+            </div>
+        }
+        else if (!Model.SelectedTrainingId.HasValue)
+        {
+            <div class="info-alert">
+                <i class="fas fa-hand-pointer" style="font-size: 24px; margin-bottom: 12px; display: block; color: #64748b;"></i>
+                <strong>Выберите тренировку</strong><br/>
+                Пожалуйста, выберите конкретное занятие из списка выше, чтобы отметить посещаемость.
+            </div>
+        }
+        else
+        {
+            <div class="stats-box">
+                <div class="stats-title">Информация о тренировке</div>
+                <div class="stats-text mb-2">@Model.TrainingInfo</div>
+                <div class="stats-text" id="live-stats">Присутствует: <strong>0 из 0 учеников (0%)</strong></div>
             </div>
 
-            <div class="table-row">
-                <div class="student-name">Петрова Анна</div>
-                <div class="status-group">
-                    <label class="radio-option">
-                        <input type="radio" name="student2" onchange="updateStatistics()">
-                        <span>Был</span>
-                    </label>
-                    <label class="radio-option absent">
-                        <input type="radio" name="student2" checked onchange="updateStatistics()">
-                        <span>Не был</span>
-                    </label>
-                </div>
-                <div>
-                    <input type="text" class="comment-input" placeholder="Болеет">
-                </div>
-            </div>
+            <!-- Форма сохранения посещаемости -->
+            <form method="post" asp-page-handler="Save">
+                <input type="hidden" asp-for="SelectedTrainingId" />
+                <input type="hidden" asp-for="FilterTeamId" />
+                <input type="hidden" asp-for="FilterDate" />
 
-            <div class="table-row">
-                <div class="student-name">Сидоров Дмитрий</div>
-                <div class="status-group">
-                    <label class="radio-option">
-                        <input type="radio" name="student3" checked onchange="updateStatistics()">
-                        <span>Был</span>
-                    </label>
-                    <label class="radio-option absent">
-                        <input type="radio" name="student3" onchange="updateStatistics()">
-                        <span>Не был</span>
-                    </label>
+                <div class="action-buttons">
+                    <button type="button" class="btn-mark-all" onclick="markAllPresent()">
+                        <i class="fas fa-check-circle"></i>
+                        Отметить всех
+                    </button>
+                    <button type="button" class="btn-mark-none" onclick="markAllAbsent()">
+                        <i class="fas fa-times-circle"></i>
+                        Никого нет
+                    </button>
                 </div>
-                <div>
-                    <input type="text" class="comment-input" placeholder="Комментарий (необязательно)">
-                </div>
-            </div>
 
-            <div class="table-row">
-                <div class="student-name">Козлова София</div>
-                <div class="status-group">
-                    <label class="radio-option">
-                        <input type="radio" name="student4" checked onchange="updateStatistics()">
-                        <span>Был</span>
-                    </label>
-                    <label class="radio-option absent">
-                        <input type="radio" name="student4" onchange="updateStatistics()">
-                        <span>Не был</span>
-                    </label>
-                </div>
-                <div>
-                    <input type="text" class="comment-input" placeholder="Комментарий (необязательно)">
-                </div>
-            </div>
+                <div class="attendance-table">
+                    <div class="table-header">
+                        <div>Ученик</div>
+                        <div>Статус</div>
+                        <div>Комментарий</div>
+                    </div>
 
-            <div class="table-row">
-                <div class="student-name">Новиков Кирилл</div>
-                <div class="status-group">
-                    <label class="radio-option">
-                        <input type="radio" name="student5" onchange="updateStatistics()">
-                        <span>Был</span>
-                    </label>
-                    <label class="radio-option absent">
-                        <input type="radio" name="student5" checked onchange="updateStatistics()">
-                        <span>Не был</span>
-                    </label>
-                </div>
-                <div>
-                    <input type="text" class="comment-input" placeholder="Отпуск">
-                </div>
-            </div>
-        </div>
+                    @if (!Model.AttendanceItems.Any())
+                    {
+                        <div class="p-4 text-center text-muted">В данной группе пока нет учеников.</div>
+                    }
 
-        <div class="bottom-actions">
-            <button class="btn-export" onclick="exportAttendance()">
-                <i class="fas fa-download"></i>
-                Экспорт
-            </button>
-            <button class="btn-save" onclick="saveAttendance()">
-                <i class="fas fa-save"></i>
-                Сохранить
-            </button>
-        </div>
+                    @for (int i = 0; i < Model.AttendanceItems.Count; i++)
+                    {
+                        <div class="table-row student-row">
+                            <input type="hidden" asp-for="AttendanceItems[i].StudentId" />
+                            
+                            <div class="student-name">@Model.AttendanceItems[i].StudentName</div>
+                            
+                            <div class="status-group">
+                                <label class="radio-option">
+                                    <input type="radio" asp-for="AttendanceItems[i].Status" value="Был" onchange="updateStatistics()" />
+                                    <span>Был</span>
+                                </label>
+                                <label class="radio-option absent">
+                                    <input type="radio" asp-for="AttendanceItems[i].Status" value="Не был" onchange="updateStatistics()" />
+                                    <span>Не был</span>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <input type="text" asp-for="AttendanceItems[i].Comment" class="comment-input" placeholder="Комментарий (необязательно)">
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="bottom-actions">
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i>
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        }
+
     </div>
 </div>
 
-<script>
-    function updateStatistics() {
-        const totalStudents = 5;
-        let presentCount = 0;
+@section Scripts {
+    <script>
+        function updateStatistics() {
+            const rows = document.querySelectorAll('.student-row');
+            const totalStudents = rows.length;
+            
+            if (totalStudents === 0) return;
 
-        // Считаем количество присутствующих
-        for (let i = 1; i <= totalStudents; i++) {
-            const presentRadio = document.querySelector(`input[name="student${i}"]`);
-            if (presentRadio.checked) {
-                presentCount++;
-            }
+            let presentCount = 0;
+            rows.forEach(row => {
+                const presentRadio = row.querySelector('input[type="radio"][value="Был"]');
+                if (presentRadio && presentRadio.checked) {
+                    presentCount++;
+                }
+            });
+
+            const percentage = Math.round((presentCount / totalStudents) * 100);
+            document.getElementById('live-stats').innerHTML =
+                `Присутствует: <strong>${presentCount} из ${totalStudents} учеников (${percentage}%)</strong>`;
         }
 
-        const percentage = Math.round((presentCount / totalStudents) * 100);
-        document.querySelector('.stats-text').innerHTML =
-            `Присутствует: <strong>${presentCount} из ${totalStudents} учеников (${percentage}%)</strong>`;
-    }
-
-    function markAllPresent() {
-        for (let i = 1; i <= 5; i++) {
-            const presentRadio = document.querySelector(`input[name="student${i}"]`);
-            presentRadio.checked = true;
+        function markAllPresent() {
+            document.querySelectorAll('.student-row input[type="radio"][value="Был"]').forEach(r => r.checked = true);
+            updateStatistics();
         }
-        updateStatistics();
-    }
 
-    function markAllAbsent() {
-        for (let i = 1; i <= 5; i++) {
-            const absentRadio = document.querySelectorAll(`input[name="student${i}"]`)[1];
-            absentRadio.checked = true;
+        function markAllAbsent() {
+            document.querySelectorAll('.student-row input[type="radio"][value="Не был"]').forEach(r => r.checked = true);
+            updateStatistics();
         }
-        updateStatistics();
-    }
 
-    function saveAttendance() {
-        // Здесь будет логика сохранения данных
-        alert('Посещаемость успешно сохранена!');
-    }
-
-    function exportAttendance() {
-        // Здесь будет логика экспорта данных
-        alert('Данные экспортированы в Excel!');
-    }
-
-    // Обработка горячих клавиш
-    document.addEventListener('keydown', function(event) {
-        const key = event.key.toLowerCase();
-
-        // У/Л - присутствует, N/О - отсутствует
-        if (key === 'у' || key === 'l' || key === 'n' || key === 'о') {
-            event.preventDefault();
-
-            // В реальном приложении здесь была бы логика определения активного ряда
-            // и установки соответствующего статуса
-            console.log(`Нажата клавиша: ${key}`);
-        }
-    });
-
-    // Инициализация статистики при загрузке
-    document.addEventListener('DOMContentLoaded', updateStatistics);
-</script>
+        document.addEventListener('DOMContentLoaded', updateStatistics);
+    </script>
+}
