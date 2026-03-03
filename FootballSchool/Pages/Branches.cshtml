@@ -637,7 +637,7 @@
                     <div class="card" onclick="openBranchDetails(@branch.BranchId)">
                         <div class="card-image">
                             <!-- Вывод Base64 из БД, либо заглушки -->
-                            <img src="@(branch.PhotoBase64 != null ? $"data:image/jpeg;base64,{branch.PhotoBase64}" : GetRandomImage(branch.BranchId))" alt="Branch Image">
+                            <img src="@(branch.PhotoBase64 != null ? $"data:{branch.PhotoMimeType};base64,{branch.PhotoBase64}" : GetRandomImage(branch.BranchId))" alt="Branch Image">
                         </div>
                         <div class="card-content">
                             <h3 class="text-truncate" title="@branch.Name">@branch.Name</h3>
@@ -693,7 +693,7 @@
             <div class="sidebar-body">
                 <div class="branch-preview">
                     <!-- Фото для сайдбара -->
-                    <img src="@(branch.PhotoBase64 != null ? $"data:image/jpeg;base64,{branch.PhotoBase64}" : GetRandomImage(branch.BranchId))" alt="Branch preview">
+                    <img src="@(branch.PhotoBase64 != null ? $"data:{branch.PhotoMimeType};base64,{branch.PhotoBase64}" : GetRandomImage(branch.BranchId))" alt="Branch preview">
                 </div>
 
                 <div class="branch-details">
@@ -855,8 +855,8 @@
                     <!-- Поле загрузки фотографии -->
                     <div class="mb-3">
                         <label class="form-label">Фотография (необязательно)</label>
-                        <input type="file" name="BranchPhoto" class="form-control" accept="image/jpeg, image/png" />
-                        <small class="text-muted">Загрузите JPG или PNG изображение для карточки филиала</small>
+                        <input type="file" name="BranchPhoto" class="form-control" accept="image/jpeg, image/png, image/gif, image/webp" />
+                        <small class="text-muted">Поддерживаются JPG, PNG, GIF и WebP, размер до 5 МБ</small>
                     </div>
 
                 </div>
