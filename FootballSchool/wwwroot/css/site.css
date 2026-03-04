@@ -93,8 +93,6 @@ body {
             body.dark-theme .subscription-card,
             body.dark-theme .hall-card,
             body.dark-theme .trainer-card,
-            body.dark-theme .event,
-            body.dark-theme .event-day,
             body.dark-theme .group-card-item,
             body.dark-theme .table-row,
             body.dark-theme .view-toggle,
@@ -122,6 +120,20 @@ body {
                 border-color: var(--border-color) !important;
                 color: var(--text-color) !important;
             }
+
+            body.dark-theme .event,
+            body.dark-theme .event-day {
+                background-color: #27374D !important;
+                border-top-color: var(--border-color) !important;
+                border-right-color: var(--border-color) !important;
+                border-bottom-color: var(--border-color) !important;
+                color: var(--text-color) !important;
+            }
+
+                body.dark-theme .event:hover,
+                body.dark-theme .event-day:hover {
+                    background-color: #31445F !important;
+                }
 
             body.dark-theme input,
             body.dark-theme select,
@@ -162,8 +174,6 @@ body {
                 body.dark-theme .student-card:hover,
                 body.dark-theme .subscription-card:hover,
                 body.dark-theme .trainer-card:hover,
-                body.dark-theme .event:hover,
-                body.dark-theme .event-day:hover,
                 body.dark-theme tr:hover,
                 body.dark-theme .table-row:hover,
                 body.dark-theme .admin-table tr:hover,
