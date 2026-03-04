@@ -1,22 +1,249 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 0 !important;
 }
+
+    body.dark-theme {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --item-bg: #334155;
+        --item-hover: #475569;
+        --border-color: #475569;
+        --text-color: #f8fafc;
+        --text-muted: #cbd5e1;
+    }
+
+        body.dark-theme,
+        body.dark-theme .main-content,
+        body.dark-theme .parent-content,
+        body.dark-theme .coaches-container,
+        body.dark-theme .coach-profile-container {
+            background-color: var(--bg-color) !important;
+            color: var(--text-color) !important;
+        }
+
+            body.dark-theme .page-header {
+                background: var(--card-bg) !important;
+                border-bottom: 1px solid var(--border-color) !important;
+            }
+
+            body.dark-theme .card,
+            body.dark-theme .profile-card,
+            body.dark-theme .table-container,
+            body.dark-theme .stats-box,
+            body.dark-theme .welcome-card,
+            body.dark-theme .filter-section,
+            body.dark-theme .filters,
+            body.dark-theme .legend,
+            body.dark-theme .page-top-header,
+            body.dark-theme .right-sidebar,
+            body.dark-theme .sidebar-header-wrapper,
+            body.dark-theme .sidebar-content,
+            body.dark-theme .sidebar-header,
+            body.dark-theme .content-section,
+            body.dark-theme .schedule-section,
+            body.dark-theme .results-section,
+            body.dark-theme .achievements-section,
+            body.dark-theme .modal-content,
+            body.dark-theme .modal-header,
+            body.dark-theme .modal-footer,
+            body.dark-theme .modal-body,
+            body.dark-theme .filters-panel,
+            body.dark-theme .calendar,
+            body.dark-theme .day-column,
+            body.dark-theme .day-view,
+            body.dark-theme .controls-wrapper,
+            body.dark-theme .welcome-section,
+            body.dark-theme .stat-card,
+            body.dark-theme .notifications-section,
+            body.dark-theme .quick-actions-section,
+            body.dark-theme .news-section,
+            body.dark-theme .login-card,
+            body.dark-theme .chart-canvas-container,
+            body.dark-theme .attendance-table,
+            body.dark-theme .tabs,
+            body.dark-theme .sidebar-tabs {
+                background-color: var(--card-bg) !important;
+                border-color: var(--border-color) !important;
+                color: var(--text-color) !important;
+                box-shadow: none !important;
+            }
+
+            body.dark-theme .notification-item,
+            body.dark-theme .action-item,
+            body.dark-theme .news-item,
+            body.dark-theme .list-item-card,
+            body.dark-theme .group-card,
+            body.dark-theme .student-card,
+            body.dark-theme .subscription-card,
+            body.dark-theme .hall-card,
+            body.dark-theme .trainer-card,
+            body.dark-theme .event,
+            body.dark-theme .event-day,
+            body.dark-theme .group-card-item,
+            body.dark-theme .table-row,
+            body.dark-theme .view-toggle,
+            body.dark-theme .time-slot-day,
+            body.dark-theme input.form-control,
+            body.dark-theme select.form-control,
+            body.dark-theme select.form-select,
+            body.dark-theme input.search-input,
+            body.dark-theme input.search-input-large,
+            body.dark-theme .filter-select,
+            body.dark-theme input.date-input,
+            body.dark-theme select.select-input,
+            body.dark-theme textarea.form-control,
+            body.dark-theme .comment-input,
+            body.dark-theme .btn-secondary,
+            body.dark-theme .btn-icon,
+            body.dark-theme .action-btn,
+            body.dark-theme .history-btn,
+            body.dark-theme .close-sidebar,
+            body.dark-theme .btn-nav,
+            body.dark-theme .btn-edit,
+            body.dark-theme .icon-btn,
+            body.dark-theme .edit-button {
+                background-color: var(--item-bg) !important;
+                border-color: var(--border-color) !important;
+                color: var(--text-color) !important;
+            }
+
+            body.dark-theme input,
+            body.dark-theme select,
+            body.dark-theme textarea {
+                color: var(--text-color) !important;
+            }
+
+            body.dark-theme ::placeholder {
+                color: var(--text-muted) !important;
+                opacity: 0.8;
+            }
+
+            body.dark-theme table th,
+            body.dark-theme .table-header,
+            body.dark-theme .history-table th,
+            body.dark-theme thead,
+            body.dark-theme .admin-table th,
+            body.dark-theme .training-table th,
+            body.dark-theme .calendar-header,
+            body.dark-theme .day-header {
+                background-color: var(--card-bg) !important;
+                border-color: var(--border-color) !important;
+                color: var(--text-muted) !important;
+            }
+
+            body.dark-theme table td,
+            body.dark-theme .table-row,
+            body.dark-theme .history-table td,
+            body.dark-theme .admin-table td,
+            body.dark-theme .training-table td,
+            body.dark-theme .time-slot-day {
+                border-color: var(--border-color) !important;
+                color: var(--text-color) !important;
+            }
+
+                body.dark-theme .action-item:hover,
+                body.dark-theme .group-card:hover,
+                body.dark-theme .student-card:hover,
+                body.dark-theme .subscription-card:hover,
+                body.dark-theme .trainer-card:hover,
+                body.dark-theme .event:hover,
+                body.dark-theme .event-day:hover,
+                body.dark-theme tr:hover,
+                body.dark-theme .table-row:hover,
+                body.dark-theme .admin-table tr:hover,
+                body.dark-theme .btn-secondary:hover,
+                body.dark-theme .btn-icon:hover,
+                body.dark-theme .action-btn:hover,
+                body.dark-theme .history-btn:hover,
+                body.dark-theme .close-sidebar:hover,
+                body.dark-theme .btn-nav:hover,
+                body.dark-theme .btn-edit:hover,
+                body.dark-theme .icon-btn:hover,
+                body.dark-theme .radio-option:hover {
+                    background-color: var(--item-hover) !important;
+                }
+
+            body.dark-theme h1, body.dark-theme h2, body.dark-theme h3,
+            body.dark-theme h4, body.dark-theme h5, body.dark-theme h6,
+            body.dark-theme .card-title, body.dark-theme .student-name,
+            body.dark-theme .profile-name, body.dark-theme .trainer-name,
+            body.dark-theme .info-value, body.dark-theme .value,
+            body.dark-theme .welcome-title, body.dark-theme .stat-value,
+            body.dark-theme .section-title, body.dark-theme .time-label,
+            body.dark-theme .modal-title, body.dark-theme label,
+            body.dark-theme .date-header, body.dark-theme .day-name,
+            body.dark-theme .legend-title, body.dark-theme .legend-item,
+            body.dark-theme .branch-details h3, body.dark-theme .form-label,
+            body.dark-theme .notification-text, body.dark-theme .news-text,
+            body.dark-theme table td, body.dark-theme .history-table td,
+            body.dark-theme .admin-table td, body.dark-theme .training-table td,
+            body.dark-theme .current-date-display, body.dark-theme .stats-title {
+                color: var(--text-color) !important;
+            }
+
+            body.dark-theme p, body.dark-theme .text-muted,
+            body.dark-theme .info-label, body.dark-theme .card-info,
+            body.dark-theme .stat-label, body.dark-theme .subscription-label,
+            body.dark-theme .trainer-spec, body.dark-theme .age,
+            body.dark-theme .label, body.dark-theme .card-age,
+            body.dark-theme .welcome-subtitle, body.dark-theme .filter-label,
+            body.dark-theme .day-date, body.dark-theme .info-item,
+            body.dark-theme .hint-text, body.dark-theme .stats-text,
+            body.dark-theme table th, body.dark-theme .table-header,
+            body.dark-theme .history-table th, body.dark-theme thead,
+            body.dark-theme .admin-table th, body.dark-theme .training-table th,
+            body.dark-theme .calendar-header, body.dark-theme .day-header,
+            body.dark-theme .tab, body.dark-theme .sidebar-tab,
+            body.dark-theme .tab-btn, body.dark-theme .tab-button,
+            body.dark-theme .toggle-btn {
+                color: var(--text-muted) !important;
+            }
+
+            body.dark-theme .tab, body.dark-theme .sidebar-tab,
+            body.dark-theme .tab-btn, body.dark-theme .tab-button,
+            body.dark-theme .toggle-btn {
+                background-color: transparent !important;
+                border-color: var(--border-color) !important;
+            }
+
+                body.dark-theme .tab.active, body.dark-theme .sidebar-tab.active,
+                body.dark-theme .tab-btn.active, body.dark-theme .tab-button.active,
+                body.dark-theme .toggle-btn.active {
+                    background-color: var(--item-hover) !important;
+                    color: #60A5FA !important;
+                    border-bottom-color: #60A5FA !important;
+                }
+
+            body.dark-theme .btn-delete,
+            body.dark-theme .action-btn.delete,
+            body.dark-theme .action-link.delete {
+                background-color: #451a1a !important;
+                border-color: #7f1d1d !important;
+                color: #fca5a5 !important;
+            }
+
+                body.dark-theme .btn-delete:hover,
+                body.dark-theme .action-btn.delete:hover {
+                    background-color: #7f1d1d !important;
+                    color: #ffffff !important;
+                }
+
+            body.dark-theme .btn-close {
+                filter: invert(1) grayscale(100%) brightness(200%);
+            }

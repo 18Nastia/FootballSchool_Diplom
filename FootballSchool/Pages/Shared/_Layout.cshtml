@@ -10,386 +10,179 @@
     <link rel="stylesheet" href="~/FootballSchool.styles.css" asp-append-version="true" />
     <!-- Подключаем Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    @await RenderSectionAsync("Styles", required: false)
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Базовые переменные макета */
+        :root {
+            --bg-color: #F9FAFB;
+            --text-color: #1F2937;
+            --sidebar-bg: #FFFFFF;
+            --border-color: #E5E7EB;
+            --nav-hover-bg: #F3F4F6;
+            --nav-active-bg: #EFF6FF;
+            --nav-active-text: #2563EB;
+            --header-bg-start: #2563EB;
+            --header-bg-end: #1D4ED8;
         }
+
+        body.dark-theme {
+            --bg-color: #111827;
+            --text-color: #F9FAFB;
+            --sidebar-bg: #1F2937;
+            --border-color: #374151;
+            --nav-hover-bg: #374151;
+            --nav-active-bg: #374151;
+            --nav-active-text: #60A5FA;
+            --header-bg-start: #1E3A8A;
+            --header-bg-end: #172554;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #F9FAFB;
-            color: #1F2937;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        .dashboard-container {
-            display: flex;
-            width: 100%;
-            min-height: 100vh;
-        }
+        .dashboard-container { display: flex; width: 100%; min-height: 100vh; }
 
         .sidebar {
-            width: 240px;
-            background-color: #FFFFFF;
-            border-right: 1px solid #E5E7EB;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
+            width: 240px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .logo {
-            padding: 24px 20px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #2563EB;
-            border-bottom: 1px solid #E5E7EB;
+            padding: 24px 20px; font-size: 18px; font-weight: 600; color: var(--nav-active-text);
+            border-bottom: 1px solid var(--border-color); text-decoration: none; display: block;
         }
 
-        .nav-menu {
-            flex: 1;
-            padding: 12px 0;
-        }
+        .logo:hover { color: #1D4ED8; text-decoration: none; }
+
+        .nav-menu { flex: 1; padding: 12px 0; }
 
         .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: #6B7280;
-            text-decoration: none;
-            transition: all 0.2s;
-            font-size: 14px;
+            display: flex; align-items: center; padding: 12px 20px; color: #6B7280;
+            text-decoration: none; transition: all 0.2s; font-size: 14px;
         }
+        .nav-item:hover { background-color: var(--nav-hover-bg); color: var(--text-color); }
+        .nav-item.active { background-color: var(--nav-active-bg); color: var(--nav-active-text); border-left: 3px solid var(--nav-active-text); }
+        .nav-icon { width: 20px; height: 20px; margin-right: 12px; text-align: center; font-size: 16px; }
+        .sidebar-footer { border-top: 1px solid var(--border-color); padding: 12px 0; }
 
-            .nav-item:hover {
-                background-color: #F3F4F6;
-                color: #1F2937;
-            }
-
-            .nav-item.active {
-                background-color: #EFF6FF;
-                color: #2563EB;
-                border-left: 3px solid #2563EB;
-            }
-
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
-            text-align: center;
-            font-size: 16px;
-        }
-
-        .sidebar-footer {
-            border-top: 1px solid #E5E7EB;
-            padding: 12px 0;
-        }
-
-        .main-content {
-            margin-left: 240px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        .main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
 
         .page-header {
-            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-            padding: 20px 40px;
-            width: 100%;
-            margin-bottom: 16px;
-            height: 75px;
-            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--header-bg-start) 0%, var(--header-bg-end) 100%);
+            padding: 20px 40px; width: 100%; margin-bottom: 16px; height: 75px; flex-shrink: 0;
         }
+        .page-header h1 { color: white !important; font-size: 22px; font-weight: 600; margin: 0; }
 
-            .page-header h1 {
-                color: white;
-                font-size: 22px;
-                font-weight: 600;
-                margin: 0;
-            }
-
-        .page-content {
-            flex: 1;
-            padding: 0 40px 32px 40px;
-            width: 100%;
-        }
+        .page-content { flex: 1; padding: 0 40px 32px 40px; width: 100%; }
 
         .page-footer {
-            border-top: 1px solid #E5E7EB;
-            padding: 32px 40px;
-            width: 100%;
-            flex-shrink: 0;
-            margin-top: auto;
+            border-top: 1px solid var(--border-color); padding: 32px 40px; width: 100%;
+            flex-shrink: 0; margin-top: auto; background-color: var(--sidebar-bg);
         }
 
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 100%;
-            height: 100%;
-        }
+        .footer-content { display: flex; justify-content: space-between; align-items: center; max-width: 100%; height: 100%; }
+        .footer-logo { font-size: 18px; font-weight: 600; color: var(--nav-active-text); text-decoration: none; }
+        .footer-logo:hover { color: #1D4ED8; text-decoration: none; }
+        .footer-links { display: flex; gap: 32px; }
+        .footer-link { color: #6B7280; text-decoration: none; font-size: 15px; font-weight: 500; }
+        .footer-link:hover { color: var(--nav-active-text); }
+        .footer-copyright { color: #6B7280; font-size: 15px; font-weight: 500; }
 
-        .footer-logo {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2563EB;
-        }
+        /* Настройки модального окна */
+        .settings-modal .modal-content { background-color: var(--sidebar-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+        .settings-modal .modal-header { border-bottom-color: var(--border-color); }
+        .settings-modal .form-control { background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color); }
 
-        .footer-links {
-            display: flex;
-            gap: 32px;
-        }
-
-        .footer-link {
-            color: #6B7280;
-            text-decoration: none;
-            font-size: 15px;
-            transition: color 0.2s;
-            font-weight: 500;
-        }
-
-            .footer-link:hover {
-                color: #2563EB;
-            }
-
-        .footer-copyright {
-            color: #6B7280;
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        /* Адаптивность */
         @@media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-
-            .main-content {
-                margin-left: 200px;
-            }
-
-            .page-header {
-                padding: 16px 20px;
-            }
-
-            .page-content {
-                padding: 0 20px 20px 20px;
-            }
-
-            .page-footer {
-                padding: 24px 20px;
-            }
-
-            .page-header h1 {
-                font-size: 20px;
-            }
-
-            .footer-content {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-
-            .footer-links {
-                gap: 24px;
-            }
-
-            .footer-logo {
-                font-size: 17px;
-            }
-
-            .footer-link,
-            .footer-copyright {
-                font-size: 14px;
-            }
+            .sidebar { width: 200px; } .main-content { margin-left: 200px; }
+            .page-header { padding: 16px 20px; } .page-content { padding: 0 20px 20px 20px; }
+            .page-footer { padding: 24px 20px; }
+            .footer-content { flex-direction: column; gap: 20px; text-align: center; }
         }
-
         @@media (max-width: 576px) {
-            .sidebar {
-                width: 60px;
-            }
-
-            .main-content {
-                margin-left: 60px;
-            }
-
-            .page-header {
-                padding: 14px 16px;
-                margin-bottom: 12px;
-            }
-
-            .page-content {
-                padding: 0 16px 16px 16px;
-            }
-
-            .page-footer {
-                padding: 20px 16px;
-            }
-
-            .page-header h1 {
-                font-size: 18px;
-            }
-
-            .footer-links {
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .footer-logo {
-                font-size: 16px;
-            }
-
-            .footer-link,
-            .footer-copyright {
-                font-size: 13px;
-            }
-
-            .nav-item span {
-                display: none;
-            }
-
-            .logo {
-                font-size: 16px;
-                padding: 16px 12px;
-                text-align: center;
-            }
+            .sidebar { width: 60px; } .main-content { margin-left: 60px; }
+            .nav-item span { display: none; } .logo { font-size: 16px; padding: 16px 12px; text-align: center; }
         }
 
-        .logout-button {
-            width: 100%;
-            background: none;
-            border: none;
-            text-align: left;
-            cursor: pointer;
-        }
+        .logout-button, .settings-btn { width: 100%; background: none; border: none; text-align: left; cursor: pointer; }
     </style>
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
+    @{
+        string homeUrl = "/Login";
+        if (User.Identity.IsAuthenticated)
+        {
+            homeUrl = User.IsInRole("Admin") ? "/Main_Pages/Index_Admin" : "/Main_Pages/Index_Parent";
+        }
+    }
+
     <div class="dashboard-container">
         <!-- Боковое меню -->
         <aside class="sidebar">
-            <div class="logo">FootballSchool</div>
+            <a href="@homeUrl" class="logo">FootballSchool</a>
 
             <nav class="nav-menu">
                 @if (User.Identity.IsAuthenticated)
                 {
                     @if (User.IsInRole("Admin"))
                     {
-                        <a asp-page="/Main_Pages/Index_Admin" class="nav-item">
-                            <i class="fas fa-home nav-icon"></i>
-                            <span>Главная</span>
-                        </a>
-
-                        <a asp-page="/GroupsStudents" class="nav-item">
-                            <i class="fas fa-users nav-icon"></i>
-                            <span>Группы и ученики</span>
-                        </a>
-
-                        <a asp-page="/Attendance" class="nav-item">
-                            <i class="fas fa-calendar-check nav-icon"></i>
-                            <span>Посещаемость</span>
-                        </a>
-
-                        <a asp-page="/TrainingResults" class="nav-item">
-                            <i class="fas fa-chart-line nav-icon"></i>
-                            <span>Результаты тренировок</span>
-                        </a>
-
-                        <a asp-page="/Coaches" class="nav-item">
-                            <i class="fas fa-users-cog nav-icon"></i>
-                            <span>Список тренеров</span>
-                        </a>
-
-                        <a asp-page="/Branches" class="nav-item">
-                            <i class="fas fa-building nav-icon"></i>
-                            <span>Филиалы и площадки</span>
-                        </a>
-
-                        <a asp-page="/Schedule" class="nav-item">
-                            <i class="fas fa-calendar-alt nav-icon"></i>
-                            <span>Расписание</span>
-                        </a>
-
-                        <a asp-page="/Subscriptions" class="nav-item">
-                            <i class="fas fa-id-card nav-icon"></i>
-                            <span>Абонементы</span>
-                        </a>
-
-                        <a asp-page="/Payments" class="nav-item">
-                            <i class="fas fa-credit-card nav-icon"></i>
-                            <span>Платежи</span>
-                        </a>
+                        <a asp-page="/Main_Pages/Index_Admin" class="nav-item"><i class="fas fa-home nav-icon"></i><span>Главная</span></a>
+                        <a asp-page="/GroupsStudents" class="nav-item"><i class="fas fa-users nav-icon"></i><span>Группы и ученики</span></a>
+                        <a asp-page="/Attendance" class="nav-item"><i class="fas fa-calendar-check nav-icon"></i><span>Посещаемость</span></a>
+                        <a asp-page="/TrainingResults" class="nav-item"><i class="fas fa-chart-line nav-icon"></i><span>Результаты тренировок</span></a>
+                        <a asp-page="/Coaches" class="nav-item"><i class="fas fa-users-cog nav-icon"></i><span>Список тренеров</span></a>
+                        <a asp-page="/Branches" class="nav-item"><i class="fas fa-building nav-icon"></i><span>Филиалы и площадки</span></a>
+                        <a asp-page="/Schedule" class="nav-item"><i class="fas fa-calendar-alt nav-icon"></i><span>Расписание</span></a>
+                        <a asp-page="/Subscriptions" class="nav-item"><i class="fas fa-id-card nav-icon"></i><span>Абонементы</span></a>
+                        <a asp-page="/Payments" class="nav-item"><i class="fas fa-credit-card nav-icon"></i><span>Платежи</span></a>
                     }
                     else if (User.IsInRole("Parent"))
                     {
-                        <!-- Расширенное меню для родителя по описанию из диплома -->
-                        <a asp-page="/Main_Pages/Index_Parent" class="nav-item">
-                            <i class="fas fa-home nav-icon"></i>
-                            <span>Главная</span>
-                        </a>
-
-                        <a asp-page="/ChildProfile" class="nav-item">
-                            <i class="fas fa-child nav-icon"></i>
-                            <span>Профиль ребенка</span>
-                        </a>
-
-                        <a asp-page="/Schedule" class="nav-item">
-                            <i class="fas fa-calendar-alt nav-icon"></i>
-                            <span>Расписание</span>
-                        </a>
-
-                        <a asp-page="/Subscriptions" class="nav-item">
-                            <i class="fas fa-id-card nav-icon"></i>
-                            <span>Абонементы</span>
-                        </a>
-
-                        <a asp-page="/Payments" class="nav-item">
-                            <i class="fas fa-credit-card nav-icon"></i>
-                            <span>Платежи</span>
-                        </a>
-
-                        <a asp-page="/Branches" class="nav-item">
-                            <i class="fas fa-map-marked-alt nav-icon"></i>
-                            <span>Филиалы и площадки</span>
-                        </a>
+                        <a asp-page="/Main_Pages/Index_Parent" class="nav-item"><i class="fas fa-home nav-icon"></i><span>Главная</span></a>
+                        
+                        <!-- БЕЗ ID: Логика теперь внутри C# кода ChildProfile -->
+                        <a asp-page="/ChildProfile" class="nav-item"><i class="fas fa-child nav-icon"></i><span>Профиль ребенка</span></a>
+                        
+                        <a asp-page="/Schedule" class="nav-item"><i class="fas fa-calendar-alt nav-icon"></i><span>Расписание</span></a>
+                        <a asp-page="/Subscriptions" class="nav-item"><i class="fas fa-id-card nav-icon"></i><span>Абонементы</span></a>
+                        <a asp-page="/Payments" class="nav-item"><i class="fas fa-credit-card nav-icon"></i><span>Платежи</span></a>
+                        <a asp-page="/Branches" class="nav-item"><i class="fas fa-map-marked-alt nav-icon"></i><span>Филиалы и площадки</span></a>
                     }
                 }
                 else
                 {
-                    <a asp-page="/Login" class="nav-item">
-                        <i class="fas fa-sign-in-alt nav-icon"></i>
-                        <span>Войти</span>
-                    </a>
+                    <a asp-page="/Login" class="nav-item"><i class="fas fa-sign-in-alt nav-icon"></i><span>Войти</span></a>
                 }
             </nav>
 
             <div class="sidebar-footer">
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <div class="nav-item" style="color: #2563EB; font-weight: 600;">
+                    <div class="nav-item" style="color: var(--nav-active-text); font-weight: 600;">
                         <i class="fas fa-user-circle nav-icon"></i>
                         <span>@User.Identity.Name</span>
                     </div>
 
+                    <button type="button" class="nav-item settings-btn" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                        <i class="fas fa-cog nav-icon"></i><span>Настройки</span>
+                    </button>
+
                     <form method="post" asp-page="/Login" asp-page-handler="Logout">
                         <button type="submit" class="nav-item logout-button">
-                            <i class="fas fa-sign-out-alt nav-icon"></i>
-                            <span>Выйти</span>
+                            <i class="fas fa-sign-out-alt nav-icon"></i><span>Выйти</span>
                         </button>
                     </form>
                 }
-
-                <a asp-page="/Settings" class="nav-item">
-                    <i class="fas fa-cog nav-icon"></i>
-                    <span>Настройки</span>
-                </a>
             </div>
         </aside>
 
@@ -405,25 +198,66 @@
             <!-- Подвал -->
             <footer class="page-footer">
                 <div class="footer-content">
-                    <div class="footer-logo">FootballSchool</div>
+                    <a href="@homeUrl" class="footer-logo">FootballSchool</a>
                     <div class="footer-links">
                         <a href="#" class="footer-link">О нас</a>
                         <a href="#" class="footer-link">Контакты</a>
-                        <a href="#" class="footer-link">Политика конфиденциальности</a>
-                        <a href="#" class="footer-link">Условия использования</a>
+                        <a href="#" class="footer-link">Политика</a>
                     </div>
-                    <div class="footer-copyright">
-                        &copy; 2025 FootballSchool.
-                    </div>
+                    <div class="footer-copyright">&copy; 2025 FootballSchool.</div>
                 </div>
             </footer>
         </main>
+    </div>
+
+    <!-- Модальное окно настроек -->
+    <div class="modal fade settings-modal" id="settingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Настройки профиля</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h6>Внешний вид</h6>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="themeSwitch">
+                            <label class="form-check-label" for="themeSwitch">Темная тема</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
+    <!-- Скрипт для сохранения и загрузки темы -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeSwitch = document.getElementById('themeSwitch');
+            
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-theme');
+                if(themeSwitch) themeSwitch.checked = true;
+            }
+
+            if(themeSwitch) {
+                themeSwitch.addEventListener('change', function () {
+                    if (this.checked) {
+                        document.body.classList.add('dark-theme');
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        document.body.classList.remove('dark-theme');
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            }
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

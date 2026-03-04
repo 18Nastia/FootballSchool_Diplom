@@ -39,17 +39,36 @@ namespace FootballSchool.Pages
 
         public SelectList TeamList { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(int? id)
         {
+            
+            if (!id.HasValue && User.IsInRole("Parent"))
+            {
+                var userIdStr = User.FindFirst("UserId")?.Value;
+                if (int.TryParse(userIdStr, out int uid))
+                {
+                    var parentStudent = await _context.Students.FirstOrDefaultAsync(s => s.UserId == uid);
+                    if (parentStudent != null)
+                    {
+                        id = parentStudent.StudentId;
+                    }
+                }
+            }
+
+            if (!id.HasValue)
+            {
+                return Page();
+            }
+
             var student = await _context.Students
                 .Include(s => s.Team)
                     .ThenInclude(t => t.Training)
                         .ThenInclude(tr => tr.Coach)
-                .FirstOrDefaultAsync(s => s.StudentId == id);
+                .FirstOrDefaultAsync(s => s.StudentId == id.Value);
 
             if (student == null)
             {
-                return NotFound();
+                return Page();
             }
 
             var today = DateOnly.FromDateTime(DateTime.Today);
@@ -58,7 +77,6 @@ namespace FootballSchool.Pages
 
             var initials = $"{(string.IsNullOrEmpty(student.NameStudent) ? "" : student.NameStudent[0].ToString())}{(string.IsNullOrEmpty(student.SurnameStudent) ? "" : student.SurnameStudent[0].ToString())}";
 
-            // Находим тренера (если у группы есть расписание тренировок)
             var coach = student.Team?.Training.Select(t => t.Coach).FirstOrDefault();
 
             StudentProfile = new ProfileDto
@@ -94,12 +112,10 @@ namespace FootballSchool.Pages
                 existing.TeamId = EditStudent.TeamId;
                 existing.LevelStudent = EditStudent.LevelStudent;
                 existing.MedicalStudent = EditStudent.MedicalStudent;
-
                 existing.SurnameParent = EditStudent.SurnameParent;
                 existing.NameParent = EditStudent.NameParent;
                 existing.MiddleParent = EditStudent.MiddleParent;
                 existing.ParentNumber = EditStudent.ParentNumber;
-
                 existing.CityStudent = EditStudent.CityStudent;
                 existing.StreetStudent = EditStudent.StreetStudent;
                 existing.HouseStudent = EditStudent.HouseStudent;
@@ -122,7 +138,6 @@ namespace FootballSchool.Pages
 
             if (student != null)
             {
-                // Если нет каскадного удаления в БД, нужно очистить зависимости вручную
                 if (student.Subscriptions.Any())
                 {
                     foreach (var sub in student.Subscriptions)
