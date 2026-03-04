@@ -16,6 +16,10 @@ public partial class Student
     [Column("Team_ID")]
     public int? TeamId { get; set; }
 
+    // НОВОЕ ПОЛЕ: Связь с пользователем
+    [Column("User_ID")]
+    public int? UserId { get; set; }
+
     [Column("Surname_student")]
     [StringLength(50)]
     [Unicode(false)]
@@ -114,4 +118,8 @@ public partial class Student
     [ForeignKey("TeamId")]
     [InverseProperty("Students")]
     public virtual Team? Team { get; set; }
+
+    [ForeignKey("UserId")]
+    [InverseProperty("Students")]
+    public virtual User? User { get; set; }
 }

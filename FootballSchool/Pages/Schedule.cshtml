@@ -498,9 +498,12 @@
                     <button type="button" class="toggle-btn @(Model.ViewType == "day" ? "active" : "")" onclick="setView('day')">День</button>
                 </div>
 
-                <button type="button" class="add-btn d-none d-md-flex" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="prepareAddModal()">
-                    <i class="fas fa-plus"></i> Добавить
-                </button>
+                @if (User.IsInRole("Admin"))
+                {
+                    <button type="button" class="add-btn d-none d-md-flex" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="prepareAddModal()">
+                        <i class="fas fa-plus"></i> Добавить
+                    </button>
+                }
             </div>
 
             <div class="date-navigation">
@@ -530,9 +533,12 @@
                 </select>
             </div>
 
-            <button type="button" class="add-btn d-md-none w-100 justify-content-center mt-2" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="prepareAddModal()">
-                <i class="fas fa-plus"></i> Добавить тренировку
-            </button>
+            @if (User.IsInRole("Admin"))
+            {
+                <button type="button" class="add-btn d-md-none w-100 justify-content-center mt-2" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="prepareAddModal()">
+                    <i class="fas fa-plus"></i> Добавить тренировку
+                </button>
+            }
         </form>
 
         <div class="calendar @(Model.ViewType == "week" ? "active" : "")">
@@ -572,16 +578,19 @@
                                 string colorClass = GetEventColorClass(coachId);
 
                                 <div class="event @colorClass">
-                                    <div class="event-actions">
-                                        <button type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="event.stopPropagation(); prepareEditModal(@training.TrainingId, '@training.DateTraining.ToString("yyyy-MM-dd")', '@training.TimeTraining.ToString("HH:mm")', @(training.CoachId), @(training.TeamId), @(training.FacilityId), '@safeTitle')">
-                                            <i class="fas fa-pen"></i>
-                                        </button>
-                                        <form method="post" asp-page-handler="Delete" asp-route-id="@training.TrainingId" style="display:inline;" onsubmit="event.stopPropagation(); return confirm('Удалить эту тренировку?');">
-                                            <button type="submit" class="btn-icon">
-                                                <i class="fas fa-trash"></i>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <div class="event-actions">
+                                            <button type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="event.stopPropagation(); prepareEditModal(@training.TrainingId, '@training.DateTraining.ToString("yyyy-MM-dd")', '@training.TimeTraining.ToString("HH:mm")', @(training.CoachId), @(training.TeamId), @(training.FacilityId), '@safeTitle')">
+                                                <i class="fas fa-pen"></i>
                                             </button>
-                                        </form>
-                                    </div>
+                                            <form method="post" asp-page-handler="Delete" asp-route-id="@training.TrainingId" style="display:inline;" onsubmit="event.stopPropagation(); return confirm('Удалить эту тренировку?');">
+                                                <button type="submit" class="btn-icon">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
 
                                     <div class="fw-bold" style="font-size: 13px; color: #2980b9; margin-bottom: 4px;">
                                         @startTime.ToString("HH:mm") - @endTime.ToString("HH:mm")
@@ -637,14 +646,17 @@
                                     var colorClass = GetEventColorClass(coachId);
 
                                     <div class="event-day @colorClass">
-                                        <div class="event-actions">
-                                            <button type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="event.stopPropagation(); prepareEditModal(@training.TrainingId, '@training.DateTraining.ToString("yyyy-MM-dd")', '@training.TimeTraining.ToString("HH:mm")', @(training.CoachId), @(training.TeamId), @(training.FacilityId), '@safeTitle')">
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                            <form method="post" asp-page-handler="Delete" asp-route-id="@training.TrainingId" style="display:inline;" onsubmit="event.stopPropagation(); return confirm('Удалить тренировку?');">
-                                                <button type="submit" class="btn-icon"><i class="fas fa-trash"></i></button>
-                                            </form>
-                                        </div>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <div class="event-actions">
+                                                <button type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="event.stopPropagation(); prepareEditModal(@training.TrainingId, '@training.DateTraining.ToString("yyyy-MM-dd")', '@training.TimeTraining.ToString("HH:mm")', @(training.CoachId), @(training.TeamId), @(training.FacilityId), '@safeTitle')">
+                                                    <i class="fas fa-pen"></i>
+                                                </button>
+                                                <form method="post" asp-page-handler="Delete" asp-route-id="@training.TrainingId" style="display:inline;" onsubmit="event.stopPropagation(); return confirm('Удалить тренировку?');">
+                                                    <button type="submit" class="btn-icon"><i class="fas fa-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        }
 
                                         <div class="fw-bold text-muted mb-1" style="font-size: 11px;">@startTime.ToString("HH:mm") - @endTime.ToString("HH:mm")</div>
                                         <div class="fw-bold mb-2" style="font-size: 14px;">@title</div>

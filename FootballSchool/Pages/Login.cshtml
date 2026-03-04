@@ -1,0 +1,124 @@
+﻿@page
+@model FootballSchool.Pages.LoginModel
+@{
+    Layout = null; // Отключаем общий лейаут для чистого окна входа
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Вход - FootballSchool</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+            .login-header i {
+                font-size: 48px;
+                color: #2563EB;
+                margin-bottom: 16px;
+            }
+
+            .login-header h2 {
+                font-size: 24px;
+                font-weight: 700;
+                color: #1F2937;
+                margin: 0;
+            }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 16px;
+            border: 1px solid #E5E7EB;
+            background-color: #F9FAFB;
+            font-size: 15px;
+        }
+
+            .form-control:focus {
+                border-color: #2563EB;
+                box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+                background-color: #FFFFFF;
+            }
+
+        .btn-primary {
+            background-color: #2563EB;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+            .btn-primary:hover {
+                background-color: #1D4ED8;
+            }
+
+        .form-label {
+            color: #6B7280;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-futbol"></i>
+            <h2>FootballSchool</h2>
+            <p class="text-muted mt-2">Вход в личный кабинет</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> @Model.ErrorMessage
+            </div>
+        }
+
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label fw-bold text-uppercase">Логин</label>
+                <input asp-for="Login" class="form-control" placeholder="Введите ваш логин" required autofocus />
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-bold text-uppercase">Пароль</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Введите ваш пароль" required />
+            </div>
+            <button type="submit" class="btn btn-primary">
+                Войти <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <small class="text-muted">Если вы забыли пароль, обратитесь к администратору.</small>
+        </div>
+    </div>
+</body>
+</html>

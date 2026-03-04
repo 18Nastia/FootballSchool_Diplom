@@ -43,11 +43,24 @@ namespace FootballSchool.Pages
 
         public async Task OnGetAsync()
         {
-            var subs = await _context.Subscriptions
-                .Include(s => s.Student)
-                .ToListAsync();
+            // Базовые запросы к БД
+            IQueryable<Subscription> query = _context.Subscriptions.Include(s => s.Student);
+            IQueryable<Student> studentsQuery = _context.Students;
 
-            var students = await _context.Students
+            // Если вошел родитель, фильтруем данные только для его ребенка
+            if (User.IsInRole("Parent"))
+            {
+                var userIdStr = User.FindFirst("UserId")?.Value;
+                if (int.TryParse(userIdStr, out int uid))
+                {
+                    query = query.Where(s => s.Student.UserId == uid);
+                    studentsQuery = studentsQuery.Where(s => s.UserId == uid);
+                }
+            }
+
+            var subs = await query.ToListAsync();
+
+            var students = await studentsQuery
                 .Select(s => new { s.StudentId, FullName = $"{s.SurnameStudent} {s.NameStudent}" })
                 .ToListAsync();
 
@@ -80,6 +93,12 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostSaveSubAsync()
         {
+            // Только администратор может сохранять абонементы
+            if (!User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             ModelState.Clear();
 
             try
@@ -114,6 +133,12 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostDeleteSubAsync(int id)
         {
+            // Только администратор может удалять абонементы
+            if (!User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             var sub = await _context.Subscriptions.Include(s => s.Payments).FirstOrDefaultAsync(s => s.SubscriptionId == id);
             if (sub != null)
             {

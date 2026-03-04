@@ -50,6 +50,7 @@
             border-radius: 12px;
             border: 1px solid #E5E7EB;
             overflow: hidden;
+            overflow-x: auto;
         }
 
         .admin-table {
@@ -145,10 +146,20 @@
         }
 
         <div class="content-header">
-            <h1>Бухгалтерия и платежи</h1>
-            <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal" onclick="prepareAddPayment()">
-                <i class="fas fa-plus"></i> Зарегистрировать платеж
-            </button>
+            @if (User.IsInRole("Admin"))
+            {
+                <h1>Бухгалтерия и платежи</h1>
+                <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal" onclick="prepareAddPayment()">
+                    <i class="fas fa-plus"></i> Зарегистрировать платеж
+                </button>
+            }
+            else
+            {
+                <h1>История платежей</h1>
+                <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal" onclick="prepareOnlinePayment()">
+                    <i class="fas fa-credit-card"></i> Внести оплату онлайн
+                </button>
+            }
         </div>
 
         <div class="table-container">
@@ -161,13 +172,16 @@
                         <th>Способ</th>
                         <th>Сумма</th>
                         <th>Статус</th>
-                        <th>Действия</th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th>Действия</th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
                     @if (!Model.PaymentsList.Any())
                     {
-                        <tr><td colspan="7" class="text-center text-muted py-4">Платежей пока нет.</td></tr>
+                        <tr><td colspan="@(User.IsInRole("Admin") ? 7 : 6)" class="text-center text-muted py-4">Платежей пока нет.</td></tr>
                     }
                     @foreach (var p in Model.PaymentsList)
                     {
@@ -183,18 +197,21 @@
                             <td>
                                 <span class="status-badge @badgeClass"><i class="fas @iconClass"></i> @p.Status</span>
                             </td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="btn-icon" title="Изменить статус" onclick="prepareEditPayment(@p.PaymentId, '@p.Status', '@p.Method', @p.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture))" data-bs-toggle="modal" data-bs-target="#paymentModal">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form method="post" asp-page-handler="DeletePayment" asp-route-id="@p.PaymentId" onsubmit="return confirm('Вы уверены, что хотите удалить запись о платеже?');">
-                                        <button type="submit" class="btn-icon delete" title="Удалить">
-                                            <i class="fas fa-trash"></i>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Изменить статус" onclick="prepareEditPayment(@p.PaymentId, '@p.Status', '@p.Method', @p.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture))" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                                            <i class="fas fa-edit"></i>
                                         </button>
-                                    </form>
-                                </div>
-                            </td>
+                                        <form method="post" asp-page-handler="DeletePayment" asp-route-id="@p.PaymentId" onsubmit="return confirm('Вы уверены, что хотите удалить запись о платеже?');">
+                                            <button type="submit" class="btn-icon delete" title="Удалить">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>
@@ -228,31 +245,46 @@
                         </div>
                         <div class="col-6 mb-3">
                             <label>Дата оплаты</label>
-                            <input asp-for="ModalPayment.DatePayment" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            <input asp-for="ModalPayment.DatePayment" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required readonly="@(User.IsInRole("Parent") ? "readonly" : null)" />
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label>Способ оплаты</label>
-                        <select asp-for="ModalPayment.MethodPayment" id="payMethod" class="form-select" required>
-                            <option value="Наличные">Наличные</option>
-                            <option value="Перевод на карту">Перевод на карту</option>
-                            <option value="Онлайн-эквайринг">Онлайн-эквайринг</option>
-                            <option value="Терминал">Терминал (эквайринг)</option>
-                        </select>
-                    </div>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="mb-3">
+                            <label>Способ оплаты</label>
+                            <select asp-for="ModalPayment.MethodPayment" id="payMethod" class="form-select" required>
+                                <option value="Наличные">Наличные</option>
+                                <option value="Перевод на карту">Перевод на карту</option>
+                                <option value="Онлайн-эквайринг">Онлайн-эквайринг</option>
+                                <option value="Терминал">Терминал (эквайринг)</option>
+                            </select>
+                        </div>
 
-                    <div class="mb-3">
-                        <label>Статус платежа</label>
-                        <select asp-for="ModalPayment.StatusPayment" id="payStatus" class="form-select" required>
-                            <option value="Оплачен">Оплачен</option>
-                            <option value="В обработке">В обработке / Ожидает</option>
-                            <option value="Ошибка">Ошибка оплаты</option>
-                        </select>
-                    </div>
+                        <div class="mb-3">
+                            <label>Статус платежа</label>
+                            <select asp-for="ModalPayment.StatusPayment" id="payStatus" class="form-select" required>
+                                <option value="Оплачен">Оплачен</option>
+                                <option value="В обработке">В обработке / Ожидает</option>
+                                <option value="Ошибка">Ошибка оплаты</option>
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Скрытые поля для родителя, так как бэкенд все равно их переопределит -->
+                        <input type="hidden" asp-for="ModalPayment.MethodPayment" value="Онлайн-эквайринг" />
+                        <input type="hidden" asp-for="ModalPayment.StatusPayment" value="В обработке" />
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> Вы будете перенаправлены на платежный шлюз банка. После оплаты статус изменится.
+                        </div>
+                    }
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary w-100 justify-content-center">Сохранить данные</button>
+                    <button type="submit" class="btn btn-primary w-100 justify-content-center">
+                        @(User.IsInRole("Admin") ? "Сохранить данные" : "Перейти к оплате")
+                    </button>
                 </div>
             </form>
         </div>
@@ -266,8 +298,19 @@
             document.getElementById('payId').value = '0';
             document.getElementById('subSelectDiv').style.display = 'block';
             document.getElementById('payAmount').value = '';
-            document.getElementById('payMethod').value = 'Наличные';
-            document.getElementById('payStatus').value = 'Оплачен';
+            
+            let methodEl = document.getElementById('payMethod');
+            if(methodEl) methodEl.value = 'Наличные';
+            
+            let statusEl = document.getElementById('payStatus');
+            if(statusEl) statusEl.value = 'Оплачен';
+        }
+
+        function prepareOnlinePayment() {
+            document.getElementById('paymentModalTitle').innerText = 'Внесение оплаты онлайн';
+            document.getElementById('payId').value = '0';
+            document.getElementById('subSelectDiv').style.display = 'block';
+            document.getElementById('payAmount').value = '';
         }
 
         function prepareEditPayment(id, status, method, amount) {
@@ -275,8 +318,12 @@
             document.getElementById('payId').value = id;
             document.getElementById('subSelectDiv').style.display = 'none';
             document.getElementById('payAmount').value = amount;
-            document.getElementById('payMethod').value = method;
-            document.getElementById('payStatus').value = status;
+            
+            let methodEl = document.getElementById('payMethod');
+            if(methodEl) methodEl.value = method;
+            
+            let statusEl = document.getElementById('payStatus');
+            if(statusEl) statusEl.value = status;
         }
     </script>
 }

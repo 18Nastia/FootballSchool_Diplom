@@ -53,22 +53,25 @@
 
 <div class="profile-content">
 
-    @if (TempData["SuccessMessage"] != null)
+   @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
     }
 
     <div class="profile-card">
-        <div class="admin-actions">
-            <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editStudentModal">
-                <i class="fas fa-edit"></i> Редактировать
-            </button>
-            <form method="post" asp-page-handler="Delete" asp-route-id="@Model.StudentProfile?.StudentId" onsubmit="return confirm('Удалить профиль ученика безвозвратно?');">
-                <button type="submit" class="btn-delete">
-                    <i class="fas fa-trash"></i> Удалить
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="admin-actions">
+                <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editStudentModal">
+                    <i class="fas fa-edit"></i> Редактировать
                 </button>
-            </form>
-        </div>
+                <form method="post" asp-page-handler="Delete" asp-route-id="@Model.StudentProfile?.StudentId" onsubmit="return confirm('Удалить профиль ученика безвозвратно?');">
+                    <button type="submit" class="btn-delete">
+                        <i class="fas fa-trash"></i> Удалить
+                    </button>
+                </form>
+            </div>
+        }
 
         @if (Model.StudentProfile != null)
         {

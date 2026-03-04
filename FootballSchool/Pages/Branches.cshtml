@@ -500,11 +500,14 @@
 
         <header class="header">
             <h1>Филиалы и площадки</h1>
-            <div class="header-actions">
-                <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#branchModal" onclick="prepareAddBranchModal()">
-                    <i class="fas fa-plus"></i> Добавить филиал
-                </button>
-            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="header-actions">
+                    <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#branchModal" onclick="prepareAddBranchModal()">
+                        <i class="fas fa-plus"></i> Добавить филиал
+                    </button>
+                </div>
+            }
         </header>
 
         <form method="get" class="filters w-100" id="filterForm">
@@ -590,7 +593,10 @@
                 <div class="sidebar-tab-content active" id="info-@branch.BranchId">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="mb-0">Залы (@branch.Facilities.Count)</h4>
-                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#facilityModal" onclick="prepareAddFacilityModal(@branch.BranchId)">+ Добавить</button>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#facilityModal" onclick="prepareAddFacilityModal(@branch.BranchId)">+ Добавить</button>
+                        }
                     </div>
                     @foreach (var facility in branch.Facilities)
                     {
@@ -604,10 +610,13 @@
                                 <span>Тип: @facility.TypeFacility</span>
                                 <span>Вместимость: @facility.CapacityFacility чел.</span>
                             </div>
-                            <div class="hall-actions">
-                                <button class="action-link" data-bs-toggle="modal" data-bs-target="#facilityModal" onclick="prepareEditFacilityModal(@facility.FacilityId, @branch.BranchId, '@facility.NameFacility.Replace("'", "\\'")', '@facility.TypeFacility', @facility.CapacityFacility, '@facility.StatusFacility', @(facility.CostFacility ?? 0), '@(facility.NumberFacility ?? "")')">Изменить</button>
-                                <form method="post" asp-page-handler="DeleteFacility" asp-route-id="@facility.FacilityId" class="d-inline" onsubmit="return confirm('Удалить?');"><button type="submit" class="action-link delete">Удалить</button></form>
-                            </div>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="hall-actions">
+                                    <button class="action-link" data-bs-toggle="modal" data-bs-target="#facilityModal" onclick="prepareEditFacilityModal(@facility.FacilityId, @branch.BranchId, '@facility.NameFacility.Replace("'", "\\'")', '@facility.TypeFacility', @facility.CapacityFacility, '@facility.StatusFacility', @(facility.CostFacility ?? 0), '@(facility.NumberFacility ?? "")')">Изменить</button>
+                                    <form method="post" asp-page-handler="DeleteFacility" asp-route-id="@facility.FacilityId" class="d-inline" onsubmit="return confirm('Удалить?');"><button type="submit" class="action-link delete">Удалить</button></form>
+                                </div>
+                            }
                         </div>
                     }
                 </div>
@@ -635,10 +644,13 @@
                 </div>
             </div>
 
-            <div class="sidebar-actions mt-auto">
-                <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#branchModal" onclick="prepareEditBranchModal(@branch.BranchId, '@safeName', '@safeCity', '@safeStreet', '@safeHouse', '@safePhone')"><i class="fas fa-edit"></i> Редактировать</button>
-                <form method="post" asp-page-handler="DeleteBranch" asp-route-id="@branch.BranchId" class="flex-grow-1" onsubmit="return confirm('Удалить филиал?');"><button type="submit" class="btn-delete w-100"><i class="fas fa-trash"></i> Удалить</button></form>
-            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="sidebar-actions mt-auto">
+                    <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#branchModal" onclick="prepareEditBranchModal(@branch.BranchId, '@safeName', '@safeCity', '@safeStreet', '@safeHouse', '@safePhone')"><i class="fas fa-edit"></i> Редактировать</button>
+                    <form method="post" asp-page-handler="DeleteBranch" asp-route-id="@branch.BranchId" class="flex-grow-1" onsubmit="return confirm('Удалить филиал?');"><button type="submit" class="btn-delete w-100"><i class="fas fa-trash"></i> Удалить</button></form>
+                </div>
+            }
         </div>
     }
 </div>

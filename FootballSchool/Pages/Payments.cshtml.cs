@@ -39,15 +39,30 @@ namespace FootballSchool.Pages
 
         public async Task OnGetAsync()
         {
-            var payments = await _context.Payments
+            IQueryable<Payment> paymentsQuery = _context.Payments
                 .Include(p => p.Subscription)
-                    .ThenInclude(s => s.Student)
+                    .ThenInclude(s => s.Student);
+
+            IQueryable<Subscription> subsQuery = _context.Subscriptions
+                .Include(s => s.Student);
+
+            // Фильтрация данных: если пользователь - родитель, показываем только его платежи
+            if (User.IsInRole("Parent"))
+            {
+                var userIdStr = User.FindFirst("UserId")?.Value;
+                if (int.TryParse(userIdStr, out int uid))
+                {
+                    paymentsQuery = paymentsQuery.Where(p => p.Subscription.Student.UserId == uid);
+                    subsQuery = subsQuery.Where(s => s.Student.UserId == uid);
+                }
+            }
+
+            var payments = await paymentsQuery
                 .OrderByDescending(p => p.DatePayment)
                 .ToListAsync();
 
             // Для добавления платежа нужно выбрать к какому абонементу он относится
-            var activeSubs = await _context.Subscriptions
-                .Include(s => s.Student)
+            var activeSubs = await subsQuery
                 .Select(s => new {
                     s.SubscriptionId,
                     DisplayText = $"{(s.Student != null ? s.Student.SurnameStudent : "")} - {s.TypeSubscription} ({s.CostSubscription} ₽)"
@@ -76,10 +91,32 @@ namespace FootballSchool.Pages
             ModelState.Clear();
             try
             {
+                // Родитель не может редактировать уже существующие платежи, только администратор
+                if (!User.IsInRole("Admin") && ModalPayment.PaymentId != 0)
+                {
+                    return Forbid();
+                }
+
+                // Переопределение свойств для роли "Родитель" (защита от подмены данных через DevTools)
+                if (User.IsInRole("Parent"))
+                {
+                    ModalPayment.StatusPayment = "В обработке";
+                    ModalPayment.MethodPayment = "Онлайн-эквайринг";
+                    ModalPayment.DatePayment = DateOnly.FromDateTime(DateTime.Now);
+                }
+
                 if (ModalPayment.PaymentId == 0)
                 {
                     _context.Payments.Add(ModalPayment);
-                    TempData["SuccessMessage"] = "Платеж успешно зарегистрирован!";
+
+                    if (User.IsInRole("Parent"))
+                    {
+                        TempData["SuccessMessage"] = "Заявка на онлайн-оплату сформирована. Статус изменится после подтверждения банком.";
+                    }
+                    else
+                    {
+                        TempData["SuccessMessage"] = "Платеж успешно зарегистрирован!";
+                    }
                 }
                 else
                 {
@@ -104,6 +141,12 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostDeletePaymentAsync(int id)
         {
+            // Только администратор может удалять платежи
+            if (!User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             var payment = await _context.Payments.FindAsync(id);
             if (payment != null)
             {

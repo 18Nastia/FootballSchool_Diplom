@@ -225,22 +225,32 @@
         }
 
         <div class="content-header">
-            <h1>Управление абонементами</h1>
-            <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#subModal" onclick="prepareAddSub()">
-                <i class="fas fa-plus"></i> Выдать абонемент
-            </button>
+            @if (User.IsInRole("Admin"))
+            {
+                <h1>Управление абонементами</h1>
+                <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#subModal" onclick="prepareAddSub()">
+                    <i class="fas fa-plus"></i> Выдать абонемент
+                </button>
+            }
+            else
+            {
+                <h1>Мои абонементы</h1>
+            }
         </div>
 
-        <div class="stats-overview">
-            <div class="stat-card">
-                <div class="stat-value">@Model.ActiveCount</div>
-                <div class="stat-label">Активных абонементов</div>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <div class="stat-value">@Model.ActiveCount</div>
+                    <div class="stat-label">Активных абонементов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">@Model.TotalRevenue.ToString("N0") ₽</div>
+                    <div class="stat-label">Сумма активных (потенциал)</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">@Model.TotalRevenue.ToString("N0") ₽</div>
-                <div class="stat-label">Сумма активных (потенциал)</div>
-            </div>
-        </div>
+        }
 
         <div class="filter-tabs">
             <button class="tab-button active" onclick="filterSubs('all', this)">Все абонементы</button>
@@ -249,6 +259,13 @@
         </div>
 
         <div class="subscriptions-grid">
+            @if (!Model.SubscriptionsList.Any())
+            {
+                <div class="col-12 text-muted py-4">
+                    Нет данных об абонементах.
+                </div>
+            }
+
             @foreach (var sub in Model.SubscriptionsList)
             {
                 <div class="subscription-card" data-status="@sub.Status">
@@ -276,14 +293,23 @@
                     </div>
 
                     <div class="card-actions">
-                        <button class="action-btn" onclick="prepareEditSub(@sub.SubscriptionId, @sub.Cost.ToString(System.Globalization.CultureInfo.InvariantCulture), @sub.DaysCount, '@sub.Type', '@sub.Terms')" data-bs-toggle="modal" data-bs-target="#subModal">
-                            <i class="fas fa-edit"></i> Изменить
-                        </button>
-                        <form method="post" asp-page-handler="DeleteSub" asp-route-id="@sub.SubscriptionId" class="w-100" onsubmit="return confirm('Аннулировать абонемент? Все связанные платежи будут удалены.');">
-                            <button type="submit" class="action-btn delete w-100">
-                                <i class="fas fa-trash"></i> Аннулировать
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <button class="action-btn" onclick="prepareEditSub(@sub.SubscriptionId, @sub.Cost.ToString(System.Globalization.CultureInfo.InvariantCulture), @sub.DaysCount, '@sub.Type', '@sub.Terms')" data-bs-toggle="modal" data-bs-target="#subModal">
+                                <i class="fas fa-edit"></i> Изменить
                             </button>
-                        </form>
+                            <form method="post" asp-page-handler="DeleteSub" asp-route-id="@sub.SubscriptionId" class="w-100" onsubmit="return confirm('Аннулировать абонемент? Все связанные платежи будут удалены.');">
+                                <button type="submit" class="action-btn delete w-100">
+                                    <i class="fas fa-trash"></i> Аннулировать
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a href="/Payments" class="action-btn w-100 text-decoration-none" style="background-color: #2563eb; color: white; border: none;">
+                                <i class="fas fa-credit-card"></i> Перейти к оплате
+                            </a>
+                        }
                     </div>
                 </div>
             }
@@ -291,52 +317,55 @@
     </div>
 </div>
 
-<div class="modal fade" id="subModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" asp-page-handler="SaveSub">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Оформление абонемента</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" asp-for="ModalSub.SubscriptionId" id="subId" />
-
-                    <div class="mb-3" id="studentSelectDiv">
-                        <label>Ученик</label>
-                        <select asp-for="ModalSub.StudentId" asp-items="Model.StudentsList" class="form-select" required>
-                            <option value="">Выберите ученика...</option>
-                        </select>
+@if (User.IsInRole("Admin"))
+{
+    <div class="modal fade" id="subModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="SaveSub">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Оформление абонемента</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
+                    <div class="modal-body">
+                        <input type="hidden" asp-for="ModalSub.SubscriptionId" id="subId" />
 
-                    <div class="mb-3">
-                        <label>Тип абонемента</label>
-                        <input asp-for="ModalSub.TypeSubscription" id="subType" class="form-control" placeholder="Например: Базовый (8 занятий)" required />
-                    </div>
-
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label>Кол-во занятий (дней)</label>
-                            <input asp-for="ModalSub.DaysSubscription" id="subDays" type="number" class="form-control" required />
+                        <div class="mb-3" id="studentSelectDiv">
+                            <label>Ученик</label>
+                            <select asp-for="ModalSub.StudentId" asp-items="Model.StudentsList" class="form-select" required>
+                                <option value="">Выберите ученика...</option>
+                            </select>
                         </div>
-                        <div class="col-6 mb-3">
-                            <label>Стоимость (₽)</label>
-                            <input asp-for="ModalSub.CostSubscription" id="subCost" type="number" step="0.01" class="form-control" required />
+
+                        <div class="mb-3">
+                            <label>Тип абонемента</label>
+                            <input asp-for="ModalSub.TypeSubscription" id="subType" class="form-control" placeholder="Например: Базовый (8 занятий)" required />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label>Кол-во занятий (дней)</label>
+                                <input asp-for="ModalSub.DaysSubscription" id="subDays" type="number" class="form-control" required />
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label>Стоимость (₽)</label>
+                                <input asp-for="ModalSub.CostSubscription" id="subCost" type="number" step="0.01" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Условия / Примечания</label>
+                            <textarea asp-for="ModalSub.TermsSubscription" id="subTerms" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label>Условия / Примечания</label>
-                        <textarea asp-for="ModalSub.TermsSubscription" id="subTerms" class="form-control" rows="2"></textarea>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn-primary w-100 justify-content-center">Сохранить абонемент</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary w-100 justify-content-center">Сохранить абонемент</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+}
 
 @section Scripts {
     <script>
