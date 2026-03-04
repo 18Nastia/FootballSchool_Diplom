@@ -120,12 +120,9 @@ namespace FootballSchool.Pages
             var training = await _context.Training.FindAsync(id);
             if (training != null)
             {
-                // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Удаляем связанные записи посещаемости перед удалением тренировки
-                // Иначе база данных выдаст ошибку внешнего ключа (FK_Attendance_Training)
                 var relatedAttendances = _context.Attendances.Where(a => a.TrainingId == id);
                 _context.Attendances.RemoveRange(relatedAttendances);
 
-                // Теперь можно безопасно удалить саму тренировку
                 _context.Training.Remove(training);
                 await _context.SaveChangesAsync();
             }

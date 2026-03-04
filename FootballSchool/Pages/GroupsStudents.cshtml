@@ -155,6 +155,7 @@
             font-size: 20px;
             font-weight: 600;
             color: #1d1d1f;
+            margin: 0;
         }
 
         .edit-button {
@@ -168,11 +169,6 @@
 
             .edit-button:hover {
                 color: #1d1d1f;
-            }
-
-            .edit-button svg {
-                width: 18px;
-                height: 18px;
             }
 
         .card-age {
@@ -189,11 +185,6 @@
             font-size: 14px;
             font-weight: 500;
             color: #1d1d1f;
-        }
-
-        .students-icon {
-            width: 18px;
-            height: 18px;
         }
 
         .card-info {
@@ -261,10 +252,6 @@
                 border-color: #2563eb;
             }
 
-            .search-input-large::placeholder {
-                color: #a1a1a6;
-            }
-
         .student-card {
             background: white;
             border-radius: 12px;
@@ -289,6 +276,7 @@
                 font-size: 18px;
                 font-weight: 600;
                 color: #1d1d1f;
+                margin: 0;
             }
 
         .age {
@@ -321,24 +309,13 @@
             color: #2563eb;
             text-decoration: none;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
             .details-link:hover {
                 text-decoration: underline;
-            }
-
-        .edit-btn {
-            background: none;
-            border: none;
-            padding: 4px;
-            cursor: pointer;
-            color: #6e6e73;
-            margin-left: auto;
-            transition: color 0.2s;
-        }
-
-            .edit-btn:hover {
-                color: #1d1d1f;
             }
 
         .progress-bar {
@@ -356,22 +333,6 @@
             border-radius: 3px;
             transition: width 0.3s ease;
         }
-
-        .rating-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #e5e5e7;
-        }
-
-            .dot.filled {
-                background: #2563eb;
-            }
 
         .student-info {
             display: grid;
@@ -431,10 +392,20 @@
 
 <div class="groups-students-page">
     <div class="main-content">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success mb-4"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger mb-4"><i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]</div>
+        }
+
         <button class="btn-primary" id="addButton">
             <i class="fas fa-plus"></i>
-            Добавить ученика
+            <span id="addButtonText">Добавить группу</span>
         </button>
+
         <div class="tabs">
             <button class="tab active" data-view="groups">
                 <i class="fas fa-users tab-icon"></i>
@@ -442,7 +413,7 @@
             </button>
             <button class="tab" data-view="students">
                 <i class="fas fa-user tab-icon"></i>
-                Индивидуальные ученики
+                Все ученики
             </button>
         </div>
 
@@ -451,240 +422,268 @@
             <div class="filter-section">
                 <div class="filter-group">
                     <label>Поиск по группе</label>
-                    <input type="text" class="search-input" placeholder="Введите название группы">
-                </div>
-                <div class="filter-group">
-                    <label>Возрастная группа</label>
-                    <select class="select-input">
-                        <option>Все возрасты</option>
-                        <option>5-7 лет</option>
-                        <option>8-10 лет</option>
-                        <option>11-13 лет</option>
-                        <option>14-16 лет</option>
-                    </select>
+                    <input type="text" class="search-input" placeholder="Введите название группы" id="searchGroup">
                 </div>
             </div>
 
-            <div class="cards-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Юниоры</h3>
-                        <button class="edit-button">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                    <p class="card-age">Возраст: 8-10 лет</p>
-                    <div class="card-students">
-                        <i class="fas fa-users students-icon"></i>
-                        <span>12 учеников</span>
-                    </div>
-                    <p class="card-info">Тренер: Иванов И.И.</p>
-                    <p class="card-info">Расписание: Пн, Ср, Пт 16:00-17:30</p>
-                    <button class="view-button">Просмотреть учеников</button>
+            @if (!Model.Teams.Any())
+            {
+                <div class="text-muted py-4">Группы не найдены.</div>
+            }
+            else
+            {
+                <div class="cards-grid">
+                    @foreach (var team in Model.Teams)
+                    {
+                        <div class="card group-card-item">
+                            <div class="card-header">
+                                <h3 class="card-title">@team.CategoryName</h3>
+                                <button class="edit-button" title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                            <p class="card-age">Статус: @team.Status</p>
+                            <div class="card-students">
+                                <i class="fas fa-users students-icon"></i>
+                                <span>@team.StudentsCount учеников</span>
+                            </div>
+                            <p class="card-info">Тренер: @team.CoachName</p>
+                            <button class="view-button" onclick="switchToStudentsTab('@team.CategoryName')">Просмотреть учеников</button>
+                        </div>
+                    }
                 </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Старшая группа</h3>
-                        <button class="edit-button">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                    <p class="card-age">Возраст: 14-16 лет</p>
-                    <div class="card-students">
-                        <i class="fas fa-users students-icon"></i>
-                        <span>8 учеников</span>
-                    </div>
-                    <p class="card-info">Тренер: Петров П.П.</p>
-                    <p class="card-info">Расписание: Вт, Чт 18:00-20:00, Сб 10:00-12:00</p>
-                    <button class="view-button">Просмотреть учеников</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Начинающие</h3>
-                        <button class="edit-button">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                    <p class="card-age">Возраст: 5-7 лет</p>
-                    <div class="card-students">
-                        <i class="fas fa-users students-icon"></i>
-                        <span>15 учеников</span>
-                    </div>
-                    <p class="card-info">Тренер: Сидорова А.В.</p>
-                    <p class="card-info">Расписание: Пн, Ср 15:00-16:00</p>
-                    <button class="view-button">Просмотреть учеников</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Продвинутые</h3>
-                        <button class="edit-button">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                    <p class="card-age">Возраст: 11-13 лет</p>
-                    <div class="card-students">
-                        <i class="fas fa-users students-icon"></i>
-                        <span>10 учеников</span>
-                    </div>
-                    <p class="card-info">Тренер: Иванов И.И.</p>
-                    <p class="card-info">Расписание: Вт, Чт, Сб 17:00-18:30</p>
-                    <button class="view-button">Просмотреть учеников</button>
-                </div>
-            </div>
+            }
         </div>
 
         <!-- Students View -->
         <div class="students-view" id="studentsView">
             <div class="section-header">
-                <h2>Индивидуальные ученики</h2>
-                <p class="section-subtitle">Ученики, не привязанные к группам</p>
+                <h2>Список учеников</h2>
+                <p class="section-subtitle">Управление профилями всех учащихся школы</p>
             </div>
 
             <div class="search-bar">
-                <input type="text" class="search-input-large" placeholder="Поиск по имени или родителю">
+                <input type="text" id="searchStudent" class="search-input-large" placeholder="Поиск по имени или группе">
             </div>
 
-            <div class="student-card">
-                <div class="student-header">
-                    <h3>Смирнов Михаил</h3>
-                    <span class="age">12 лет</span>
-                </div>
-                <div class="progress-section">
-                    <div class="progress-label">
-                        <span>Прогресс</span>
-                        <a href="#" class="details-link">Подробнее</a>
-                        <button class="edit-btn">
-                            <i class="fas fa-edit"></i>
-                        </button>
+            @if (!Model.Students.Any())
+            {
+                <div class="text-muted py-4">Ученики не найдены.</div>
+            }
+            else
+            {
+                @foreach (var student in Model.Students)
+                {
+                    <div class="student-card student-list-item" data-team="@student.TeamName">
+                        <div class="student-header">
+                            <h3 class="student-name">@student.FullName</h3>
+                            <span class="age">@student.Age лет</span>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-label">
+                                <span>Прогресс</span>
+                                <a href="/ChildProfile/@student.StudentId" class="details-link">
+                                    Открыть профиль <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+                                </a>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @student.ProgressPercentage%"></div>
+                            </div>
+                        </div>
+                        <div class="student-info">
+                            <div class="info-item">
+                                <span class="info-label">Родитель</span>
+                                <span class="info-value">@student.ParentName</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Телефон</span>
+                                <span class="info-value">@student.Phone</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Группа</span>
+                                <span class="info-value student-team-name">@student.TeamName</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 75%"></div>
-                    </div>
-                    <div class="rating-dots">
-                        <span class="dot filled"></span>
-                        <span class="dot filled"></span>
-                        <span class="dot filled"></span>
-                        <span class="dot filled"></span>
-                        <span class="dot"></span>
-                    </div>
-                </div>
-                <div class="student-info">
-                    <div class="info-item">
-                        <span class="info-label">Родитель</span>
-                        <span class="info-value">Смирнова Татьяна</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Телефон</span>
-                        <span class="info-value">+7 (999) 111-22-33</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Email</span>
-                        <span class="info-value">smirnova@example.com</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="student-card">
-                <div class="student-header">
-                    <h3>Кузнецова Елена</h3>
-                    <span class="age">8 лет</span>
-                </div>
-                <div class="progress-section">
-                    <div class="progress-label">
-                        <span>Прогресс</span>
-                        <a href="#" class="details-link">Подробнее</a>
-                        <button class="edit-btn">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 60%"></div>
-                    </div>
-                    <div class="rating-dots">
-                        <span class="dot filled"></span>
-                        <span class="dot filled"></span>
-                        <span class="dot filled"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                    </div>
-                </div>
-                <div class="student-info">
-                    <div class="info-item">
-                        <span class="info-label">Родитель</span>
-                        <span class="info-value">Кузнецов Игорь</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Телефон</span>
-                        <span class="info-value">+7 (999) 222-33-44</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Email</span>
-                        <span class="info-value">kuznetsov@example.com</span>
-                    </div>
-                </div>
-            </div>
+                }
+            }
         </div>
     </div>
 </div>
 
-<script>
-    // Tab switching functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const tabs = document.querySelectorAll('.tab');
-        const groupsView = document.getElementById('groupsView');
-        const studentsView = document.getElementById('studentsView');
-        const addButton = document.getElementById('addButton');
+<!-- Модальное окно: Добавление группы -->
+<div class="modal fade" id="addTeamModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="AddTeam">
+                <div class="modal-header">
+                    <h5 class="modal-title">Создание новой группы</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Название группы</label>
+                        <input asp-for="NewTeam.CategoryTeam" class="form-control" placeholder="Например: Юниоры U10" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Статус группы</label>
+                        <select asp-for="NewTeam.StatusTeam" class="form-select" required>
+                            <option value="Активна">Активна</option>
+                            <option value="Набор закрыт">Набор закрыт</option>
+                            <option value="Расформирована">Расформирована</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Создать группу</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all tabs
-                tabs.forEach(t => t.classList.remove('active'));
+<!-- Модальное окно: Добавление ученика -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="AddStudent">
+                <div class="modal-header">
+                    <h5 class="modal-title">Регистрация нового ученика</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные ученика</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewStudent.SurnameStudent" class="form-control" required /></div>
+                        <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewStudent.NameStudent" class="form-control" required /></div>
+                        <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewStudent.MiddleStudent" class="form-control" /></div>
 
-                // Add active class to clicked tab
-                this.classList.add('active');
+                        <div class="col-md-4 mb-3"><label>Дата рождения</label><input asp-for="NewStudent.BirthStudent" type="date" class="form-control" required /></div>
+                        <div class="col-md-4 mb-3">
+                            <label>Пол</label>
+                            <select asp-for="NewStudent.GenderStudent" class="form-select" required>
+                                <option value="Мужской">Мужской</option>
+                                <option value="Женский">Женский</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label>Уровень подготовки</label>
+                            <select asp-for="NewStudent.LevelStudent" class="form-select" required>
+                                <option value="Новичок">Новичок</option>
+                                <option value="Любитель">Любитель</option>
+                                <option value="Продвинутый">Продвинутый</option>
+                            </select>
+                        </div>
 
-                // Show/hide views based on data-view attribute
-                const view = this.getAttribute('data-view');
-                if (view === 'groups') {
-                    groupsView.style.display = 'block';
-                    studentsView.style.display = 'none';
-                    addButton.innerHTML = '<i class="fas fa-plus"></i> Добавить группу';
+                        <div class="col-md-12 mb-3">
+                            <label>Определение в группу</label>
+                            <select asp-for="NewStudent.TeamId" asp-items="Model.TeamSelectList" class="form-select">
+                                <option value="">Оставить без группы (Резерв)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3"><label>Медицинские показания</label><textarea asp-for="NewStudent.MedicalStudent" class="form-control" rows="2" placeholder="Аллергии, травмы и т.д."></textarea></div>
+                    </div>
+
+                    <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Данные родителя (опекуна)</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewStudent.SurnameParent" class="form-control" required /></div>
+                        <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewStudent.NameParent" class="form-control" required /></div>
+                        <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewStudent.MiddleParent" class="form-control" /></div>
+                        <div class="col-md-12 mb-3"><label>Телефон родителя</label><input asp-for="NewStudent.ParentNumber" class="form-control" required placeholder="+7 (999) 000-00-00" /></div>
+                    </div>
+
+                    <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Адрес проживания</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label>Город</label><input asp-for="NewStudent.CityStudent" class="form-control" required /></div>
+                        <div class="col-md-6 mb-3"><label>Улица</label><input asp-for="NewStudent.StreetStudent" class="form-control" required /></div>
+                        <div class="col-md-6 mb-3"><label>Дом</label><input asp-for="NewStudent.HouseStudent" class="form-control" required /></div>
+                        <div class="col-md-6 mb-3"><label>Квартира</label><input asp-for="NewStudent.ApartmentStudent" class="form-control" /></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Зарегистрировать ученика</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Переключение вкладок
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const groupsView = document.getElementById('groupsView');
+            const studentsView = document.getElementById('studentsView');
+            const addButtonText = document.getElementById('addButtonText');
+            const addButton = document.getElementById('addButton');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const view = this.getAttribute('data-view');
+                    if (view === 'groups') {
+                        groupsView.style.display = 'block';
+                        studentsView.style.display = 'none';
+                        addButtonText.textContent = 'Добавить группу';
+
+                        // Сброс поиска учеников при возврате к группам
+                        document.getElementById('searchStudent').value = '';
+                        filterStudents('');
+                    } else {
+                        groupsView.style.display = 'none';
+                        studentsView.style.display = 'block';
+                        addButtonText.textContent = 'Добавить ученика';
+                    }
+                });
+            });
+
+            // Обработчик кнопки "Добавить..." с использованием jQuery (встроен в ASP.NET)
+            addButton.addEventListener('click', function() {
+                const activeTab = document.querySelector('.tab.active');
+                if (activeTab.getAttribute('data-view') === 'groups') {
+                    // Открываем модалку для группы
+                    $('#addTeamModal').modal('show');
                 } else {
-                    groupsView.style.display = 'none';
-                    studentsView.style.display = 'block';
-                    addButton.innerHTML = '<i class="fas fa-plus"></i> Добавить ученика';
+                    // Открываем модалку для ученика
+                    $('#addStudentModal').modal('show');
                 }
             });
-        });
 
-        // Add button functionality
-        addButton.addEventListener('click', function() {
-            const activeTab = document.querySelector('.tab.active');
-            if (activeTab.getAttribute('data-view') === 'groups') {
-                alert('Добавление новой группы');
-            } else {
-                alert('Добавление нового ученика');
-            }
-        });
+            // Поиск по группам (JS-фильтрация)
+            document.getElementById('searchGroup').addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase();
+                document.querySelectorAll('.group-card-item').forEach(card => {
+                    const title = card.querySelector('.card-title').textContent.toLowerCase();
+                    card.style.display = title.includes(term) ? 'block' : 'none';
+                });
+            });
 
-        // Edit button functionality
-        document.querySelectorAll('.edit-button, .edit-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation();
-                alert('Редактирование');
+            // Поиск по ученикам (JS-фильтрация)
+            document.getElementById('searchStudent').addEventListener('input', function(e) {
+                filterStudents(e.target.value.toLowerCase());
             });
         });
 
-        // View button functionality
-        document.querySelectorAll('.view-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const card = this.closest('.card');
-                const groupName = card.querySelector('.card-title').textContent;
-                alert(`Просмотр учеников группы: ${groupName}`);
+        function filterStudents(term) {
+            document.querySelectorAll('.student-list-item').forEach(card => {
+                const name = card.querySelector('.student-name').textContent.toLowerCase();
+                const team = card.querySelector('.student-team-name').textContent.toLowerCase();
+                card.style.display = (name.includes(term) || team.includes(term)) ? 'block' : 'none';
             });
-        });
-    });
-</script>
+        }
+
+        // Функция для кнопки "Просмотреть учеников" в карточке группы
+        function switchToStudentsTab(teamName) {
+            document.querySelector('.tab[data-view="students"]').click();
+
+            const searchInput = document.getElementById('searchStudent');
+            searchInput.value = teamName;
+            filterStudents(teamName.toLowerCase());
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+}

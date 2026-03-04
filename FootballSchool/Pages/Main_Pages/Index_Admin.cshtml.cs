@@ -20,7 +20,6 @@ namespace FootballSchool.Pages.Main_Pages
             _logger = logger;
         }
 
-        // Свойства для отображения статистики
         public int TodayTrainingsCount { get; set; }
         public int TotalStudentsCount { get; set; }
         public double WeeklyAttendancePercentage { get; set; }
@@ -28,7 +27,6 @@ namespace FootballSchool.Pages.Main_Pages
         public int PendingPaymentsCount { get; set; }
         public int CoachesCount { get; set; }
 
-        // Динамический список уведомлений
         public List<string> Notifications { get; set; } = new List<string>();
 
         public async Task OnGetAsync()
@@ -36,14 +34,11 @@ namespace FootballSchool.Pages.Main_Pages
             var today = DateOnly.FromDateTime(DateTime.Today);
             var weekAgo = today.AddDays(-7);
 
-            // 1. Считаем тренировки на сегодня
             TodayTrainingsCount = await _context.Training
                 .CountAsync(t => t.DateTraining == today);
 
-            // 2. Считаем общее количество учеников
             TotalStudentsCount = await _context.Students.CountAsync();
 
-            // 3. Высчитываем % посещаемости за последние 7 дней
             var recentAttendances = await _context.Attendances
                 .Include(a => a.Training)
                 .Where(a => a.Training.DateTraining >= weekAgo && a.Training.DateTraining <= today)
@@ -59,17 +54,12 @@ namespace FootballSchool.Pages.Main_Pages
                 WeeklyAttendancePercentage = 0;
             }
 
-            // 4. Считаем абонементы (в данном случае просто все выданные, можно добавить логику проверки дат)
             ActiveSubscriptionsCount = await _context.Subscriptions.CountAsync();
 
-            // 5. Считаем проблемные/ожидающие платежи
             PendingPaymentsCount = await _context.Payments
                 .CountAsync(p => p.StatusPayment == "В обработке" || p.StatusPayment == "Не оплачен");
-
-            // 6. Считаем тренеров
             CoachesCount = await _context.Coaches.CountAsync();
 
-            // 7. Генерируем динамические уведомления (например, ближайшие 3 тренировки)
             var upcomingTrainings = await _context.Training
                 .Include(t => t.Team)
                 .Where(t => t.DateTraining >= today)
@@ -84,7 +74,6 @@ namespace FootballSchool.Pages.Main_Pages
                 Notifications.Add($"Ближайшая тренировка группы «{teamName}»: {dayStr} в {t.TimeTraining.ToString("HH:mm")}");
             }
 
-            // Проверка на случай отсутствия событий
             if (!Notifications.Any())
             {
                 Notifications.Add("На ближайшее время нет запланированных событий.");

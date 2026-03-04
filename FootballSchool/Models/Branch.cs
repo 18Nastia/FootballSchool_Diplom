@@ -37,9 +37,10 @@ public partial class Branch
     [StringLength(20)]
     [Unicode(false)]
     public string PhoneBranch { get; set; } = null!;
-    
+
     [Column("Photo_branch")]
-    public byte[]? PhotoBranch { get; set; }
+    [StringLength(255)] 
+    public string? PhotoBranch { get; set; }
 
     [InverseProperty("Branch")]
     public virtual ICollection<Facility> Facilities { get; set; } = new List<Facility>();

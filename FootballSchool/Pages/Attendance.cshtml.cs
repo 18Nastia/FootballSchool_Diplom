@@ -19,24 +19,19 @@ namespace FootballSchool.Pages
             _context = context;
         }
 
-        // Список групп для фильтра
         public SelectList TeamList { get; set; } = default!;
 
-        // Выбранные фильтры
         [BindProperty(SupportsGet = true)]
         public int? FilterTeamId { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public DateTime? FilterDate { get; set; }
 
-        // Идентификатор конкретно выбранной тренировки из списка
         [BindProperty(SupportsGet = true)]
         public int? SelectedTrainingId { get; set; }
 
-        // Доступные тренировки на выбранный день
         public List<Training> AvailableTrainings { get; set; } = new List<Training>();
 
-        // Данные для формы сохранения
         [BindProperty]
         public List<AttendanceItem> AttendanceItems { get; set; } = new List<AttendanceItem>();
 

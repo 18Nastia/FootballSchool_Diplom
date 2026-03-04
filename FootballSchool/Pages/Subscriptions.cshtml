@@ -1,7 +1,7 @@
 ﻿@page
 @model FootballSchool.Pages.SubscriptionsModel
 @{
-    ViewData["Title"] = "Абонементы";
+    ViewData["Title"] = "Управление абонементами";
 }
 
 @section Styles {
@@ -12,26 +12,68 @@
         }
 
         .content-header {
-            margin-bottom: 32px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
             .content-header h1 {
                 font-size: 28px;
                 font-weight: 600;
-                margin-bottom: 8px;
                 color: #111827;
+                margin: 0;
             }
 
-        .subtitle {
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+            .btn-primary:hover {
+                background-color: #1d4ed8;
+            }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
             font-size: 14px;
             color: #6B7280;
-            line-height: 1.5;
         }
 
         .filter-tabs {
             display: flex;
             gap: 8px;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .tab-button {
@@ -43,12 +85,7 @@
             color: #6B7280;
             cursor: pointer;
             transition: all 0.2s;
-            font-family: inherit;
         }
-
-            .tab-button:hover {
-                border-color: #D1D5DB;
-            }
 
             .tab-button.active {
                 background-color: #DBEAFE;
@@ -58,9 +95,8 @@
 
         .subscriptions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 24px;
-            margin-bottom: 24px;
         }
 
         .subscription-card {
@@ -69,6 +105,7 @@
             border-radius: 12px;
             padding: 24px;
             transition: all 0.3s;
+            position: relative;
         }
 
             .subscription-card:hover {
@@ -79,7 +116,7 @@
         .card-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 20px;
         }
 
@@ -87,6 +124,13 @@
                 font-size: 18px;
                 font-weight: 600;
                 color: #111827;
+                margin: 0;
+            }
+
+            .card-header .student-name {
+                font-size: 14px;
+                color: #6B7280;
+                margin-top: 4px;
             }
 
         .badge {
@@ -99,11 +143,6 @@
         .badge-active {
             background-color: #D1FAE5;
             color: #065F46;
-        }
-
-        .badge-expiring {
-            background-color: #FEF3C7;
-            color: #92400E;
         }
 
         .badge-expired {
@@ -133,411 +172,205 @@
                 font-weight: 500;
             }
 
-        .progress-bar {
-            height: 6px;
-            background-color: #F3F4F6;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.3s;
-        }
-
-        .progress-green {
-            background-color: #10B981;
-        }
-
-        .progress-orange {
-            background-color: #F59E0B;
-        }
-
-        .progress-red {
-            background-color: #EF4444;
-        }
-
         .card-actions {
             display: flex;
-            flex-direction: column;
             gap: 8px;
+            margin-top: 16px;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 16px;
         }
 
-        .extend-button {
-            width: 100%;
-            padding: 12px;
-            background-color: #2563EB;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: background-color 0.2s;
-            font-family: inherit;
-        }
-
-            .extend-button:hover {
-                background-color: #1D4ED8;
-            }
-
-        .download-button {
-            width: 100%;
-            padding: 12px;
-            background-color: #FFFFFF;
-            color: #374151;
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
             border: 1px solid #E5E7EB;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-            .download-button:hover {
-                background-color: #F9FAFB;
-                border-color: #D1D5DB;
-            }
-
-        .warning-message {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 16px;
-            background-color: #FFFBEB;
-            border: 1px solid #FDE68A;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #92400E;
-            margin-bottom: 24px;
-        }
-
-            .warning-message i {
-                flex-shrink: 0;
-                margin-top: 2px;
-            }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6B7280;
-        }
-
-            .empty-state i {
-                font-size: 48px;
-                margin-bottom: 16px;
-                color: #D1D5DB;
-            }
-
-            .empty-state h3 {
-                font-size: 18px;
-                margin-bottom: 8px;
-                color: #374151;
-            }
-
-            .empty-state p {
-                font-size: 14px;
-                margin-bottom: 20px;
-            }
-
-        .new-subscription-btn {
-            padding: 12px 24px;
-            background-color: #2563EB;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s;
-        }
-
-            .new-subscription-btn:hover {
-                background-color: #1D4ED8;
-            }
-
-        .stats-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #E5E7EB;
+            color: #374151;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
         }
 
-        .stat-value {
-            font-size: 24px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: #6B7280;
-        }
-
-        @@media (max-width: 768px) {
-            .subscriptions-page .main-content {
-                padding: 24px 16px;
+            .action-btn:hover {
+                background: #f9fafb;
+                border-color: #d1d5db;
             }
 
-            .subscriptions-grid {
-                grid-template-columns: 1fr;
+            .action-btn.delete {
+                color: #dc2626;
+                border-color: #fecaca;
+                background: #fef2f2;
             }
 
-            .stats-overview {
-                grid-template-columns: 1fr;
-            }
-
-            .filter-tabs {
-                flex-wrap: wrap;
-            }
-        }
+                .action-btn.delete:hover {
+                    background: #fee2e2;
+                }
     </style>
 }
 
 <div class="subscriptions-page">
     <div class="main-content">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success mb-3"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger mb-3"><i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]</div>
+        }
+
+        <div class="content-header">
+            <h1>Управление абонементами</h1>
+            <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#subModal" onclick="prepareAddSub()">
+                <i class="fas fa-plus"></i> Выдать абонемент
+            </button>
+        </div>
 
         <div class="stats-overview">
             <div class="stat-card">
-                <div class="stat-value">2</div>
-                <div class="stat-label">Активных абонемента</div>
+                <div class="stat-value">@Model.ActiveCount</div>
+                <div class="stat-label">Активных абонементов</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">7</div>
-                <div class="stat-label">Осталось занятий</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">10 000 ₽</div>
-                <div class="stat-label">Общая стоимость</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">3 дня</div>
-                <div class="stat-label">До окончания</div>
+                <div class="stat-value">@Model.TotalRevenue.ToString("N0") ₽</div>
+                <div class="stat-label">Сумма активных (потенциал)</div>
             </div>
         </div>
 
         <div class="filter-tabs">
-            <button class="tab-button active" onclick="filterSubscriptions('active')">Активные</button>
-            <button class="tab-button" onclick="filterSubscriptions('expired')">Истёкшие</button>
-            <button class="tab-button" onclick="filterSubscriptions('all')">Все</button>
+            <button class="tab-button active" onclick="filterSubs('all', this)">Все абонементы</button>
+            <button class="tab-button" onclick="filterSubs('Активен', this)">Активные</button>
+            <button class="tab-button" onclick="filterSubs('Истёк', this)">Истёкшие</button>
         </div>
 
-        <div class="warning-message" id="warningMessage">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span>Ваш абонемент истекает через 3 дня. Продлите его, чтобы не потерять место в группе.</span>
-        </div>
+        <div class="subscriptions-grid">
+            @foreach (var sub in Model.SubscriptionsList)
+            {
+                <div class="subscription-card" data-status="@sub.Status">
+                    <div class="card-header">
+                        <div>
+                            <h3>@sub.Type</h3>
+                            <div class="student-name"><i class="fas fa-user"></i> @sub.StudentName</div>
+                        </div>
+                        <span class="badge @sub.StatusClass">@sub.Status</span>
+                    </div>
 
-        <div class="subscriptions-grid" id="subscriptionsGrid">
-            <!-- Active Subscription 1 -->
-            <div class="subscription-card" data-status="active">
-                <div class="card-header">
-                    <h3>8 тренировок</h3>
-                    <span class="badge badge-active">Активен</span>
-                </div>
+                    <div class="card-details">
+                        <div class="detail-row">
+                            <span class="label">Остаток занятий:</span>
+                            <span class="value">@sub.DaysCount шт.</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Условия:</span>
+                            <span class="value">@sub.Terms</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Стоимость:</span>
+                            <span class="value">@sub.Cost.ToString("N0") ₽</span>
+                        </div>
+                    </div>
 
-                <div class="card-details">
-                    <div class="detail-row">
-                        <span class="label">Период:</span>
-                        <span class="value">01.10–31.10.2025</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Ребёнок:</span>
-                        <span class="value">Даниил</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Остаток занятий:</span>
-                        <span class="value">6 из 8</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Стоимость:</span>
-                        <span class="value">4 000 ₽</span>
-                    </div>
-                </div>
-
-                <div class="progress-bar">
-                    <div class="progress-fill progress-green" style="width: 75%"></div>
-                </div>
-
-                <div class="card-actions">
-                    <button class="download-button" onclick="downloadReceipt(1)">
-                        <i class="fas fa-download"></i>
-                        Скачать чек
-                    </button>
-                </div>
-            </div>
-
-            <!-- Active Subscription 2 -->
-            <div class="subscription-card" data-status="active">
-                <div class="card-header">
-                    <h3>12 тренировок</h3>
-                    <span class="badge badge-expiring">Заканчивается</span>
-                </div>
-
-                <div class="card-details">
-                    <div class="detail-row">
-                        <span class="label">Период:</span>
-                        <span class="value">01.11–30.11.2025</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Ребёнок:</span>
-                        <span class="value">Даниил</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Остаток занятий:</span>
-                        <span class="value">1 из 12</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Стоимость:</span>
-                        <span class="value">6 000 ₽</span>
+                    <div class="card-actions">
+                        <button class="action-btn" onclick="prepareEditSub(@sub.SubscriptionId, @sub.Cost.ToString(System.Globalization.CultureInfo.InvariantCulture), @sub.DaysCount, '@sub.Type', '@sub.Terms')" data-bs-toggle="modal" data-bs-target="#subModal">
+                            <i class="fas fa-edit"></i> Изменить
+                        </button>
+                        <form method="post" asp-page-handler="DeleteSub" asp-route-id="@sub.SubscriptionId" class="w-100" onsubmit="return confirm('Аннулировать абонемент? Все связанные платежи будут удалены.');">
+                            <button type="submit" class="action-btn delete w-100">
+                                <i class="fas fa-trash"></i> Аннулировать
+                            </button>
+                        </form>
                     </div>
                 </div>
-
-                <div class="progress-bar">
-                    <div class="progress-fill progress-orange" style="width: 8.33%"></div>
-                </div>
-
-                <div class="card-actions">
-                    <button class="extend-button" onclick="extendSubscription(2)">
-                        <i class="fas fa-clock"></i>
-                        Продлить
-                    </button>
-                    <button class="download-button" onclick="downloadReceipt(2)">
-                        <i class="fas fa-download"></i>
-                        Скачать чек
-                    </button>
-                </div>
-            </div>
-
-            <!-- Expired Subscription -->
-            <div class="subscription-card" data-status="expired" style="display: none;">
-                <div class="card-header">
-                    <h3>8 тренировок</h3>
-                    <span class="badge badge-expired">Истёк</span>
-                </div>
-
-                <div class="card-details">
-                    <div class="detail-row">
-                        <span class="label">Период:</span>
-                        <span class="value">01.09–30.09.2025</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Ребёнок:</span>
-                        <span class="value">Даниил</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Использовано:</span>
-                        <span class="value">8 из 8</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Стоимость:</span>
-                        <span class="value">4 000 ₽</span>
-                    </div>
-                </div>
-
-                <div class="progress-bar">
-                    <div class="progress-fill progress-red" style="width: 100%"></div>
-                </div>
-
-                <div class="card-actions">
-                    <button class="download-button" onclick="downloadReceipt(3)">
-                        <i class="fas fa-download"></i>
-                        Скачать чек
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="empty-state" id="emptyState" style="display: none;">
-            <i class="fas fa-file-invoice"></i>
-            <h3>Нет абонементов</h3>
-            <p>У вас пока нет активных абонементов</p>
-            <button class="new-subscription-btn" onclick="createNewSubscription()">
-                <i class="fas fa-plus"></i>
-                Оформить абонемент
-            </button>
+            }
         </div>
     </div>
 </div>
 
-<script>
-    function filterSubscriptions(filter) {
-        // Update active tab
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
+<div class="modal fade" id="subModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="SaveSub">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Оформление абонемента</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="ModalSub.SubscriptionId" id="subId" />
 
-        const cards = document.querySelectorAll('.subscription-card');
-        let visibleCount = 0;
+                    <div class="mb-3" id="studentSelectDiv">
+                        <label>Ученик</label>
+                        <select asp-for="ModalSub.StudentId" asp-items="Model.StudentsList" class="form-select" required>
+                            <option value="">Выберите ученика...</option>
+                        </select>
+                    </div>
 
-        cards.forEach(card => {
-            const status = card.getAttribute('data-status');
+                    <div class="mb-3">
+                        <label>Тип абонемента</label>
+                        <input asp-for="ModalSub.TypeSubscription" id="subType" class="form-control" placeholder="Например: Базовый (8 занятий)" required />
+                    </div>
 
-            if (filter === 'all' || status === filter) {
-                card.style.display = 'block';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label>Кол-во занятий (дней)</label>
+                            <input asp-for="ModalSub.DaysSubscription" id="subDays" type="number" class="form-control" required />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label>Стоимость (₽)</label>
+                            <input asp-for="ModalSub.CostSubscription" id="subCost" type="number" step="0.01" class="form-control" required />
+                        </div>
+                    </div>
 
-        // Show/hide empty state
-        const emptyState = document.getElementById('emptyState');
-        const warningMessage = document.getElementById('warningMessage');
+                    <div class="mb-3">
+                        <label>Условия / Примечания</label>
+                        <textarea asp-for="ModalSub.TermsSubscription" id="subTerms" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary w-100 justify-content-center">Сохранить абонемент</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-        if (visibleCount === 0) {
-            emptyState.style.display = 'block';
-            warningMessage.style.display = 'none';
-        } else {
-            emptyState.style.display = 'none';
-            if (filter === 'active') {
-                warningMessage.style.display = 'flex';
-            } else {
-                warningMessage.style.display = 'none';
-            }
+@section Scripts {
+    <script>
+        function filterSubs(status, btnElement) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            document.querySelectorAll('.subscription-card').forEach(card => {
+                if (status === 'all' || card.getAttribute('data-status') === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
-    }
 
-    function extendSubscription(subscriptionId) {
-        // Здесь будет логика продления абонемента
-        alert(`Продление абонемента #${subscriptionId}. Откроется форма оплаты.`);
-    }
+        function prepareAddSub() {
+            document.getElementById('modalTitle').innerText = 'Оформление абонемента';
+            document.getElementById('subId').value = '0';
+            document.getElementById('studentSelectDiv').style.display = 'block';
+            document.getElementById('subType').value = '';
+            document.getElementById('subDays').value = '';
+            document.getElementById('subCost').value = '';
+            document.getElementById('subTerms').value = '';
+        }
 
-    function downloadReceipt(subscriptionId) {
-        // Здесь будет логика скачивания чека
-        alert(`Скачивание чека для абонемента #${subscriptionId}`);
-    }
-
-    function createNewSubscription() {
-        // Здесь будет логика создания нового абонемента
-        alert('Открытие формы оформления нового абонемента');
-    }
-
-    // Инициализация при загрузке
-    document.addEventListener('DOMContentLoaded', function() {
-        // Показываем только активные абонементы по умолчанию
-        filterSubscriptions('active');
-    });
-</script>
+        function prepareEditSub(id, cost, days, type, terms) {
+            document.getElementById('modalTitle').innerText = 'Редактирование абонемента';
+            document.getElementById('subId').value = id;
+            document.getElementById('studentSelectDiv').style.display = 'none';
+            document.getElementById('subType').value = type;
+            document.getElementById('subDays').value = days;
+            document.getElementById('subCost').value = cost;
+            document.getElementById('subTerms').value = terms;
+        }
+    </script>
+}

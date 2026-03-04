@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 using FootballSchool.Models;
 
 namespace FootballSchool.Pages
@@ -15,10 +16,12 @@ namespace FootballSchool.Pages
     public class BranchesModel : PageModel
     {
         private readonly FootballSchoolContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public BranchesModel(FootballSchoolContext context)
+        public BranchesModel(FootballSchoolContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         public class BranchDto
@@ -30,10 +33,7 @@ namespace FootballSchool.Pages
             public string House { get; set; } = string.Empty;
             public string Phone { get; set; } = string.Empty;
             public string Address => $"{Street}, {House}";
-
-            public string PhotoMimeType { get; set; } = "image/jpeg";
-            // Ñâîéñòâî äëÿ îòîáðàæåíèÿ êàðòèíêè èç áàéòîâ ÁÄ
-            public string? PhotoBase64 { get; set; }
+            public string PhotoPath { get; set; } = string.Empty;
 
             public int GroupsCount { get; set; }
             public int CoachesCount { get; set; }
@@ -53,8 +53,6 @@ namespace FootballSchool.Pages
         [BindProperty]
         public Facility ModalFacility { get; set; } = new Facility();
 
-        [BindProperty]
-        public IFormFile? BranchPhoto { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public string? FilterCity { get; set; }
@@ -73,26 +71,62 @@ namespace FootballSchool.Pages
         {
             var cities = await _context.Branches.Select(b => b.CityBranch).Distinct().ToListAsync();
             CityList = new SelectList(cities);
+
             var types = await _context.Facilities.Select(f => f.TypeFacility).Distinct().ToListAsync();
             TypeList = new SelectList(types);
+
             var statuses = await _context.Facilities.Select(f => f.StatusFacility).Distinct().ToListAsync();
             StatusList = new SelectList(statuses);
 
-            var query = _context.Branches.Include(b => b.Facilities).AsQueryable();
-            if (!string.IsNullOrEmpty(FilterCity)) query = query.Where(b => b.CityBranch == FilterCity);
-            if (!string.IsNullOrEmpty(FilterType)) query = query.Where(b => b.Facilities.Any(f => f.TypeFacility == FilterType));
-            if (!string.IsNullOrEmpty(FilterStatus)) query = query.Where(b => b.Facilities.Any(f => f.StatusFacility == FilterStatus));
+            var query = _context.Branches
+                .Include(b => b.Facilities)
+                .AsQueryable();
 
-            var branchesFromDb = await query.ToListAsync();
+            if (!string.IsNullOrEmpty(FilterCity))
+                query = query.Where(b => b.CityBranch == FilterCity);
+
+            if (!string.IsNullOrEmpty(FilterType))
+                query = query.Where(b => b.Facilities.Any(f => f.TypeFacility == FilterType));
+
+            if (!string.IsNullOrEmpty(FilterStatus))
+                query = query.Where(b => b.Facilities.Any(f => f.StatusFacility == FilterStatus));
+
+            var branchesData = await query.Select(b => new
+            {
+                b.BranchId,
+                b.NameBranch,
+                b.CityBranch,
+                b.StreetBranch,
+                b.HouseBranch,
+                b.PhoneBranch,
+                b.PhotoBranch,
+                Facilities = b.Facilities.ToList()
+            }).ToListAsync();
+
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            foreach (var b in branchesFromDb)
+            foreach (var b in branchesData)
             {
-                var trainings = await _context.Training.Include(t => t.Coach).Include(t => t.Team)
-                    .Where(t => t.Facility != null && t.Facility.BranchId == b.BranchId).ToListAsync();
-                var teams = trainings.Where(t => t.Team != null).Select(t => t.Team).GroupBy(t => t.TeamId).Select(g => g.First()).ToList();
-                var upcoming = trainings.Where(t => t.DateTraining >= today).OrderBy(t => t.DateTraining).ThenBy(t => t.TimeTraining).Take(10).ToList();
+                var trainings = await _context.Training
+                    .Include(t => t.Coach)
+                    .Include(t => t.Team)
+                    .Where(t => t.Facility != null && t.Facility.BranchId == b.BranchId)
+                    .ToListAsync();
+
+                var teams = trainings.Where(t => t.Team != null)
+                                     .Select(t => t.Team)
+                                     .GroupBy(t => t.TeamId)
+                                     .Select(g => g.First())
+                                     .ToList();
+
+                var upcoming = trainings.Where(t => t.DateTraining >= today)
+                                        .OrderBy(t => t.DateTraining)
+                                        .ThenBy(t => t.TimeTraining)
+                                        .Take(10)
+                                        .ToList();
+
                 var mainCoach = trainings.Select(t => t.Coach).FirstOrDefault(c => c != null);
+                string coachName = mainCoach != null ? $"{mainCoach.SurnameCoach} {mainCoach.NameCoach}" : "Не назначен";
 
                 Branches.Add(new BranchDto
                 {
@@ -102,60 +136,66 @@ namespace FootballSchool.Pages
                     Street = b.StreetBranch,
                     House = b.HouseBranch,
                     Phone = b.PhoneBranch,
-                    PhotoMimeType = b.PhotoBranch != null ? GetImageMimeType(b.PhotoBranch) ?? "image/jpeg" : "image/jpeg",
-                    const long maxImageSize = 5 * 1024 * 1024; // 5 MB
-                    if (BranchPhoto.Length > maxImageSize)
-                    {
-                        TempData["ErrorMessage"] = "     5 .";
-                        return RedirectToPage();
-                    }
-
-
-                    if (GetImageMimeType(imageData) == null)
-                    {
-                        TempData["ErrorMessage"] = "   JPG, PNG, GIF  WebP.";
-                        return RedirectToPage();
-                    }
-                    // Êîíâåðòèðóåì áàéòû èç ÁÄ â ñòðîêó äëÿ HTML
-                    PhotoBase64 = b.PhotoBranch != null ? Convert.ToBase64String(b.PhotoBranch) : null,
+                    PhotoPath = b.PhotoBranch ?? "",
                     GroupsCount = teams.Count,
                     CoachesCount = trainings.Select(t => t.CoachId).Distinct().Count(),
                     TrainingsCount = trainings.Count,
-                    MainCoachName = mainCoach != null ? $"{mainCoach.SurnameCoach} {mainCoach.NameCoach}" : "Íå íàçíà÷åí",
-                    Facilities = b.Facilities.ToList(),
+                    MainCoachName = coachName,
+                    Facilities = b.Facilities,
                     UpcomingTrainings = upcoming,
                     BranchTeams = teams
                 });
             }
         }
 
-        public async Task<IActionResult> OnPostSaveBranchAsync()
+        public async Task<IActionResult> OnPostSaveBranchAsync(IFormFile? BranchPhoto)
         {
             try
             {
-                byte[]? imageData = null;
+                if (!ModelState.IsValid)
+                {
+                    TempData["ErrorMessage"] = "Ошибка заполнения формы.";
+                    return RedirectToPage();
+                }
+
+                string? relativePhotoPath = null;
+
                 if (BranchPhoto != null && BranchPhoto.Length > 0)
                 {
-                    using (var ms = new MemoryStream())
+                    string imgext = Path.GetExtension(BranchPhoto.FileName).ToLower();
+
+                    if (imgext == ".jpg" || imgext == ".jpeg" || imgext == ".png" || imgext == ".gif")
                     {
-                        await BranchPhoto.CopyToAsync(ms);
-                        imageData = ms.ToArray();
+                        string uniqueFileName = Guid.NewGuid().ToString() + imgext;
+                        string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "branches");
+
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await BranchPhoto.CopyToAsync(stream);
+                        }
+                        relativePhotoPath = "/images/branches/" + uniqueFileName;
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Разрешены только файлы .jpg, .png, .gif";
+                        return RedirectToPage();
                     }
                 }
 
                 if (ModalBranch.BranchId == 0)
                 {
-                    var newBranch = new Branch
+                    if (relativePhotoPath != null)
                     {
-                        NameBranch = ModalBranch.NameBranch,
-                        CityBranch = ModalBranch.CityBranch,
-                        StreetBranch = ModalBranch.StreetBranch,
-                        HouseBranch = ModalBranch.HouseBranch,
-                        PhoneBranch = ModalBranch.PhoneBranch,
-                        PhotoBranch = imageData // Ñîõðàíÿåì áàéòû â ÁÄ
-                    };
-                    _context.Branches.Add(newBranch);
-                    TempData["SuccessMessage"] = "Íîâûé ôèëèàë äîáàâëåí â áàçó!";
+                        ModalBranch.PhotoBranch = relativePhotoPath;
+                    }
+                    _context.Branches.Add(ModalBranch);
                 }
                 else
                 {
@@ -168,19 +208,21 @@ namespace FootballSchool.Pages
                         existing.HouseBranch = ModalBranch.HouseBranch;
                         existing.PhoneBranch = ModalBranch.PhoneBranch;
 
-                        // Îáíîâëÿåì ôîòî òîëüêî åñëè çàãðóæåíî íîâîå
-                        if (imageData != null) existing.PhotoBranch = imageData;
-
-                        TempData["SuccessMessage"] = "Äàííûå â ÁÄ îáíîâëåíû!";
+                        if (relativePhotoPath != null)
+                        {
+                            existing.PhotoBranch = relativePhotoPath;
+                        }
                     }
                 }
 
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Филиал успешно сохранен!";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Îøèáêà ÁÄ: " + ex.Message;
+                TempData["ErrorMessage"] = "Критическая ошибка базы данных: " + ex.InnerException?.Message ?? ex.Message;
             }
+
             return RedirectToPage();
         }
 
@@ -189,36 +231,104 @@ namespace FootballSchool.Pages
             var branch = await _context.Branches.Include(b => b.Facilities).FirstOrDefaultAsync(b => b.BranchId == id);
             if (branch != null)
             {
-                var facilityIds = branch.Facilities.Select(f => f.FacilityId).ToList();
-                var trainings = await _context.Training.Where(t => facilityIds.Contains(t.FacilityId)).ToListAsync();
-                var attendances = await _context.Attendances.Where(a => trainings.Select(t => t.TrainingId).Contains(a.TrainingId)).ToListAsync();
+                try
+                {
+                    var facilityIds = branch.Facilities.Select(f => f.FacilityId).ToList();
+                    var trainings = await _context.Training.Where(t => facilityIds.Contains(t.FacilityId)).ToListAsync();
+                    var trainingIds = trainings.Select(t => t.TrainingId).ToList();
+                    var attendances = await _context.Attendances.Where(a => trainingIds.Contains(a.TrainingId)).ToListAsync();
 
-                _context.Attendances.RemoveRange(attendances);
-                _context.Training.RemoveRange(trainings);
-                _context.Facilities.RemoveRange(branch.Facilities);
-                _context.Branches.Remove(branch);
+                    if (attendances.Any())
+                    {
+                        _context.Attendances.RemoveRange(attendances);
+                        await _context.SaveChangesAsync();
+                    }
+                    if (trainings.Any())
+                    {
+                        _context.Training.RemoveRange(trainings);
+                        await _context.SaveChangesAsync();
+                    }
+                    if (branch.Facilities.Any())
+                    {
+                        _context.Facilities.RemoveRange(branch.Facilities);
+                        await _context.SaveChangesAsync();
+                    }
 
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Ôèëèàë óäàëåí èç áàçû äàííûõ!";
+                    if (!string.IsNullOrEmpty(branch.PhotoBranch))
+                    {
+                        var filePath = Path.Combine(_environment.WebRootPath, branch.PhotoBranch.TrimStart('/'));
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            System.IO.File.Delete(filePath);
+                        }
+                    }
+
+                    _context.Branches.Remove(branch);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Филиал успешно удален!";
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "Ошибка при удалении: " + ex.Message;
+                }
             }
             return RedirectToPage();
         }
 
-        // Ëîãèêà çàëîâ îñòàåòñÿ ïðåæíåé
         public async Task<IActionResult> OnPostSaveFacilityAsync()
         {
-            if (ModalFacility.FacilityId == 0) _context.Facilities.Add(ModalFacility);
-            else
+            ModelState.Clear();
+
+            TryValidateModel(ModalFacility, nameof(ModalFacility));
+            ModelState.Remove("ModalFacility.Branch");
+            ModelState.Remove("ModalFacility.Training");
+
+            if (!ModelState.IsValid)
             {
-                var ex = await _context.Facilities.FindAsync(ModalFacility.FacilityId);
-                if (ex != null)
-                {
-                    ex.NameFacility = ModalFacility.NameFacility; ex.TypeFacility = ModalFacility.TypeFacility;
-                    ex.CapacityFacility = ModalFacility.CapacityFacility; ex.StatusFacility = ModalFacility.StatusFacility;
-                    ex.CostFacility = ModalFacility.CostFacility; ex.NumberFacility = ModalFacility.NumberFacility;
-                }
+                var errs = ModelState.Where(x => x.Value?.Errors.Count > 0)
+                    .Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
+                TempData["ErrorMessage"] = "Ошибка заполнения площадки: " + string.Join(" | ", errs);
+                return RedirectToPage();
             }
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                if (ModalFacility.FacilityId == 0)
+                {
+                    var newFacility = new Facility
+                    {
+                        BranchId = ModalFacility.BranchId,
+                        NameFacility = ModalFacility.NameFacility,
+                        TypeFacility = ModalFacility.TypeFacility,
+                        CapacityFacility = ModalFacility.CapacityFacility,
+                        StatusFacility = ModalFacility.StatusFacility,
+                        CostFacility = ModalFacility.CostFacility,
+                        NumberFacility = ModalFacility.NumberFacility
+                    };
+                    _context.Facilities.Add(newFacility);
+                    TempData["SuccessMessage"] = "Новая площадка добавлена!";
+                }
+                else
+                {
+                    var existing = await _context.Facilities.FindAsync(ModalFacility.FacilityId);
+                    if (existing != null)
+                    {
+                        existing.NameFacility = ModalFacility.NameFacility;
+                        existing.TypeFacility = ModalFacility.TypeFacility;
+                        existing.CapacityFacility = ModalFacility.CapacityFacility;
+                        existing.StatusFacility = ModalFacility.StatusFacility;
+                        existing.CostFacility = ModalFacility.CostFacility;
+                        existing.NumberFacility = ModalFacility.NumberFacility;
+                        TempData["SuccessMessage"] = "Данные площадки обновлены!";
+                    }
+                }
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Ошибка при сохранении площадки: " + ex.Message;
+            }
             return RedirectToPage();
         }
 
@@ -227,38 +337,33 @@ namespace FootballSchool.Pages
             var facility = await _context.Facilities.FindAsync(id);
             if (facility != null)
             {
-                var trainings = await _context.Training.Where(t => t.FacilityId == id).ToListAsync();
-                var attendances = await _context.Attendances.Where(a => trainings.Select(t => t.TrainingId).Contains(a.TrainingId)).ToListAsync();
-                _context.Attendances.RemoveRange(attendances);
-                _context.Training.RemoveRange(trainings);
-                _context.Facilities.Remove(facility);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    var trainings = await _context.Training.Where(t => t.FacilityId == id).ToListAsync();
+                    var trainingIds = trainings.Select(t => t.TrainingId).ToList();
+                    var attendances = await _context.Attendances.Where(a => trainingIds.Contains(a.TrainingId)).ToListAsync();
+
+                    if (attendances.Any())
+                    {
+                        _context.Attendances.RemoveRange(attendances);
+                        await _context.SaveChangesAsync();
+                    }
+                    if (trainings.Any())
+                    {
+                        _context.Training.RemoveRange(trainings);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    _context.Facilities.Remove(facility);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Площадка успешно удалена!";
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "Ошибка при удалении площадки: " + ex.Message;
+                }
             }
             return RedirectToPage();
-        }
-   
-        private static string? GetImageMimeType(byte[] imageData)
-        {
-            if (imageData.Length >= 3 && imageData[0] == 0xFF && imageData[1] == 0xD8 && imageData[2] == 0xFF)
-                return "image/jpeg";
-
-            if (imageData.Length >= 8 && imageData[0] == 0x89 && imageData[1] == 0x50 && imageData[2] == 0x4E && imageData[3] == 0x47
-                && imageData[4] == 0x0D && imageData[5] == 0x0A && imageData[6] == 0x1A && imageData[7] == 0x0A)
-                return "image/png";
-
-            if (imageData.Length >= 6)
-            {
-                var gifHeader = System.Text.Encoding.ASCII.GetString(imageData, 0, 6);
-                if (gifHeader == "GIF87a" || gifHeader == "GIF89a")
-                    return "image/gif";
-            }
-
-            if (imageData.Length >= 12
-                && imageData[0] == 0x52 && imageData[1] == 0x49 && imageData[2] == 0x46 && imageData[3] == 0x46
-                && imageData[8] == 0x57 && imageData[9] == 0x45 && imageData[10] == 0x42 && imageData[11] == 0x50)
-                return "image/webp";
-
-            return null;
         }
     }
 }

@@ -229,7 +229,6 @@
 }
 
 <div class="welcome-section">
-    <!-- Имя администратора можно будет потом брать из User.Identity.Name при внедрении авторизации -->
     <h1 class="welcome-title">Добро пожаловать, Администратор!</h1>
     <p class="welcome-subtitle">
         Сегодня: <strong>@Model.TodayTrainingsCount</strong> тренировок,
@@ -271,7 +270,6 @@
         </div>
 
         <div class="notification-list">
-            <!-- Динамический вывод уведомлений -->
             @foreach (var notification in Model.Notifications)
             {
                 <div class="notification-item">
@@ -285,15 +283,14 @@
         <h2 class="section-title">Быстрые действия</h2>
 
         <div class="action-list">
-            <!-- Ссылки ведут на реальные страницы твоего проекта -->
             <a href="/TrainingResults" class="action-item">
                 <i class="fas fa-file-alt action-icon"></i>
                 <span>Отчеты и успеваемость</span>
             </a>
 
-            <a href="/ChildProfile" class="action-item">
-                <i class="fas fa-user-plus action-icon"></i>
-                <span>Добавить ученика</span>
+            <a href="/GroupsStudents" class="action-item">
+                <i class="fas fa-users action-icon"></i>
+                <span>Управление учениками</span>
             </a>
 
             <a href="/Schedule" class="action-item">
@@ -309,7 +306,6 @@
     </div>
 </div>
 
-<!-- Блок новостей пока остается статичным, так как в БД нет таблицы News -->
 <div class="news-section">
     <h2 class="section-title">Системные обновления</h2>
 

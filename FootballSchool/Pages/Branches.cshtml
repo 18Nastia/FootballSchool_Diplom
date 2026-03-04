@@ -5,7 +5,6 @@
 }
 
 @functions {
-    // Картинки по умолчанию, если пользователь не загрузил фото филиала
     public string GetRandomImage(int id)
     {
         var images = new[]
@@ -43,11 +42,6 @@
                 font-weight: 600;
                 color: #111827;
             }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
 
         .btn-primary {
             display: flex;
@@ -207,7 +201,6 @@
             transform: translateX(4px);
         }
 
-        /* === Right Sidebar === */
         .right-sidebar {
             width: 420px;
             background: white;
@@ -325,64 +318,24 @@
 
         .sidebar-tab-content {
             display: none;
-            animation: fadeIn 0.3s ease;
         }
 
             .sidebar-tab-content.active {
                 display: block;
+                animation: fadeIn 0.3s ease;
             }
 
         @@keyframes fadeIn {
-            from
-
-        {
-            opacity: 0;
-            transform: translateY(5px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        }
-
-        .halls-section, .contact-section {
-            margin-bottom: 24px;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-            .section-header h4 {
-                font-size: 16px;
-                font-weight: 700;
-                color: #111827;
-                margin: 0;
+            from {
+                opacity: 0;
+                transform: translateY(5px);
             }
 
-        .add-btn-small {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #EFF6FF;
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: none;
-            color: #2563eb;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-            .add-btn-small:hover {
-                background: #DBEAFE;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
+        }
 
         .hall-card {
             background: white;
@@ -391,29 +344,6 @@
             padding: 16px;
             margin-bottom: 12px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-        }
-
-        .hall-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-            .hall-header h5 {
-                font-size: 15px;
-                font-weight: 600;
-                color: #111827;
-                margin: 0 0 4px 0;
-            }
-
-        .hall-status {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .active-status {
@@ -431,6 +361,15 @@
             color: #991B1B;
         }
 
+        .hall-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .hall-info {
             display: flex;
             flex-direction: column;
@@ -438,13 +377,6 @@
             font-size: 13px;
             color: #4B5563;
             margin-bottom: 12px;
-        }
-
-        .hall-actions {
-            display: flex;
-            gap: 12px;
-            border-top: 1px solid #F3F4F6;
-            padding-top: 12px;
         }
 
         .action-link {
@@ -522,7 +454,6 @@
             background: rgba(17, 24, 39, 0.6);
             backdrop-filter: blur(2px);
             z-index: 999;
-            transition: opacity 0.3s;
         }
 
             .overlay.active {
@@ -551,41 +482,13 @@
                 margin: 0;
                 line-height: 1.4;
             }
-
-        @@media (max-width: 1200px) {
-            .branches-page .main-content.with-sidebar {
-                margin-right: 0;
-            }
-
-            .right-sidebar {
-                width: 100%;
-                right: -100%;
-            }
-        }
-
-        @@media (max-width: 768px) {
-            .filters {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-        }
     </style>
 }
 
 <div class="branches-page">
-    <div class="overlay" id="overlay"></div>
+    <div class="overlay" id="overlay" onclick="closeBranchDetails()"></div>
 
     <div class="main-content" id="mainContent">
-
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success mb-4"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
@@ -607,21 +510,15 @@
         <form method="get" class="filters w-100" id="filterForm">
             <div class="filter-group">
                 <label>Город</label>
-                <select asp-for="FilterCity" asp-items="Model.CityList" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Все города</option>
-                </select>
+                <select asp-for="FilterCity" asp-items="Model.CityList" class="filter-select" onchange="this.form.submit()"><option value="">Все города</option></select>
             </div>
             <div class="filter-group">
                 <label>Тип зала</label>
-                <select asp-for="FilterType" asp-items="Model.TypeList" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Все типы</option>
-                </select>
+                <select asp-for="FilterType" asp-items="Model.TypeList" class="filter-select" onchange="this.form.submit()"><option value="">Все типы</option></select>
             </div>
             <div class="filter-group">
                 <label>Статус площадки</label>
-                <select asp-for="FilterStatus" asp-items="Model.StatusList" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Все статусы</option>
-                </select>
+                <select asp-for="FilterStatus" asp-items="Model.StatusList" class="filter-select" onchange="this.form.submit()"><option value="">Все статусы</option></select>
             </div>
         </form>
 
@@ -636,24 +533,14 @@
                 {
                     <div class="card" onclick="openBranchDetails(@branch.BranchId)">
                         <div class="card-image">
-                            <!-- Вывод Base64 из БД, либо заглушки -->
-                            <img src="@(branch.PhotoBase64 != null ? $"data:{branch.PhotoMimeType};base64,{branch.PhotoBase64}" : GetRandomImage(branch.BranchId))" alt="Branch Image">
+                            <img src="@(string.IsNullOrEmpty(branch.PhotoPath) ? GetRandomImage(branch.BranchId) : branch.PhotoPath)" onerror="this.onerror=null; this.src='@GetRandomImage(branch.BranchId)';" alt="Branch">
                         </div>
                         <div class="card-content">
                             <h3 class="text-truncate" title="@branch.Name">@branch.Name</h3>
                             <div class="card-info">
-                                <div class="info-item text-truncate" title="@branch.Address · @branch.City">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>@branch.Address · @branch.City</span>
-                                </div>
-                                <div class="info-item text-truncate" title="@branch.MainCoachName">
-                                    <i class="fas fa-user-tie"></i>
-                                    <span>@branch.MainCoachName</span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-layer-group"></i>
-                                    <span>Площадок: @branch.Facilities.Count</span>
-                                </div>
+                                <div class="info-item text-truncate"><i class="fas fa-map-marker-alt"></i> <span>@branch.Address · @branch.City</span></div>
+                                <div class="info-item text-truncate"><i class="fas fa-user-tie"></i> <span>@branch.MainCoachName</span></div>
+                                <div class="info-item"><i class="fas fa-layer-group"></i> <span>Площадок: @branch.Facilities.Count</span></div>
                             </div>
                             <div class="card-footer">
                                 <span class="details-link">Открыть профиль <i class="fas fa-arrow-right"></i></span>
@@ -665,21 +552,15 @@
         }
     </div>
 
-    <!-- Right Sidebar container -->
     <aside class="right-sidebar" id="branchSidebar">
         <div class="sidebar-header">
             <h2>Профиль филиала</h2>
-            <button class="close-btn" onclick="closeBranchDetails()">
-                <i class="fas fa-times"></i>
-            </button>
+            <button class="close-btn" onclick="closeBranchDetails()"><i class="fas fa-times"></i></button>
         </div>
-        <div id="sidebarDynamicContent" class="d-flex flex-column h-100">
-            <!-- Динамическое содержимое сайдбара будет вставлено сюда через JS -->
-        </div>
+        <div id="sidebarDynamicContent" class="d-flex flex-column h-100"></div>
     </aside>
 </div>
 
-<!-- Скрытый контейнер с шаблонами данных для сайдбара -->
 <div id="sidebar-data-store" style="display: none;">
     @foreach (var branch in Model.Branches)
     {
@@ -692,238 +573,149 @@
         <div id="branch-content-@branch.BranchId" class="d-flex flex-column h-100">
             <div class="sidebar-body">
                 <div class="branch-preview">
-                    <!-- Фото для сайдбара -->
-                    <img src="@(branch.PhotoBase64 != null ? $"data:{branch.PhotoMimeType};base64,{branch.PhotoBase64}" : GetRandomImage(branch.BranchId))" alt="Branch preview">
+                    <img src="@(string.IsNullOrEmpty(branch.PhotoPath) ? GetRandomImage(branch.BranchId) : branch.PhotoPath)" onerror="this.onerror=null; this.src='@GetRandomImage(branch.BranchId)';" alt="Branch preview">
                 </div>
-
                 <div class="branch-details">
                     <h3>@branch.Name</h3>
-                    <div class="detail-item"><i class="fas fa-map-marker-alt"></i> <span>@branch.Address, @branch.City</span></div>
-                    <div class="detail-item"><i class="fas fa-phone"></i> <span>@(string.IsNullOrEmpty(branch.Phone) ? "Не указан" : branch.Phone)</span></div>
+                    <div class="info-item mb-2"><i class="fas fa-map-marker-alt"></i> <span>@branch.Address, @branch.City</span></div>
+                    <div class="info-item mb-2"><i class="fas fa-phone"></i> <span>@(string.IsNullOrEmpty(branch.Phone) ? "Не указан" : branch.Phone)</span></div>
                 </div>
 
                 <div class="tabs">
-                    <button class="tab active" onclick="switchSidebarTab(event, 'info')">Площадки</button>
-                    <button class="tab" onclick="switchSidebarTab(event, 'schedule')">Расписание</button>
-                    <button class="tab" onclick="switchSidebarTab(event, 'groups')">Группы</button>
+                    <button class="tab active" onclick="switchSidebarTab(event, 'info-@branch.BranchId')">Площадки</button>
+                    <button class="tab" onclick="switchSidebarTab(event, 'schedule-@branch.BranchId')">Расписание</button>
+                    <button class="tab" onclick="switchSidebarTab(event, 'groups-@branch.BranchId')">Группы</button>
                 </div>
 
-                <!-- Вкладка: Информация и Площадки -->
-                <div class="sidebar-tab-content active" data-tab="info">
-                    <div class="halls-section">
-                        <div class="section-header">
-                            <h4>Залы и площадки (@branch.Facilities.Count)</h4>
-                            <button class="add-btn-small" data-bs-toggle="modal" data-bs-target="#facilityModal" onclick="prepareAddFacilityModal(@branch.BranchId)">
-                                <i class="fas fa-plus"></i> Добавить зал
-                            </button>
-                        </div>
-
-                        @if (!branch.Facilities.Any())
-                        {
-                            <div class="text-muted" style="font-size: 13px;">В этом филиале пока нет залов.</div>
-                        }
-
-                        @foreach (var facility in branch.Facilities)
-                        {
-                            var statusClass = facility.StatusFacility == "Активен" ? "active-status" : facility.StatusFacility == "На ремонте" ? "repair-status" : "new-status";
-                            var safeFacName = facility.NameFacility.Replace("'", "\\'");
-                            var safeFacType = facility.TypeFacility.Replace("'", "\\'");
-                            var safeFacStatus = facility.StatusFacility.Replace("'", "\\'");
-                            var safeFacNum = facility.NumberFacility?.Replace("'", "\\'") ?? "";
-                            var facCost = facility.CostFacility?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0";
-
-                            <div class="hall-card">
-                                <div class="hall-header">
-                                    <h5>@facility.NameFacility</h5>
-                                    <span class="hall-status @statusClass">@facility.StatusFacility</span>
-                                </div>
-                                <div class="hall-info">
-                                    <span><i class="fas fa-tag fa-fw text-muted"></i> Тип: @facility.TypeFacility</span>
-                                    <span><i class="fas fa-users fa-fw text-muted"></i> Вместимость: @facility.CapacityFacility чел.</span>
-                                    @if (!string.IsNullOrEmpty(facility.NumberFacility))
-                                    {
-                                        <span><i class="fas fa-door-open fa-fw text-muted"></i> Кабинет: @facility.NumberFacility</span>
-                                    }
-                                </div>
-                                <div class="hall-actions">
-                                    <button class="action-link" data-bs-toggle="modal" data-bs-target="#facilityModal"
-                                            onclick="prepareEditFacilityModal(@facility.FacilityId, @branch.BranchId, '@safeFacName', '@safeFacType', @facility.CapacityFacility, '@safeFacStatus', @facCost, '@safeFacNum')">
-                                        <i class="fas fa-edit"></i> Изменить
-                                    </button>
-                                    <form method="post" asp-page-handler="DeleteFacility" asp-route-id="@facility.FacilityId" onsubmit="return confirm('Удалить площадку?');" style="display:inline;">
-                                        <button type="submit" class="action-link delete"><i class="fas fa-trash"></i> Удалить</button>
-                                    </form>
-                                </div>
-                            </div>
-                        }
+                <div class="sidebar-tab-content active" id="info-@branch.BranchId">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">Залы (@branch.Facilities.Count)</h4>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#facilityModal" onclick="prepareAddFacilityModal(@branch.BranchId)">+ Добавить</button>
                     </div>
-
-                    <div class="contact-section mt-4 pt-4 border-top">
-                        <h4>Статистика по филиалу</h4>
-                        <div class="detail-item"><i class="fas fa-users"></i> Тренируется групп: <strong>@branch.GroupsCount</strong></div>
-                        <div class="detail-item"><i class="fas fa-user-tie"></i> Работает тренеров: <strong>@branch.CoachesCount</strong></div>
-                        <div class="detail-item"><i class="fas fa-calendar-check"></i> Запланировано тренировок: <strong>@branch.UpcomingTrainings.Count</strong></div>
-                    </div>
-                </div>
-
-                <!-- Вкладка: Расписание -->
-                <div class="sidebar-tab-content" data-tab="schedule">
-                    <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">Ближайшие тренировки</h4>
-                    @if (!branch.UpcomingTrainings.Any())
+                    @foreach (var facility in branch.Facilities)
                     {
-                        <p class="text-muted" style="font-size: 13px;">В ближайшее время тренировок нет.</p>
+                        var statusClass = facility.StatusFacility == "Активен" ? "active-status" : facility.StatusFacility == "На ремонте" ? "repair-status" : "new-status";
+                        <div class="hall-card">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>@facility.NameFacility</strong>
+                                <span class="hall-status @statusClass">@facility.StatusFacility</span>
+                            </div>
+                            <div class="hall-info">
+                                <span>Тип: @facility.TypeFacility</span>
+                                <span>Вместимость: @facility.CapacityFacility чел.</span>
+                            </div>
+                            <div class="hall-actions">
+                                <button class="action-link" data-bs-toggle="modal" data-bs-target="#facilityModal" onclick="prepareEditFacilityModal(@facility.FacilityId, @branch.BranchId, '@facility.NameFacility.Replace("'", "\\'")', '@facility.TypeFacility', @facility.CapacityFacility, '@facility.StatusFacility', @(facility.CostFacility ?? 0), '@(facility.NumberFacility ?? "")')">Изменить</button>
+                                <form method="post" asp-page-handler="DeleteFacility" asp-route-id="@facility.FacilityId" class="d-inline" onsubmit="return confirm('Удалить?');"><button type="submit" class="action-link delete">Удалить</button></form>
+                            </div>
+                        </div>
                     }
+                </div>
+
+                <div class="sidebar-tab-content" id="schedule-@branch.BranchId">
+                    <h4 class="mb-3">Ближайшие тренировки</h4>
                     @foreach (var t in branch.UpcomingTrainings)
                     {
                         <div class="list-item-card" style="border-left-color: #10B981;">
-                            <h6>@t.DateTraining.ToString("dd MMM (ddd)") в @t.TimeTraining.ToString("HH:mm")</h6>
-                            <p><i class="fas fa-bullseye fa-fw"></i> @(string.IsNullOrEmpty(t.PlanTraining) ? "Плановая тренировка" : t.PlanTraining)</p>
+                            <h6>@t.DateTraining.ToString("dd MMM") в @t.TimeTraining.ToString("HH:mm")</h6>
+                            <p>@t.PlanTraining</p>
                         </div>
                     }
                 </div>
 
-                <!-- Вкладка: Группы -->
-                <div class="sidebar-tab-content" data-tab="groups">
-                    <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">Группы филиала</h4>
-                    @if (!branch.BranchTeams.Any())
-                    {
-                        <p class="text-muted" style="font-size: 13px;">За филиалом пока не закреплено ни одной группы.</p>
-                    }
+                <div class="sidebar-tab-content" id="groups-@branch.BranchId">
+                    <h4 class="mb-3">Группы филиала</h4>
                     @foreach (var t in branch.BranchTeams)
                     {
                         <div class="list-item-card" style="border-left-color: #8B5CF6;">
                             <h6>@t.CategoryTeam</h6>
-                            <p><i class="fas fa-info-circle fa-fw"></i> Статус: @t.StatusTeam</p>
+                            <p>Статус: @t.StatusTeam</p>
                         </div>
                     }
                 </div>
             </div>
 
-            <!-- Подвал сайдбара с кнопками -->
             <div class="sidebar-actions mt-auto">
-                <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#branchModal"
-                        onclick="prepareEditBranchModal(@branch.BranchId, '@safeName', '@safeCity', '@safeStreet', '@safeHouse', '@safePhone')">
-                    <i class="fas fa-edit"></i> Редактировать
-                </button>
-                <form method="post" asp-page-handler="DeleteBranch" asp-route-id="@branch.BranchId" onsubmit="return confirm('Внимание! Будут удалены все площадки и привязанные к ним тренировки. Вы уверены?');" style="display: flex; flex: 1;">
-                    <button type="submit" class="btn-delete w-100">
-                        <i class="fas fa-trash"></i> Удалить
-                    </button>
-                </form>
+                <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#branchModal" onclick="prepareEditBranchModal(@branch.BranchId, '@safeName', '@safeCity', '@safeStreet', '@safeHouse', '@safePhone')"><i class="fas fa-edit"></i> Редактировать</button>
+                <form method="post" asp-page-handler="DeleteBranch" asp-route-id="@branch.BranchId" class="flex-grow-1" onsubmit="return confirm('Удалить филиал?');"><button type="submit" class="btn-delete w-100"><i class="fas fa-trash"></i> Удалить</button></form>
             </div>
         </div>
     }
 </div>
 
-<!-- ================= МОДАЛЬНЫЕ ОКНА ================= -->
-<!-- Модальное окно: Филиал -->
 <div class="modal fade" id="branchModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        @* стало шире *@
         <div class="modal-content">
-            <!-- enctype="multipart/form-data" обязательно для загрузки файлов -->
-            <form method="post" asp-page-handler="SaveBranch" id="branchForm" enctype="multipart/form-data">
+            <form method="post" asp-page-handler="SaveBranch" enctype="multipart/form-data">
+
                 <div class="modal-header">
-                    <h5 class="modal-title" id="branchModalLabel">Новый филиал</h5>
+                    <h5 class="modal-title" id="branchModalTitle">Филиал</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
+
                 <div class="modal-body">
-                    <input type="hidden" asp-for="ModalBranch.BranchId" id="ModalBranch_BranchId" />
+                    <input type="hidden" asp-for="ModalBranch.BranchId" id="ModalBranch_Id" />
 
                     <div class="mb-3">
-                        <label asp-for="ModalBranch.NameBranch" class="form-label">Название филиала</label>
-                        <input asp-for="ModalBranch.NameBranch" class="form-control" required id="ModalBranch_NameBranch" placeholder='Например: Футбольная школа "Чемпион" - Центр' />
+                        <label class="form-label">Название</label>
+                        <input asp-for="ModalBranch.NameBranch" class="form-control" required id="ModalBranch_Name" />
                     </div>
+
                     <div class="mb-3">
-                        <label asp-for="ModalBranch.CityBranch" class="form-label">Город</label>
-                        <input asp-for="ModalBranch.CityBranch" class="form-control" required id="ModalBranch_CityBranch" placeholder="Москва" />
+                        <label class="form-label">Город</label>
+                        <input asp-for="ModalBranch.CityBranch" class="form-control" required id="ModalBranch_City" />
                     </div>
-                    <div class="row">
-                        <div class="col-md-8 mb-3">
-                            <label asp-for="ModalBranch.StreetBranch" class="form-label">Улица</label>
-                            <input asp-for="ModalBranch.StreetBranch" class="form-control" required id="ModalBranch_StreetBranch" placeholder="ул. Ленина" />
+
+                    <div class="row g-3">
+                        <div class="col-8">
+                            <label class="form-label">Улица</label>
+                            <input asp-for="ModalBranch.StreetBranch" class="form-control" required id="ModalBranch_Street" />
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label asp-for="ModalBranch.HouseBranch" class="form-label">Дом</label>
-                            <input asp-for="ModalBranch.HouseBranch" class="form-control" required id="ModalBranch_HouseBranch" placeholder="10А" />
+                        <div class="col-4">
+                            <label class="form-label">Дом</label>
+                            <input asp-for="ModalBranch.HouseBranch" class="form-control" required id="ModalBranch_House" />
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="ModalBranch.PhoneBranch" class="form-label">Телефон для связи</label>
-                        <input asp-for="ModalBranch.PhoneBranch" class="form-control" required id="ModalBranch_PhoneBranch" placeholder="+7 (999) 000-00-00" />
+
+                    <div class="mt-3 mb-3">
+                        <label class="form-label">Телефон</label>
+                        <input asp-for="ModalBranch.PhoneBranch" class="form-control" required id="ModalBranch_Phone" />
                     </div>
 
-                    <!-- Поле загрузки фотографии -->
                     <div class="mb-3">
-                        <label class="form-label">Фотография (необязательно)</label>
-                        <input type="file" name="BranchPhoto" class="form-control" accept="image/jpeg, image/png, image/gif, image/webp" />
-                        <small class="text-muted">Поддерживаются JPG, PNG, GIF и WebP, размер до 5 МБ</small>
+                        <label class="form-label">Фото</label>
+                        <input type="file" name="BranchPhoto" id="BranchPhoto" class="form-control" accept="image/*" />
                     </div>
-
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
                     <button type="submit" class="btn btn-primary">Сохранить</button>
                 </div>
+
             </form>
         </div>
     </div>
 </div>
 
-<!-- Модальное окно: Площадка (Facility) -->
 <div class="modal fade" id="facilityModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" asp-page-handler="SaveFacility" id="facilityForm">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="facilityModalLabel">Новая площадка</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-                </div>
+            <form method="post" asp-page-handler="SaveFacility">
+                <div class="modal-header"><h5>Площадка</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <input type="hidden" asp-for="ModalFacility.FacilityId" id="ModalFacility_FacilityId" />
+                    <input type="hidden" asp-for="ModalFacility.FacilityId" id="ModalFacility_Id" />
                     <input type="hidden" asp-for="ModalFacility.BranchId" id="ModalFacility_BranchId" />
-
-                    <div class="mb-3">
-                        <label asp-for="ModalFacility.NameFacility" class="form-label">Название площадки / зала</label>
-                        <input asp-for="ModalFacility.NameFacility" class="form-control" required id="ModalFacility_NameFacility" placeholder='Например: Главное поле' />
-                    </div>
+                    <div class="mb-3"><label>Название</label><input asp-for="ModalFacility.NameFacility" class="form-control" required id="ModalFacility_Name" /></div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ModalFacility.TypeFacility" class="form-label">Тип</label>
-                            <select asp-for="ModalFacility.TypeFacility" class="form-select" required id="ModalFacility_TypeFacility">
-                                <option value="Футбольное поле">Футбольное поле</option>
-                                <option value="Манеж">Крытый манеж</option>
-                                <option value="Универсальный зал">Универсальный зал</option>
-                                <option value="Тренажерный">Тренажерный зал</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ModalFacility.CapacityFacility" class="form-label">Вместимость (чел.)</label>
-                            <input asp-for="ModalFacility.CapacityFacility" type="number" class="form-control" required id="ModalFacility_CapacityFacility" min="1" value="20" />
-                        </div>
+                        <div class="col-6 mb-3"><label>Тип</label><select asp-for="ModalFacility.TypeFacility" class="form-select" id="ModalFacility_Type"><option value="Футбольное поле">Поле</option><option value="Манеж">Манеж</option><option value="Тренажерный">Зал</option></select></div>
+                        <div class="col-6 mb-3"><label>Вместимость</label><input asp-for="ModalFacility.CapacityFacility" class="form-control" type="number" id="ModalFacility_Cap" /></div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ModalFacility.StatusFacility" class="form-label">Статус</label>
-                            <select asp-for="ModalFacility.StatusFacility" class="form-select" required id="ModalFacility_StatusFacility">
-                                <option value="Активен">Активен</option>
-                                <option value="На ремонте">На ремонте</option>
-                                <option value="Неактивен">Неактивен</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ModalFacility.NumberFacility" class="form-label">Номер (если есть)</label>
-                            <input asp-for="ModalFacility.NumberFacility" class="form-control" id="ModalFacility_NumberFacility" placeholder="F-101" />
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="ModalFacility.CostFacility" class="form-label">Стоимость аренды (руб/час)</label>
-                        <input asp-for="ModalFacility.CostFacility" type="number" step="0.01" class="form-control" id="ModalFacility_CostFacility" />
-                    </div>
+                    <div class="mb-3"><label>Статус</label><select asp-for="ModalFacility.StatusFacility" class="form-select" id="ModalFacility_Stat"><option value="Активен">Активен</option><option value="На ремонте">На ремонте</option></select></div>
+                    <div class="mb-3"><label>Стоимость</label><input asp-for="ModalFacility.CostFacility" class="form-control" type="number" step="0.01" id="ModalFacility_Cost" /></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary">Сохранить</button></div>
             </form>
         </div>
     </div>
@@ -931,20 +723,13 @@
 
 @section Scripts {
     <script>
-        function openBranchDetails(branchId) {
+        function openBranchDetails(id) {
             const sidebar = document.getElementById('branchSidebar');
-            const mainContent = document.getElementById('mainContent');
-            const overlay = document.getElementById('overlay');
-            const dynamicContent = document.getElementById('sidebarDynamicContent');
-
-            const sourceContent = document.getElementById('branch-content-' + branchId);
-            if (sourceContent) {
-                dynamicContent.innerHTML = sourceContent.innerHTML;
-            }
-
+            const content = document.getElementById('branch-content-' + id);
+            document.getElementById('sidebarDynamicContent').innerHTML = content.innerHTML;
             sidebar.classList.add('active');
-            mainContent.classList.add('with-sidebar');
-            overlay.classList.add('active');
+            document.getElementById('mainContent').classList.add('with-sidebar');
+            document.getElementById('overlay').classList.add('active');
         }
 
         function closeBranchDetails() {
@@ -953,55 +738,41 @@
             document.getElementById('overlay').classList.remove('active');
         }
 
-        document.getElementById('overlay').addEventListener('click', closeBranchDetails);
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBranchDetails(); });
-
-        function switchSidebarTab(event, tabName) {
-            const container = document.getElementById('sidebarDynamicContent');
-            container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        function switchSidebarTab(event, tabId) {
+            const parent = event.target.closest('#sidebarDynamicContent');
+            parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-            container.querySelectorAll('.sidebar-tab-content').forEach(c => c.classList.remove('active'));
-            container.querySelector(`.sidebar-tab-content[data-tab="${tabName}"]`).classList.add('active');
+            parent.querySelectorAll('.sidebar-tab-content').forEach(c => c.classList.remove('active'));
+            parent.querySelector('#' + tabId).classList.add('active');
         }
 
         function prepareAddBranchModal() {
-            document.getElementById('branchForm').reset();
-            document.getElementById('ModalBranch_BranchId').value = 0;
-            document.getElementById('branchModalLabel').innerText = 'Новый филиал';
+            document.getElementById('ModalBranch_Id').value = 0;
+            document.querySelector('#branchModal h5').innerText = 'Новый филиал';
         }
 
         function prepareEditBranchModal(id, name, city, street, house, phone) {
-            document.getElementById('branchForm').reset();
-            document.getElementById('ModalBranch_BranchId').value = id;
-            document.getElementById('ModalBranch_NameBranch').value = name;
-            document.getElementById('ModalBranch_CityBranch').value = city;
-            document.getElementById('ModalBranch_StreetBranch').value = street;
-            document.getElementById('ModalBranch_HouseBranch').value = house;
-            document.getElementById('ModalBranch_PhoneBranch').value = phone;
-            document.getElementById('branchModalLabel').innerText = 'Редактировать филиал';
+            document.getElementById('ModalBranch_Id').value = id;
+            document.getElementById('ModalBranch_Name').value = name;
+            document.getElementById('ModalBranch_City').value = city;
+            document.getElementById('ModalBranch_Street').value = street;
+            document.getElementById('ModalBranch_House').value = house;
+            document.getElementById('ModalBranch_Phone').value = phone;
         }
 
         function prepareAddFacilityModal(branchId) {
-            document.getElementById('facilityForm').reset();
-            document.getElementById('ModalFacility_FacilityId').value = 0;
+            document.getElementById('ModalFacility_Id').value = 0;
             document.getElementById('ModalFacility_BranchId').value = branchId;
-            document.getElementById('facilityModalLabel').innerText = 'Новая площадка';
         }
 
-        function prepareEditFacilityModal(id, branchId, name, type, capacity, status, cost, number) {
-            document.getElementById('facilityForm').reset();
-            document.getElementById('ModalFacility_FacilityId').value = id;
+        function prepareEditFacilityModal(id, branchId, name, type, cap, stat, cost, num) {
+            document.getElementById('ModalFacility_Id').value = id;
             document.getElementById('ModalFacility_BranchId').value = branchId;
-            document.getElementById('ModalFacility_NameFacility').value = name;
-            document.getElementById('ModalFacility_TypeFacility').value = type;
-            document.getElementById('ModalFacility_CapacityFacility').value = capacity;
-            document.getElementById('ModalFacility_StatusFacility').value = status;
-
-            // Форматируем стоимость для правильного отображения в input type="number"
-            document.getElementById('ModalFacility_CostFacility').value = cost ? cost.toString().replace(',', '.') : '';
-
-            document.getElementById('ModalFacility_NumberFacility').value = number;
-            document.getElementById('facilityModalLabel').innerText = 'Редактировать площадку';
+            document.getElementById('ModalFacility_Name').value = name;
+            document.getElementById('ModalFacility_Type').value = type;
+            document.getElementById('ModalFacility_Cap').value = cap;
+            document.getElementById('ModalFacility_Stat').value = stat;
+            document.getElementById('ModalFacility_Cost').value = cost;
         }
     </script>
 }

@@ -65,6 +65,7 @@
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             margin-bottom: 24px;
+            width: 100%;
         }
 
         table {
@@ -89,6 +90,7 @@
         td {
             padding: 16px;
             border-bottom: 1px solid #f5f5f7;
+            vertical-align: middle;
         }
 
         .student-cell {
@@ -106,7 +108,8 @@
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            color: #666;
+            color: #2563eb;
+            background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
         }
 
         .student-info h3 {
@@ -118,6 +121,7 @@
         .student-info p {
             font-size: 12px;
             color: #999;
+            margin: 0;
         }
 
         .group-badge {
@@ -148,13 +152,20 @@
         }
 
         .progress-chart {
-            width: 120px;
-            height: 40px;
+            width: 100px;
+            height: 6px;
+            background: #f5f5f7;
+            border-radius: 3px;
+            overflow: hidden;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #2563eb;
-            font-size: 20px;
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #2563eb;
+            border-radius: 3px;
         }
 
         .action-buttons {
@@ -181,59 +192,102 @@
                 color: #2563eb;
             }
 
-        /* Стили для скрытой панели */
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-            .sidebar-header h2 {
-                font-size: 18px;
-                font-weight: 600;
-                color: #333;
-            }
-
-        .close-sidebar {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: none;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #666;
-        }
-
-            .close-sidebar:hover {
-                background-color: #f5f5f7;
-                color: #333;
-            }
 
         .right-sidebar {
-            width: 400px;
+            width: 450px;
             background-color: #fff;
             border-left: 1px solid #e5e5e5;
-            padding: 24px;
+            padding: 0;
             overflow-y: auto;
             position: fixed;
-            right: -400px;
+            right: -450px;
             top: 0;
             height: 100vh;
             transition: right 0.3s ease;
             z-index: 1000;
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
 
             .right-sidebar.open {
                 right: 0;
             }
+
+        .sidebar-header-wrapper {
+            padding: 24px 24px 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e5e5;
+            background: #fff;
+        }
+
+            .sidebar-header-wrapper h2 {
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0;
+                color: #333;
+            }
+
+        .sidebar-tabs {
+            display: flex;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            background: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+
+            .sidebar-tab.active {
+                color: #2563eb;
+                border-bottom-color: #2563eb;
+            }
+
+            .sidebar-tab:hover:not(.active) {
+                color: #374151;
+            }
+
+        .sidebar-content {
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-tab-pane {
+            display: none;
+        }
+
+            .sidebar-tab-pane.active {
+                display: block;
+                animation: fadeIn 0.3s ease;
+            }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
 
         .toggle-sidebar-btn {
             position: fixed;
@@ -254,21 +308,13 @@
             transition: all 0.3s ease;
         }
 
-            .toggle-sidebar-btn:hover {
-                background-color: #1d4ed8;
-            }
-
             .toggle-sidebar-btn.open {
-                right: 400px;
+                right: 450px;
             }
 
-            .toggle-sidebar-btn i {
-                transition: transform 0.3s ease;
-            }
-
-            .toggle-sidebar-btn.open i {
-                transform: rotate(180deg);
-            }
+                .toggle-sidebar-btn.open i {
+                    transform: rotate(180deg);
+                }
 
         .content-with-sidebar {
             display: flex;
@@ -280,60 +326,81 @@
             width: 100%;
         }
 
-        .chart-section {
-            margin-bottom: 32px;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-            .chart-header h2 {
-                font-size: 16px;
-                font-weight: 600;
-            }
-
-        .chart-select {
-            padding: 6px 12px;
-            border: 1px solid #e5e5e5;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: #fff;
-        }
-
-        .chart-canvas {
+        .chart-canvas-container {
             width: 100%;
-            height: 200px;
+            height: 220px;
             border: 1px solid #e5e5e5;
             border-radius: 8px;
             padding: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-size: 14px;
-            background-color: #f9fafb;
+            background-color: #fff;
+            margin-bottom: 20px;
+            position: relative;
         }
 
-        .form-section h2 {
-            font-size: 16px;
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+            .history-table th {
+                background: #f9fafb;
+                padding: 10px;
+                font-weight: 600;
+                color: #6b7280;
+                border-bottom: 1px solid #e5e5e5;
+                text-transform: uppercase;
+                font-size: 11px;
+            }
+
+            .history-table td {
+                padding: 12px 10px;
+                border-bottom: 1px solid #f3f4f6;
+                color: #111827;
+            }
+
+            .history-table tr:last-child td {
+                border-bottom: none;
+            }
+
+        .val-badge {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 4px 8px;
+            border-radius: 6px;
             font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        .add-link {
-            color: #2563eb;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
+        .history-actions {
+            display: flex;
+            gap: 4px;
         }
+
+        .history-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            font-size: 13px;
+        }
+
+            .history-btn.edit {
+                color: #2563eb;
+            }
+
+                .history-btn.edit:hover {
+                    background: #eff6ff;
+                }
+
+            .history-btn.delete {
+                color: #ef4444;
+            }
+
+                .history-btn.delete:hover {
+                    background: #fef2f2;
+                }
 
         .form-group {
             margin-bottom: 16px;
@@ -353,7 +420,6 @@
             border: 1px solid #e5e5e5;
             border-radius: 6px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
         }
 
             .form-control:focus {
@@ -375,38 +441,40 @@
             }
 
         textarea.form-control {
-            min-height: 100px;
+            min-height: 80px;
             resize: vertical;
         }
 
-        .form-actions {
+        .close-sidebar {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            border-radius: 6px;
             display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 16px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666;
         }
 
-        .comments-section {
-            margin-top: 32px;
-        }
-
-            .comments-section textarea {
-                margin-bottom: 16px;
+            .close-sidebar:hover {
+                background-color: #f5f5f7;
+                color: #333;
             }
-
-        .save-btn {
-            width: 100%;
-        }
 
         @@media (max-width: 1200px) {
-            .right-sidebar {
-                width: 350px;
-                right: -350px;
-            }
+            .right-sidebar
 
-            .toggle-sidebar-btn.open {
-                right: 350px;
-            }
+        {
+            width: 350px;
+            right: -350px;
+        }
+
+        .toggle-sidebar-btn.open {
+            right: 350px;
+        }
+
         }
 
         @@media (max-width: 768px) {
@@ -420,14 +488,6 @@
                 width: 100%;
                 justify-content: space-between;
             }
-
-            .result-input-group {
-                flex-direction: column;
-            }
-
-                .result-input-group select {
-                    width: 100%;
-                }
 
             .right-sidebar {
                 width: 100%;
@@ -443,19 +503,21 @@
 
 <div class="training-results-page">
     <div class="main-content">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success mb-4"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger mb-4"><i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]</div>
+        }
+
         <div class="header">
+            <h1>Результаты тренировок</h1>
             <div class="header-actions">
                 <button class="btn btn-secondary">
-                    <i class="fas fa-filter"></i>
-                    Фильтры
-                </button>
-                <button class="btn btn-secondary">
-                    <i class="fas fa-download"></i>
-                    Экспорт
-                </button>
-                <button class="btn btn-primary" id="addResultBtn">
-                    <i class="fas fa-plus"></i>
-                    Добавить результат
+                    <i class="fas fa-download"></i> Экспорт
                 </button>
             </div>
         </div>
@@ -474,186 +536,52 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <div class="student-cell">
-                                        <div class="avatar">И</div>
-                                        <div class="student-info">
-                                            <h3>Иван Петров</h3>
-                                            <p>12 лет</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="group-badge">Группа А</span>
-                                </td>
-                                <td>
-                                    <div class="test-info">
-                                        <h4>Скорость</h4>
-                                        <div class="date">2023-10-08</div>
-                                        <div class="result">9 сек</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="progress-chart">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="icon-btn" onclick="addResult('Иван Петров')">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button class="icon-btn" onclick="toggleSidebar()">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="student-cell">
-                                        <div class="avatar">М</div>
-                                        <div class="student-info">
-                                            <h3>Мария Иванова</h3>
-                                            <p>11 лет</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="group-badge">Группа Б</span>
-                                </td>
-                                <td>
-                                    <div class="test-info">
-                                        <h4>Техника</h4>
-                                        <div class="date">2023-08-20</div>
-                                        <div class="result">8 балл</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="progress-chart">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="icon-btn" onclick="addResult('Мария Иванова')">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button class="icon-btn" onclick="toggleSidebar()">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="student-cell">
-                                        <div class="avatar">А</div>
-                                        <div class="student-info">
-                                            <h3>Алексей Смирнов</h3>
-                                            <p>13 лет</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="group-badge">Группа А</span>
-                                </td>
-                                <td>
-                                    <div class="test-info">
-                                        <h4>Сила удара</h4>
-                                        <div class="date">2023-08-20</div>
-                                        <div class="result">68 км/ч</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="progress-chart">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="icon-btn" onclick="addResult('Алексей Смирнов')">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button class="icon-btn" onclick="toggleSidebar()">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="student-cell">
-                                        <div class="avatar">Д</div>
-                                        <div class="student-info">
-                                            <h3>Дмитрий Козлов</h3>
-                                            <p>12 лет</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="group-badge">Группа В</span>
-                                </td>
-                                <td>
-                                    <div class="test-info">
-                                        <h4>Техника</h4>
-                                        <div class="date">2023-08-25</div>
-                                        <div class="result">7 балл</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="progress-chart">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="icon-btn" onclick="addResult('Дмитрий Козлов')">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button class="icon-btn" onclick="toggleSidebar()">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="student-cell">
-                                        <div class="avatar">Е</div>
-                                        <div class="student-info">
-                                            <h3>Екатерина Новикова</h3>
-                                            <p>11 лет</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="group-badge">Группа Б</span>
-                                </td>
-                                <td>
-                                    <div class="test-info">
-                                        <h4>Точность</h4>
-                                        <div class="date">2023-08-20</div>
-                                        <div class="result">8 балл</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="progress-chart">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="icon-btn" onclick="addResult('Екатерина Новикова')">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button class="icon-btn" onclick="toggleSidebar()">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                            @if (Model.StudentsList == null || !Model.StudentsList.Any())
+                            {
+                                <tr><td colspan="5" class="text-center text-muted">Учеников не найдено.</td></tr>
+                            }
+                            else
+                            {
+                                @foreach (var student in Model.StudentsList)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="student-cell">
+                                                <div class="avatar">@student.Initials</div>
+                                                <div class="student-info">
+                                                    <h3>@student.FullName</h3>
+                                                    <p>@student.Age лет</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="group-badge">@student.TeamName</span>
+                                        </td>
+                                        <td>
+                                            <div class="test-info">
+                                                <h4>@student.LatestTestName</h4>
+                                                <div class="date">@student.LatestTestDate</div>
+                                                <div class="result">@student.LatestTestResult</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="progress-chart">
+                                                <div class="progress-fill" style="width: @student.ProgressPercentage%"></div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button type="button" class="icon-btn" title="Добавить/Посмотреть результат" data-name="@student.FullName" onclick="openSidebar(@student.StudentId, this.getAttribute('data-name'))">
+                                                    <i class="fas fa-chart-pie"></i>
+                                                </button>
+                                                <a href="/ChildProfile/@student.StudentId" class="icon-btn" title="Профиль ученика">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -661,171 +589,307 @@
         </div>
     </div>
 
-    <!-- Правая панель -->
+    <button class="toggle-sidebar-btn" onclick="toggleSidebar()">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+
     <aside class="right-sidebar" id="rightSidebar">
-        <div class="chart-section">
-            <div class="chart-header">
-                <h2>Динамика прогресса</h2>
-                <button class="close-sidebar" onclick="toggleSidebar()">
-                    <i class="fas fa-times"></i>
-                </button>
-                <select class="chart-select" id="chartType">
-                    <option>Все тесты</option>
-                    <option>Скорость</option>
-                    <option>Техника</option>
-                    <option>Сила удара</option>
-                    <option>Точность</option>
-                </select>
-            </div>
-            <div class="chart-canvas">
-                <i class="fas fa-chart-line" style="font-size: 48px; color: #2563eb; margin-bottom: 10px;"></i>
-                <div>График прогресса ученика</div>
-            </div>
+
+        <div class="sidebar-header-wrapper">
+            <h2 id="sidebarTitle">Выберите ученика</h2>
+            <button type="button" class="close-sidebar" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
-        <div class="form-section">
-            <h2>
-                Последние результаты
-                <a href="#" class="add-link" onclick="clearForm()">
-                    <i class="fas fa-plus"></i> Добавить
-                </a>
-            </h2>
+        <div class="sidebar-tabs">
+            <button class="sidebar-tab active" onclick="switchSidebarTab('history')">История и Графики</button>
+            <button class="sidebar-tab" onclick="switchSidebarTab('add')">Внести результат</button>
+        </div>
 
-            <div class="form-group">
-                <label>Тип теста</label>
-                <select class="form-control" id="testType">
-                    <option>Скорость</option>
-                    <option>Техника</option>
-                    <option>Сила удара</option>
-                    <option>Точность</option>
-                </select>
-            </div>
+        <div class="sidebar-content">
 
-            <div class="form-group">
-                <label>Дата</label>
-                <input type="date" class="form-control" id="testDate" value="@DateTime.Now.ToString("yyyy-MM-dd")">
-            </div>
-
-            <div class="form-group">
-                <label>Результат</label>
-                <div class="result-input-group">
-                    <input type="text" class="form-control" id="testResult" placeholder="Введите результат">
-                    <select class="form-control" id="resultUnit">
-                        <option>сек</option>
-                        <option>балл</option>
-                        <option>км/ч</option>
-                        <option>%</option>
+            <div id="tab-history" class="sidebar-tab-pane active">
+                <div class="form-group mb-4">
+                    <label>Выберите тип графика</label>
+                    <select class="form-control" id="chartTypeSelect" onchange="renderChartAndHistory()">
+                        <option value="Скорость">Скорость (бег 30м)</option>
+                        <option value="Техника">Техника владения</option>
+                        <option value="Сила удара">Сила удара</option>
+                        <option value="Точность">Точность передач</option>
+                        <option value="Выносливость">Выносливость (челночный бег)</option>
                     </select>
+                </div>
+
+                <div class="chart-canvas-container">
+                    <canvas id="progressChart"></canvas>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <h4 style="font-size:15px; font-weight:600; margin-bottom:12px; color:#111827;">История результатов</h4>
+                    <div style="border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Тип</th>
+                                    <th>Результат</th>
+                                    <th style="width: 70px;">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Примечания</label>
-                <textarea class="form-control" id="testNotes" placeholder="Добавьте примечания..."></textarea>
+            <div id="tab-add" class="sidebar-tab-pane">
+                <form method="post" asp-page-handler="SaveResult">
+                    <input type="hidden" asp-for="SelectedStudentId" id="selectedStudentId" />
+                    <input type="hidden" asp-for="EditingResultId" id="editingResultId" value="0" />
+
+                    <div class="form-group">
+                        <label>Тип теста</label>
+                        <select asp-for="TestType" class="form-control" id="formTestType">
+                            <option value="Скорость">Скорость (бег 30м)</option>
+                            <option value="Техника">Техника владения</option>
+                            <option value="Сила удара">Сила удара</option>
+                            <option value="Точность">Точность передач</option>
+                            <option value="Выносливость">Выносливость (челночный бег)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Дата</label>
+                        <input asp-for="TestDate" type="date" class="form-control" id="formTestDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Результат</label>
+                        <div class="result-input-group">
+                            <input asp-for="TestResult" type="text" class="form-control" id="formTestResult" placeholder="Например: 9.5" required>
+                            <select asp-for="ResultUnit" class="form-control" id="formResultUnit">
+                                <option value="сек">сек</option>
+                                <option value="балл">балл</option>
+                                <option value="км/ч">км/ч</option>
+                                <option value="%">%</option>
+                                <option value="раз">раз</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Примечания к тесту</label>
+                        <textarea asp-for="TestNotes" class="form-control" id="formTestNotes" placeholder="Слабая левая нога, отличный рывок..."></textarea>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <label>Общий комментарий тренера</label>
+                        <textarea asp-for="CoachComments" class="form-control" id="formCoachComments" placeholder="Добавьте развернутый комментарий о прогрессе..."></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 16px;">
+                        <button type="button" class="btn btn-secondary w-100" onclick="clearAddForm()" style="justify-content: center;">
+                            <i class="fas fa-eraser"></i> Очистить
+                        </button>
+                        <button type="submit" class="btn btn-primary w-100" style="justify-content: center;">
+                            <i class="fas fa-save"></i> <span id="saveBtnText">Сохранить</span>
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <div class="form-actions">
-                <button class="btn btn-secondary" onclick="clearForm()">
-                    <i class="fas fa-times"></i> Отмена
-                </button>
-                <button class="btn btn-primary" onclick="saveResult()">
-                    <i class="fas fa-save"></i> Сохранить
-                </button>
-            </div>
-        </div>
-
-        <div class="comments-section">
-            <h2>Комментарии тренера</h2>
-            <textarea class="form-control" id="coachComments" placeholder="Добавьте комментарий о прогрессе ученика..."></textarea>
-            <button class="btn btn-primary save-btn" onclick="saveComments()">
-                <i class="fas fa-save"></i> Сохранить комментарий
-            </button>
         </div>
     </aside>
+
+    <form id="deleteForm" method="post" asp-page-handler="DeleteResult" style="display: none;">
+        <input type="hidden" name="resultId" id="deleteResultId" />
+    </form>
 </div>
 
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('rightSidebar');
-        const toggleBtn = document.querySelector('.toggle-sidebar-btn');
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        sidebar.classList.toggle('open');
-        toggleBtn.classList.toggle('open');
-    }
+    <script type="application/json" id="studentsHistoryData">
+        @Html.Raw(Model != null && !string.IsNullOrEmpty(Model.StudentsHistoryJson) ? Model.StudentsHistoryJson : "{}")
+    </script>
 
-    function addResult(studentName) {
-        alert(`Добавление результата для ученика: ${studentName}`);
-        // Здесь можно добавить логику предзаполнения формы данными ученика
-    }
-
-    function saveResult() {
-        const testType = document.getElementById('testType').value;
-        const testDate = document.getElementById('testDate').value;
-        const testResult = document.getElementById('testResult').value;
-        const resultUnit = document.getElementById('resultUnit').value;
-        const testNotes = document.getElementById('testNotes').value;
-
-        if (!testResult) {
-            alert('Пожалуйста, введите результат теста');
-            return;
+    <script>
+        // Получаем JSON с историей всех студентов
+        let studentsHistory = {};
+        try {
+            const dataElement = document.getElementById('studentsHistoryData');
+            if (dataElement && dataElement.textContent.trim() !== '') {
+                const rawText = dataElement.textContent.trim();
+                if (rawText.startsWith('{') || rawText.startsWith('[')) {
+                    studentsHistory = JSON.parse(rawText);
+                }
+            }
+        } catch (e) {
+            console.error("Ошибка парсинга истории студентов:", e);
         }
 
-        // Здесь будет логика сохранения результата
-        console.log('Сохранение результата:', {
-            testType,
-            testDate,
-            testResult,
-            resultUnit,
-            testNotes
-        });
+        let chartInstance = null;
 
-        alert('Результат успешно сохранен!');
-        clearForm();
-    }
-
-    function saveComments() {
-        const comments = document.getElementById('coachComments').value;
-
-        if (!comments) {
-            alert('Пожалуйста, введите комментарий');
-            return;
-        }
-
-        // Здесь будет логика сохранения комментария
-        console.log('Сохранение комментария:', comments);
-        alert('Комментарий успешно сохранен!');
-        document.getElementById('coachComments').value = '';
-    }
-
-    function clearForm() {
-        document.getElementById('testType').value = 'Скорость';
-        document.getElementById('testDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('testResult').value = '';
-        document.getElementById('resultUnit').value = 'сек';
-        document.getElementById('testNotes').value = '';
-    }
-
-    // Обработчик изменения типа графика
-    document.getElementById('chartType').addEventListener('change', function() {
-        const chartType = this.value;
-        console.log('Изменен тип графика:', chartType);
-        // Здесь можно обновить данные графика
-    });
-
-    // Обработчик кнопки добавления результата
-    document.getElementById('addResultBtn').addEventListener('click', function() {
-        clearForm();
-        // Открываем панель при нажатии на кнопку добавления
-        toggleSidebar();
-    });
-
-    // Закрытие панели при нажатии на Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
+        function toggleSidebar() {
             const sidebar = document.getElementById('rightSidebar');
-            if (sidebar.classList.contains('open')) {
-                toggleSidebar();
+            const toggleBtn = document.querySelector('.toggle-sidebar-btn');
+
+            sidebar.classList.toggle('open');
+            toggleBtn.classList.toggle('open');
+        }
+
+        // Переключение табов в боковой панели
+        function switchSidebarTab(tabId) {
+            document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-tab-pane').forEach(p => p.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            if (tabId === 'history') {
+                renderChartAndHistory();
             }
         }
-    });
-</script>
+
+        // Открытие боковой панели с данными выбранного ученика
+        function openSidebar(studentId, studentName) {
+            document.getElementById('selectedStudentId').value = studentId;
+            document.getElementById('sidebarTitle').innerHTML = `<span style='color:#2563EB'>${studentName}</span>`;
+            clearAddForm();
+            document.querySelector('.sidebar-tabs button:first-child').click();
+
+            const sidebar = document.getElementById('rightSidebar');
+            const toggleBtn = document.querySelector('.toggle-sidebar-btn');
+
+            if (!sidebar.classList.contains('open')) {
+                sidebar.classList.add('open');
+                toggleBtn.classList.add('open');
+            }
+        }
+
+        // Отрисовка графика и таблицы
+        function renderChartAndHistory() {
+            const studentId = document.getElementById('selectedStudentId').value;
+            const selectedType = document.getElementById('chartTypeSelect').value;
+
+            // Берем историю ученика (если есть, иначе пустой массив)
+            const data = studentsHistory[studentId] || [];
+
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            [...data].reverse().forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.type}</td>
+                    <td><span class="val-badge">${item.value} ${item.unit}</span></td>
+                    <td>
+                        <div class="history-actions">
+                            <button type="button" class="history-btn edit" onclick="editResult(${studentId}, ${item.id})" title="Изменить"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="history-btn delete" onclick="deleteResult(${item.id})" title="Удалить"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Нет результатов</td></tr>';
+            }
+
+            // Фильтруем данные только по выбранному типу графика
+            const chartData = data.filter(d => d.type === selectedType);
+            const labels = chartData.map(d => d.date);
+            const values = chartData.map(d => d.value);
+            const unitLabel = chartData.length > 0 ? chartData[0].unit : '';
+
+            const ctx = document.getElementById('progressChart').getContext('2d');
+
+            // Если график уже существует, уничтожаем его перед созданием нового
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${selectedType} (${unitLabel})`,
+                        data: values,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#1d4ed8',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            suggestedMin: Math.min(...values) > 0 ? Math.min(...values) * 0.8 : 0
+                        }
+                    }
+                }
+            });
+        }
+
+        function editResult(studentId, resultId) {
+            const studentData = studentsHistory[studentId] || [];
+            const item = studentData.find(d => d.id === resultId);
+
+            if (!item) return;
+
+            document.getElementById('editingResultId').value = item.id;
+            document.getElementById('formTestType').value = item.type;
+
+            // Конвертация даты из DD.MM.YYYY в YYYY-MM-DD для input[type="date"]
+            const dateParts = item.date.split('.');
+            if (dateParts.length === 3) {
+                document.getElementById('formTestDate').value = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+            }
+
+            document.getElementById('formTestResult').value = item.value;
+            document.getElementById('formResultUnit').value = item.unit || 'сек';
+            document.getElementById('formTestNotes').value = item.note || '';
+            document.getElementById('formCoachComments').value = item.comment || '';
+
+            document.getElementById('saveBtnText').innerText = 'Обновить';
+
+            document.querySelectorAll('.sidebar-tabs button')[1].click();
+        }
+
+        function clearAddForm() {
+            document.getElementById('editingResultId').value = '0';
+            document.getElementById('formTestType').value = 'Скорость';
+            document.getElementById('formTestDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('formTestResult').value = '';
+            document.getElementById('formResultUnit').value = 'сек';
+            document.getElementById('formTestNotes').value = '';
+            document.getElementById('formCoachComments').value = '';
+
+            document.getElementById('saveBtnText').innerText = 'Сохранить';
+        }
+
+        function deleteResult(resultId) {
+            if (confirm('Вы уверены, что хотите удалить этот результат тестирования? Действие необратимо.')) {
+                document.getElementById('deleteResultId').value = resultId;
+                document.getElementById('deleteForm').submit();
+            }
+        }
+    </script>
+}
