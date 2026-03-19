@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FootballSchool.Pages
 {
-    public class PrivacyModel : PageModel
+    public class ContactsModel : PageModel
     {
         private readonly IWebHostEnvironment _env;
 
-        public PrivacyModel(IWebHostEnvironment env)
+        public ContactsModel(IWebHostEnvironment env)
         {
             _env = env;
         }
@@ -18,7 +18,7 @@ namespace FootballSchool.Pages
         [BindProperty]
         public string PageContent { get; set; } = string.Empty;
 
-        private string FilePath => Path.Combine(_env.ContentRootPath, "TextContent", "Privacy.txt");
+        private string FilePath => Path.Combine(_env.ContentRootPath, "TextContent", "Contacts.txt");
 
         public async Task OnGetAsync()
         {
@@ -28,7 +28,7 @@ namespace FootballSchool.Pages
             }
             else
             {
-                PageContent = "Политика обработки персональных данных...\nЗдесь будет размещен текст политики конфиденциальности.";
+                PageContent = "���� ��������:\n�������: +7 (999) 000-00-00\nEmail: info@footballschool.ru";
             }
         }
 
@@ -43,7 +43,7 @@ namespace FootballSchool.Pages
             }
 
             await System.IO.File.WriteAllTextAsync(FilePath, PageContent ?? "");
-            TempData["SuccessMessage"] = "Текст страницы «Политика конфиденциальности» успешно сохранен!";
+            TempData["SuccessMessage"] = "����� �������� ���������� ������� ��������!";
             return RedirectToPage();
         }
     }

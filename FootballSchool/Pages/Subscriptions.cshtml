@@ -1,14 +1,15 @@
 ﻿@page
 @model FootballSchool.Pages.SubscriptionsModel
 @{
-    ViewData["Title"] = "Управление абонементами";
+    ViewData["Title"] = "Финансы: Абонементы и Платежи";
 }
 
 @section Styles {
     <style>
-        .subscriptions-page .main-content {
+        .finance-page .main-content {
             margin-left: 0 !important;
             background-color: #F9FAFB;
+            min-height: 100vh;
         }
 
         .content-header {
@@ -44,176 +45,57 @@
                 background-color: #1d4ed8;
             }
 
-        .stats-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
+        /* Общие стили карточек и таблиц из ваших исходников */
+        .stats-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; }
+        .stat-value { font-size: 24px; font-weight: 600; color: #111827; margin-bottom: 4px; }
+        .stat-label { font-size: 14px; color: #6B7280; }
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+        .tab-button { padding: 8px 16px; border: 1px solid #E5E7EB; background-color: #FFFFFF; border-radius: 8px; font-size: 14px; color: #6B7280; cursor: pointer; transition: all 0.2s; }
+        .tab-button.active { background-color: #DBEAFE; border-color: #BFDBFE; color: #1E40AF; }
+        .subscriptions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; }
+        .subscription-card { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; transition: all 0.3s; position: relative; }
+        .subscription-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); transform: translateY(-2px); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .card-header h3 { font-size: 18px; font-weight: 600; color: #111827; margin: 0; }
+        .card-header .student-name { font-size: 14px; color: #6B7280; margin-top: 4px; }
+        
+        /* Таблицы платежей */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; overflow-x: auto; }
+        .admin-table { width: 100%; border-collapse: collapse; margin-bottom: 0.5rem; }
+        .admin-table th { background: #f9fafb; padding: 8px 12px; text-align: left; font-size: 13px; color: #6b7280; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #E5E7EB; }
+        .admin-table td { padding: 8px 12px; border-bottom: 1px solid #f3f4f6; font-size: 13px; color: #111827; vertical-align: middle; }
+        .admin-table tr:hover { background-color: #f9fafb; }
+        
+        .badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .badge-active { background-color: #D1FAE5; color: #065F46; }
+        .badge-expired { background-color: #FEE2E2; color: #991B1B; }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .status-badge.success { background-color: #dcfce7; color: #15803d; }
+        .status-badge.warning { background-color: #fef3c7; color: #92400e; }
+        .status-badge.error { background-color: #fee2e2; color: #dc2626; }
 
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #E5E7EB;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: #6B7280;
-        }
-
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-
-        .tab-button {
-            padding: 8px 16px;
-            border: 1px solid #E5E7EB;
-            background-color: #FFFFFF;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #6B7280;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-            .tab-button.active {
-                background-color: #DBEAFE;
-                border-color: #BFDBFE;
-                color: #1E40AF;
-            }
-
-        .subscriptions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 24px;
-        }
-
-        .subscription-card {
-            background-color: #FFFFFF;
-            border: 1px solid #E5E7EB;
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-            .subscription-card:hover {
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                transform: translateY(-2px);
-            }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-            .card-header h3 {
-                font-size: 18px;
-                font-weight: 600;
-                color: #111827;
-                margin: 0;
-            }
-
-            .card-header .student-name {
-                font-size: 14px;
-                color: #6B7280;
-                margin-top: 4px;
-            }
-
-        .badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .badge-active {
-            background-color: #D1FAE5;
-            color: #065F46;
-        }
-
-        .badge-expired {
-            background-color: #FEE2E2;
-            color: #991B1B;
-        }
-
-        .card-details {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-        }
-
-            .detail-row .label {
-                color: #6B7280;
-            }
-
-            .detail-row .value {
-                color: #111827;
-                font-weight: 500;
-            }
-
-        .card-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-            border-top: 1px solid #f3f4f6;
-            padding-top: 16px;
-        }
-
-        .action-btn {
-            flex: 1;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #E5E7EB;
-            background: white;
-            color: #374151;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-        }
-
-            .action-btn:hover {
-                background: #f9fafb;
-                border-color: #d1d5db;
-            }
-
-            .action-btn.delete {
-                color: #dc2626;
-                border-color: #fecaca;
-                background: #fef2f2;
-            }
-
-                .action-btn.delete:hover {
-                    background: #fee2e2;
-                }
+        .card-details { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .detail-row .label { color: #6B7280; }
+        .detail-row .value { color: #111827; font-weight: 500; }
+        
+        .card-actions, .action-btns { display: flex; gap: 8px; margin-top: 16px; border-top: 1px solid #f3f4f6; padding-top: 16px; }
+        .action-btns { margin-top: 0; border: none; padding-top: 0; }
+        
+        .action-btn, .btn-icon { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .btn-icon { flex: 0 0 auto; padding: 6px 10px; color: #4b5563; }
+        .action-btn:hover, .btn-icon:hover { background: #f9fafb; border-color: #d1d5db; color: #2563eb; }
+        .action-btn.delete, .btn-icon.delete { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+        .action-btn.delete:hover, .btn-icon.delete:hover { background: #fee2e2; }
+        
+        /* Вкладки для совмещения */
+        .nav-tabs .nav-link { font-weight: 500; color: #4b5563; border-radius: 8px 8px 0 0; }
+        .nav-tabs .nav-link.active { color: #2563eb; border-bottom: 2px solid #2563eb; background-color: transparent; }
     </style>
 }
 
-<div class="subscriptions-page">
+<div class="finance-page">
     <div class="main-content">
         @if (TempData["SuccessMessage"] != null)
         {
@@ -225,98 +107,198 @@
         }
 
         <div class="content-header">
-            @if (User.IsInRole("Admin"))
-            {
-                <h1>Управление абонементами</h1>
-                <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#subModal" onclick="prepareAddSub()">
-                    <i class="fas fa-plus"></i> Выдать абонемент
-                </button>
-            }
-            else
-            {
-                <h1>Мои абонементы</h1>
-            }
+            <h1>Управление финансами</h1>
         </div>
 
-        @if (User.IsInRole("Admin"))
-        {
-            <div class="stats-overview">
-                <div class="stat-card">
-                    <div class="stat-value">@Model.ActiveCount</div>
-                    <div class="stat-label">Активных абонементов</div>
+        <!-- Навигационные вкладки -->
+        <ul class="nav nav-tabs mb-4" id="financeTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="subs-tab" data-bs-toggle="tab" data-bs-target="#subs-tab-pane" type="button" role="tab" aria-controls="subs-tab-pane" aria-selected="true">
+                    <i class="fas fa-ticket-alt"></i> Абонементы
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments-tab-pane" type="button" role="tab" aria-controls="payments-tab-pane" aria-selected="false">
+                    <i class="fas fa-wallet"></i> Платежи
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="financeTabsContent">
+            
+            <!-- Вкладка Абонементов -->
+            <div class="tab-pane fade show active" id="subs-tab-pane" role="tabpanel" aria-labelledby="subs-tab" tabindex="0">
+                <div class="d-flex justify-content-between mb-3 align-items-center">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="stats-overview m-0 w-75">
+                            <div class="stat-card py-2 px-3 m-0">
+                                <div class="stat-value">@Model.ActiveCount</div>
+                                <div class="stat-label">Активных абонементов</div>
+                            </div>
+                            <div class="stat-card py-2 px-3 m-0">
+                                <div class="stat-value">@Model.TotalRevenue.ToString("N0") ₽</div>
+                                <div class="stat-label">Сумма активных (потенциал)</div>
+                            </div>
+                        </div>
+                        <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#subModal" onclick="prepareAddSub()">
+                            <i class="fas fa-plus"></i> Выдать абонемент
+                        </button>
+                    }
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">@Model.TotalRevenue.ToString("N0") ₽</div>
-                    <div class="stat-label">Сумма активных (потенциал)</div>
+
+                <div class="filter-tabs mt-2">
+                    <button class="tab-button active" onclick="filterSubs('all', this)">Все абонементы</button>
+                    <button class="tab-button" onclick="filterSubs('Активен', this)">Активные</button>
+                    <button class="tab-button" onclick="filterSubs('Истёк', this)">Истёкшие</button>
+                </div>
+
+                <div class="subscriptions-grid">
+                    @if (!Model.SubscriptionsList.Any())
+                    {
+                        <div class="col-12 text-muted py-4">Нет данных об абонементах.</div>
+                    }
+                    @foreach (var sub in Model.SubscriptionsList)
+                    {
+                        <div class="subscription-card" data-status="@sub.Status">
+                            <div class="card-header">
+                                <div>
+                                    <h3>@sub.Type</h3>
+                                    <div class="student-name"><i class="fas fa-user"></i> @sub.StudentName</div>
+                                </div>
+                                <span class="badge @sub.StatusClass">@sub.Status</span>
+                            </div>
+
+                            <div class="card-details">
+                                <div class="detail-row">
+                                    <span class="label">Остаток занятий:</span>
+                                    <span class="value">@sub.DaysCount шт.</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Условия:</span>
+                                    <span class="value">@sub.Terms</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Стоимость:</span>
+                                    <span class="value">@sub.Cost.ToString("N0") ₽</span>
+                                </div>
+                                
+                                <!-- НОВЫЙ БЛОК: Статус оплаты -->
+                                <div class="detail-row mt-1 pt-2" style="border-top: 1px dashed #E5E7EB;">
+                                    <span class="label">Статус оплаты:</span>
+                                    <span class="status-badge @sub.PaymentStatusClass">
+                                        <i class="fas @(sub.PaymentStatus == "Оплачен" || sub.PaymentStatus == "Бесплатно" ? "fa-check" : "fa-clock")"></i> @sub.PaymentStatus
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="card-actions" style="flex-direction: column;">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    @if (sub.PaymentStatus != "Оплачен" && sub.PaymentStatus != "Бесплатно")
+                                    {
+                                        <button class="action-btn w-100 mb-2" style="background-color: #ecfdf5; color: #059669; border-color: #a7f3d0;" onclick="prepareQuickPayment(@sub.SubscriptionId, '@sub.Cost.ToString(System.Globalization.CultureInfo.InvariantCulture)')" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                                            <i class="fas fa-money-bill-wave"></i> Отметить оплату
+                                        </button>
+                                    }
+                                    <div class="d-flex gap-2 w-100">
+                                        <button class="action-btn flex-fill" onclick="prepareEditSub(@sub.SubscriptionId, '@sub.Cost.ToString(System.Globalization.CultureInfo.InvariantCulture)', @sub.DaysCount, '@sub.Type', '@sub.Terms')" data-bs-toggle="modal" data-bs-target="#subModal">
+                                            <i class="fas fa-edit"></i> Изменить
+                                        </button>
+                                        <form method="post" asp-page-handler="DeleteSub" asp-route-id="@sub.SubscriptionId" class="flex-fill d-flex" onsubmit="return confirm('Аннулировать абонемент? Все связанные платежи будут удалены.');">
+                                            <button type="submit" class="action-btn delete w-100">
+                                                <i class="fas fa-trash"></i> Аннулировать
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <button onclick="document.getElementById('payments-tab').click();" class="action-btn w-100" style="background-color: #2563eb; color: white; border: none;">
+                                        <i class="fas fa-credit-card"></i> К оплате
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
-        }
 
-        <div class="filter-tabs">
-            <button class="tab-button active" onclick="filterSubs('all', this)">Все абонементы</button>
-            <button class="tab-button" onclick="filterSubs('Активен', this)">Активные</button>
-            <button class="tab-button" onclick="filterSubs('Истёк', this)">Истёкшие</button>
-        </div>
-
-        <div class="subscriptions-grid">
-            @if (!Model.SubscriptionsList.Any())
-            {
-                <div class="col-12 text-muted py-4">
-                    Нет данных об абонементах.
+            <!-- Вкладка Платежей -->
+            <div class="tab-pane fade" id="payments-tab-pane" role="tabpanel" aria-labelledby="payments-tab" tabindex="0">
+                <div class="d-flex justify-content-between mb-3 align-items-center">
+                    <h4 class="m-0 text-muted">Реестр платежных операций</h4>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal" onclick="prepareAddPayment()">
+                            <i class="fas fa-plus"></i> Зарегистрировать платеж
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal" onclick="prepareOnlinePayment()">
+                            <i class="fas fa-credit-card"></i> Внести оплату онлайн
+                        </button>
+                    }
                 </div>
-            }
 
-            @foreach (var sub in Model.SubscriptionsList)
-            {
-                <div class="subscription-card" data-status="@sub.Status">
-                    <div class="card-header">
-                        <div>
-                            <h3>@sub.Type</h3>
-                            <div class="student-name"><i class="fas fa-user"></i> @sub.StudentName</div>
-                        </div>
-                        <span class="badge @sub.StatusClass">@sub.Status</span>
-                    </div>
+                <div class="table-container">
+                    <table class="admin-table table-compact">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Ученик</th>
+                                <th>Основание (Абонемент)</th>
+                                <th>Способ</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                                @if (User.IsInRole("Admin")) { <th>Действия</th> }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.PaymentsList.Any())
+                            {
+                                <tr><td colspan="@(User.IsInRole("Admin") ? 7 : 6)" class="text-center text-muted py-4">Платежей пока нет.</td></tr>
+                            }
+                            @foreach (var p in Model.PaymentsList)
+                            {
+                                string badgeClass = p.Status == "Оплачен" ? "success" : (p.Status == "Ошибка" ? "error" : "warning");
+                                string iconClass = p.Status == "Оплачен" ? "fa-check" : (p.Status == "Ошибка" ? "fa-times" : "fa-clock");
 
-                    <div class="card-details">
-                        <div class="detail-row">
-                            <span class="label">Остаток занятий:</span>
-                            <span class="value">@sub.DaysCount шт.</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Условия:</span>
-                            <span class="value">@sub.Terms</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Стоимость:</span>
-                            <span class="value">@sub.Cost.ToString("N0") ₽</span>
-                        </div>
-                    </div>
-
-                    <div class="card-actions">
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <button class="action-btn" onclick="prepareEditSub(@sub.SubscriptionId, @sub.Cost.ToString(System.Globalization.CultureInfo.InvariantCulture), @sub.DaysCount, '@sub.Type', '@sub.Terms')" data-bs-toggle="modal" data-bs-target="#subModal">
-                                <i class="fas fa-edit"></i> Изменить
-                            </button>
-                            <form method="post" asp-page-handler="DeleteSub" asp-route-id="@sub.SubscriptionId" class="w-100" onsubmit="return confirm('Аннулировать абонемент? Все связанные платежи будут удалены.');">
-                                <button type="submit" class="action-btn delete w-100">
-                                    <i class="fas fa-trash"></i> Аннулировать
-                                </button>
-                            </form>
-                        }
-                        else
-                        {
-                            <a href="/Payments" class="action-btn w-100 text-decoration-none" style="background-color: #2563eb; color: white; border: none;">
-                                <i class="fas fa-credit-card"></i> Перейти к оплате
-                            </a>
-                        }
-                    </div>
+                                <tr>
+                                    <td>@p.Date.ToString("dd.MM.yyyy")</td>
+                                    <td><strong>@p.StudentName</strong></td>
+                                    <td class="text-muted">@p.SubscriptionInfo</td>
+                                    <td>@p.Method</td>
+                                    <td style="font-weight: 600;">@p.Amount.ToString("N0") ₽</td>
+                                    <td>
+                                        <span class="status-badge @badgeClass"><i class="fas @iconClass"></i> @p.Status</span>
+                                    </td>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <td>
+                                            <div class="action-btns">
+                                                <button type="button" class="btn-icon" title="Изменить статус" onclick="prepareEditPayment(@p.PaymentId, '@p.Status', '@p.Method', '@p.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)', @p.SubscriptionId)" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <form method="post" asp-page-handler="DeletePayment" asp-route-id="@p.PaymentId" onsubmit="return confirm('Удалить запись о платеже?');">
+                                                    <button type="submit" class="btn-icon delete" title="Удалить"><i class="fas fa-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-            }
+            </div>
+
         </div>
     </div>
 </div>
 
+<!-- Модальное окно абонемента -->
 @if (User.IsInRole("Admin"))
 {
     <div class="modal fade" id="subModal" tabindex="-1" aria-hidden="true">
@@ -349,7 +331,7 @@
                             </div>
                             <div class="col-6 mb-3">
                                 <label>Стоимость (₽)</label>
-                                <input asp-for="ModalSub.CostSubscription" id="subCost" type="number" step="0.01" class="form-control" required />
+                                <input asp-for="ModalSub.CostSubscription" id="subCost" type="number" step="any" class="form-control" required />
                             </div>
                         </div>
 
@@ -367,8 +349,80 @@
     </div>
 }
 
+<!-- Модальное окно платежа -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="SavePayment">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalTitle">Регистрация платежа</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="ModalPayment.PaymentId" id="payId" />
+
+                    <div class="mb-3" id="subSelectDiv">
+                        <label>Связанный абонемент</label>
+                        <select asp-for="ModalPayment.SubscriptionId" id="paySubId" asp-items="Model.ActiveSubscriptionsList" class="form-select" required>
+                            <option value="">Выберите абонемент...</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label>Сумма (₽)</label>
+                            <input asp-for="ModalPayment.AmountPayment" id="payAmount" type="number" step="any" class="form-control" required />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label>Дата оплаты</label>
+                            <input asp-for="ModalPayment.DatePayment" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required readonly="@(User.IsInRole("Parent") ? "readonly" : null)" />
+                        </div>
+                    </div>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="mb-3">
+                            <label>Способ оплаты</label>
+                            <select asp-for="ModalPayment.MethodPayment" id="payMethod" class="form-select" required>
+                                <option value="Наличные">Наличные</option>
+                                <option value="Перевод на карту">Перевод на карту</option>
+                                <option value="Онлайн-эквайринг">Онлайн-эквайринг</option>
+                                <option value="Терминал">Терминал (эквайринг)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Статус платежа</label>
+                            <select asp-for="ModalPayment.StatusPayment" id="payStatus" class="form-select" required>
+                                <option value="Оплачен">Оплачен</option>
+                                <option value="В обработке">В обработке / Ожидает</option>
+                                <option value="Ошибка">Ошибка оплаты</option>
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" asp-for="ModalPayment.MethodPayment" value="Онлайн-эквайринг" />
+                        <input type="hidden" asp-for="ModalPayment.StatusPayment" value="В обработке" />
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> Вы будете перенаправлены на платежный шлюз банка. Статус изменится автоматически.
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary w-100 justify-content-center">
+                        @(User.IsInRole("Admin") ? "Сохранить данные" : "Перейти к оплате")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        // Скрипты Абонементов
         function filterSubs(status, btnElement) {
             document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
             btnElement.classList.add('active');
@@ -398,8 +452,58 @@
             document.getElementById('studentSelectDiv').style.display = 'none';
             document.getElementById('subType').value = type;
             document.getElementById('subDays').value = days;
-            document.getElementById('subCost').value = cost;
+            document.getElementById('subCost').value = cost.replace(',', '.'); // Поддержка JS float
             document.getElementById('subTerms').value = terms;
+        }
+
+        // Скрипты Платежей
+        function prepareAddPayment() {
+            document.getElementById('paymentModalTitle').innerText = 'Регистрация нового платежа';
+            document.getElementById('payId').value = '0';
+            document.getElementById('subSelectDiv').style.display = 'block';
+            document.getElementById('payAmount').value = '';
+            
+            let methodEl = document.getElementById('payMethod');
+            if(methodEl) methodEl.value = 'Наличные';
+            
+            let statusEl = document.getElementById('payStatus');
+            if(statusEl) statusEl.value = 'Оплачен';
+        }
+
+        // Новая функция для быстрой оплаты абонемента
+        function prepareQuickPayment(subId, amount) {
+            document.getElementById('paymentModalTitle').innerText = 'Быстрая оплата абонемента';
+            document.getElementById('payId').value = '0';
+            document.getElementById('subSelectDiv').style.display = 'block';
+            document.getElementById('paySubId').value = subId;
+            document.getElementById('payAmount').value = amount.replace(',', '.');
+            
+            let methodEl = document.getElementById('payMethod');
+            if(methodEl) methodEl.value = 'Наличные';
+            
+            let statusEl = document.getElementById('payStatus');
+            if(statusEl) statusEl.value = 'Оплачен';
+        }
+
+        function prepareOnlinePayment() {
+            document.getElementById('paymentModalTitle').innerText = 'Внесение оплаты онлайн';
+            document.getElementById('payId').value = '0';
+            document.getElementById('subSelectDiv').style.display = 'block';
+            document.getElementById('payAmount').value = '';
+        }
+
+        function prepareEditPayment(id, status, method, amount, subId) {
+            document.getElementById('paymentModalTitle').innerText = 'Изменение платежа';
+            document.getElementById('payId').value = id;
+            document.getElementById('subSelectDiv').style.display = 'none'; // Не даем менять абонемент у существующего
+            document.getElementById('paySubId').value = subId; // Но подставляем ID для успешной валидации
+            document.getElementById('payAmount').value = amount.replace(',', '.');
+            
+            let methodEl = document.getElementById('payMethod');
+            if(methodEl) methodEl.value = method;
+            
+            let statusEl = document.getElementById('payStatus');
+            if(statusEl) statusEl.value = status;
         }
     </script>
 }

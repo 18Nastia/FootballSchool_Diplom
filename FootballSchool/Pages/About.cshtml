@@ -1,7 +1,7 @@
 ﻿@page
-@model FootballSchool.Pages.PrivacyModel
+@model FootballSchool.Pages.AboutModel
 @{
-    ViewData["Title"] = "Политика конфиденциальности";
+    ViewData["Title"] = "О нас";
     bool isEditMode = Request.Query["edit"] == "true" && User.IsInRole("Admin");
 }
 
@@ -15,14 +15,14 @@
     {
         <form method="post">
             <div class="mb-3">
-                <label class="form-label fw-bold">Редактирование текста (Политика конфиденциальности)</label>
+                <label class="form-label fw-bold">Редактирование текста (О нас)</label>
                 <textarea asp-for="PageContent" id="html-editor" class="form-control" rows="20"></textarea>
             </div>
             <div class="d-flex gap-2 mt-4">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Сохранить изменения
                 </button>
-                <a href="/Privacy" class="btn btn-secondary">
+                <a href="/About" class="btn btn-secondary">
                     Отмена
                 </a>
             </div>
@@ -33,7 +33,7 @@
         @if (User.IsInRole("Admin"))
         {
             <div class="d-flex justify-content-end mb-4 pb-3 border-bottom">
-                <a href="/Privacy?edit=true" class="btn btn-outline-primary">
+                <a href="/About?edit=true" class="btn btn-outline-primary">
                     <i class="fas fa-edit"></i> Редактировать страницу
                 </a>
             </div>
@@ -48,8 +48,10 @@
 @section Scripts {
     @if (isEditMode)
     {
+        <!-- Используем открытую версию (cdnjs) без привязки к API-ключам -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
         <script>
+            // Проверяем, включена ли темная тема на сайте
             const isDarkMode = document.body.classList.contains('dark-theme');
 
             tinymce.init({
@@ -59,8 +61,10 @@
                 menubar: false,
                 branding: false,
                 promotion: false,
+                // Подключаем темный скин для редактора, если выбрана темная тема
                 skin: isDarkMode ? 'oxide-dark' : 'oxide',
                 content_css: isDarkMode ? 'dark' : 'default',
+                // Принудительно задаем цвета фона и текста ВНУТРИ редактора
                 content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; background-color: ' + (isDarkMode ? '#1e293b' : '#ffffff') + '; color: ' + (isDarkMode ? '#f8fafc' : '#374151') + '; }'
             });
         </script>

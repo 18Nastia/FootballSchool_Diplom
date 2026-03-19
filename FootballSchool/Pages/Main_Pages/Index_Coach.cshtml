@@ -1,7 +1,7 @@
 ﻿@page
 @model FootballSchool.Pages.Main_Pages.Index_CoachModel
 @{
-    ViewData["Title"] = "";
+    ViewData["Title"] = "Панель тренера";
 }
 
 @section Styles {
@@ -97,10 +97,12 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
         }
 
             .btn-primary:hover {
                 background-color: #0055b3;
+                color: #ffffff;
             }
 
         .stat-row {
@@ -190,6 +192,8 @@
             cursor: pointer;
             transition: all 0.2s;
             border: 1px solid #e5e5e7;
+            text-decoration: none;
+            display: block;
         }
 
             .action-card:hover {
@@ -296,94 +300,102 @@
     <div class="coach-content">
         <!-- Welcome Section -->
         <div class="welcome-card">
-            <h1 class="welcome-title">Добрый день, тренер Сергей!</h1>
-            <p class="welcome-subtitle">Сегодня у вас 3 тренировки.</p>
+            <h1 class="welcome-title">Добрый день, @(Model.CurrentCoach?.NameCoach ?? "Тренер")!</h1>
+            <p class="welcome-subtitle">Сегодня у вас @Model.TodayTrainingsCount тренировок.</p>
         </div>
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-            <div class="action-card">
+            <a href="/Attendance" class="action-card">
                 <i class="fas fa-calendar-check action-icon"></i>
                 <div class="action-title">Посещаемость</div>
                 <div class="action-desc">Отметить присутствующих</div>
-            </div>
+            </a>
 
-            <div class="action-card">
+            <a href="/TrainingResults" class="action-card">
                 <i class="fas fa-chart-line action-icon"></i>
                 <div class="action-title">Результаты</div>
                 <div class="action-desc">Внести показатели</div>
-            </div>
+            </a>
 
-            <div class="action-card">
-                <i class="fas fa-file-alt action-icon"></i>
-                <div class="action-title">Отчёты</div>
-                <div class="action-desc">Создать отчёт</div>
-            </div>
+            <a href="/Schedule" class="action-card">
+                <i class="fas fa-calendar-alt action-icon"></i>
+                <div class="action-title">Мое расписание</div>
+                <div class="action-desc">Просмотр всех занятий</div>
+            </a>
         </div>
 
-        <!-- Trainings Card -->
-        <div class="trainings-card">
-            <h2 class="section-title">Ближайшие тренировки</h2>
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+            <!-- Trainings Card -->
+            <div class="trainings-card" style="margin-bottom: 0;">
+                <h2 class="section-title">Ближайшие тренировки</h2>
 
-            <table class="trainings-table">
-                <thead>
-                    <tr>
-                        <th>Время</th>
-                        <th>Группа</th>
-                        <th>Место</th>
-                        <th>Кол-во учеников</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>10:00</td>
-                        <td>U8</td>
-                        <td>Площадка №1</td>
-                        <td>12</td>
-                    </tr>
-                    <tr>
-                        <td>12:00</td>
-                        <td>U10</td>
-                        <td>Зал №3</td>
-                        <td>14</td>
-                    </tr>
-                    <tr>
-                        <td>16:00</td>
-                        <td>U12</td>
-                        <td>Площадка №2</td>
-                        <td>10</td>
-                    </tr>
-                </tbody>
-            </table>
+                @if (!Model.UpcomingTrainings.Any())
+                {
+                    <p class="text-muted">На ближайшее время тренировок не запланировано.</p>
+                }
+                else
+                {
+                    <table class="trainings-table">
+                        <thead>
+                            <tr>
+                                <th>Дата и Время</th>
+                                <th>Группа</th>
+                                <th>Место</th>
+                                <th>План</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var training in Model.UpcomingTrainings)
+                            {
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 500;">@training.DateTraining.ToString("dd.MM.yyyy")</div>
+                                        <div style="color: #6e6e73; font-size: 13px;">@training.TimeTraining.ToString("HH:mm")</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">@(training.Team?.CategoryTeam ?? "Без группы")</div>
+                                        <div style="color: #6e6e73; font-size: 13px;">@(training.Team?.Students.Count ?? 0) чел.</div>
+                                    </td>
+                                    <td>@(training.Facility?.NameFacility ?? "Не указано")</td>
+                                    <td>@(string.IsNullOrEmpty(training.PlanTraining) ? "—" : training.PlanTraining)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
 
-            <button class="btn-primary">
-                <i class="fas fa-calendar-check"></i>
-                Открыть посещаемость
-            </button>
-        </div>
-
-        <!-- Statistics Card -->
-        <div class="statistics-card">
-            <h2 class="section-title">Статистика</h2>
-
-            <div class="stat-row">
-                <span class="stat-label">Средняя посещаемость групп</span>
-                <span class="stat-value">85%</span>
+                    <a href="/Attendance" class="btn-primary">
+                        <i class="fas fa-calendar-check"></i>
+                        Открыть журнал посещаемости
+                    </a>
+                }
             </div>
 
-            <div class="stat-row">
-                <span class="stat-label">Средний прогресс учеников</span>
-                <span class="stat-value positive">+7%</span>
-            </div>
+            <!-- Statistics Card -->
+            <div class="statistics-card" style="margin-bottom: 0;">
+                <h2 class="section-title">Ваша статистика</h2>
 
-            <div class="stat-row">
-                <span class="stat-label">Последний отчёт обновлён</span>
-                <span class="stat-value">2 дня назад</span>
+                <div class="stat-row">
+                    <span class="stat-label">Учеников в ваших группах</span>
+                    <span class="stat-value">@Model.TotalStudents</span>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-label">Средняя посещаемость</span>
+                    <span class="stat-value positive">@Model.AverageAttendance</span>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-label">Ближайшее занятие</span>
+                    <span class="stat-value">
+                        @(Model.UpcomingTrainings.FirstOrDefault()?.DateTraining.ToString("dd.MM") ?? "Нет данных")
+                    </span>
+                </div>
             </div>
         </div>
 
         <!-- News Card -->
-        <div class="news-card">
+        <div class="news-card mt-4">
             <h2 class="section-title">Новости и события</h2>
 
             <div class="news-items">
@@ -391,14 +403,14 @@
                     <div class="news-icon">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <span class="news-text">Матч-тренировка U10 в субботу</span>
+                    <span class="news-text">Напоминание: Не забывайте отмечать посещаемость после каждой тренировки.</span>
                 </div>
 
                 <div class="news-item">
                     <div class="news-icon trophy">
                         <i class="fas fa-trophy"></i>
                     </div>
-                    <span class="news-text">Результаты тестирования скорости опубликованы</span>
+                    <span class="news-text">Открыт функционал внесения результатов тестирования скорости и техники.</span>
                 </div>
             </div>
         </div>

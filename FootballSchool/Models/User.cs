@@ -24,6 +24,9 @@ public partial class User
     [StringLength(20)]
     public string Role { get; set; } = null!;
 
+    [StringLength(100)]
+    public string? Email { get; set; }
+
     [InverseProperty("User")]
     public virtual ICollection<Student> Students { get; set; } = new List<Student>();
 }

@@ -150,17 +150,31 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostSaveBranchAsync(IFormFile? BranchPhoto)
         {
+            // Очищаем старое состояние и валидируем только текущую модель
+            ModelState.Clear();
+            TryValidateModel(ModalBranch, nameof(ModalBranch));
+
+            // Исключаем из проверки связанные коллекции (они в форме не передаются)
+            ModelState.Remove("ModalBranch.Facilities");
+            ModelState.Remove("ModalBranch.Teams");
+
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    TempData["ErrorMessage"] = "Ошибка заполнения формы.";
+                    // Собираем точные причины ошибок, чтобы сразу видеть проблему на экране
+                    var errs = ModelState.Where(x => x.Value?.Errors.Count > 0)
+                        .Select(x => $"{x.Key.Replace("ModalBranch.", "")}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
+
+                    TempData["ErrorMessage"] = "Ошибка заполнения: " + string.Join(" | ", errs);
                     return RedirectToPage();
                 }
 
                 string? relativePhotoPath = null;
 
                 if (BranchPhoto != null && BranchPhoto.Length > 0)
+
+                    if (BranchPhoto != null && BranchPhoto.Length > 0)
                 {
                     string imgext = Path.GetExtension(BranchPhoto.FileName).ToLower();
 

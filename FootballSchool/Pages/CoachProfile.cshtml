@@ -51,9 +51,19 @@
         .content-section.active { display: block; }
         .section-title { font-size: 20px; font-weight: 600; color: #111827; margin-bottom: 24px; }
 
-        .group-card { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
-        .group-card h3 { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 8px; }
-        .group-info { font-size: 14px; color: #6b7280; margin-bottom: 4px; }
+        .group-card { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; transition: transform 0.2s; }
+        .group-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .group-card h3 { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 8px; text-transform: capitalize; }
+        .group-info { font-size: 14px; color: #6b7280; margin-bottom: 4px; text-transform: capitalize; }
+
+        /* Стили для наград */
+        .awards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .award-card { display: flex; align-items: center; gap: 16px; background: white; border: 1px solid #e5e7eb; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .award-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .award-icon { width: 56px; height: 56px; border-radius: 50%; background: #F8FAFC; border: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .award-details h4 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #111827; }
+        .award-details .award-date { font-size: 12px; color: #2563EB; font-weight: 500; margin-bottom: 4px; }
+        .award-details p { margin: 0; font-size: 14px; color: #6B7280; line-height: 1.4; }
     </style>
 }
 
@@ -80,22 +90,25 @@
                     <p><strong>Ставка:</strong> @Model.Profile.Salary ₽</p>
                 </div>
                 
-                <div class="admin-actions">
-                    <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editCoachModal">
-                        <i class="fas fa-edit"></i> Изменить
-                    </button>
-                    <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Profile.CoachId" onsubmit="return confirm('Удалить профиль тренера безвозвратно?');">
-                        <button type="submit" class="btn-delete">
-                            <i class="fas fa-trash"></i> Удалить
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="admin-actions">
+                        <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editCoachModal">
+                            <i class="fas fa-edit"></i> Изменить
                         </button>
-                    </form>
-                </div>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Profile.CoachId" onsubmit="return confirm('Удалить профиль тренера безвозвратно?');">
+                            <button type="submit" class="btn-delete">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </form>
+                    </div>
+                }
             </div>
         </div>
 
         <div class="tabs">
             <div class="tab active" data-tab="groups">Закрепленные группы</div>
-            <div class="tab" data-tab="achievements">Награды</div>
+            <div class="tab" data-tab="achievements">Квалификация и достижения</div>
         </div>
 
         <div class="content-section active" id="groups-section">
@@ -103,7 +116,7 @@
             
             @if (!Model.Profile.Groups.Any())
             {
-                <p class="text-muted">У данного тренера пока нет закрепленных групп.</p>
+                <p class="text-muted">У данного тренера пока нет закрепленных групп с запланированными тренировками.</p>
             }
             else
             {
@@ -113,7 +126,7 @@
                         <div class="group-card">
                             <h3>@group.CategoryName</h3>
                             <div class="group-info"><i class="fas fa-users text-primary me-2"></i> @group.StudentsCount участников</div>
-                            <div class="group-info"><i class="fas fa-clock text-primary me-2"></i> Расписание: @group.ScheduleInfo</div>
+                            <div class="group-info"><i class="fas fa-clock text-primary me-2"></i> @group.ScheduleInfo</div>
                         </div>
                     }
                 </div>
@@ -121,8 +134,29 @@
         </div>
 
         <div class="content-section" id="achievements-section">
-            <h2 class="section-title">Достижения</h2>
-            <p class="text-muted">Модуль достижений в разработке.</p>
+            <h2 class="section-title">Профиль достижений</h2>
+            @if (!Model.Profile.Awards.Any())
+            {
+                <p class="text-muted">У данного тренера пока не заполнены квалификации или отсутствуют проведенные тренировки.</p>
+            }
+            else
+            {
+                <div class="awards-grid">
+                    @foreach (var award in Model.Profile.Awards)
+                    {
+                        <div class="award-card">
+                            <div class="award-icon">
+                                <i class="@award.IconClass"></i>
+                            </div>
+                            <div class="award-details">
+                                <h4>@award.Title</h4>
+                                <div class="award-date"><i class="far fa-check-circle"></i> @award.Date</div>
+                                <p>@award.Description</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     }
     else
@@ -134,7 +168,7 @@
     }
 </div>
 
-@if (Model.Profile != null)
+@if (Model.Profile != null && User.IsInRole("Admin"))
 {
     <div class="modal fade" id="editCoachModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">

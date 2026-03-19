@@ -25,18 +25,6 @@
             --header-bg-end: #1D4ED8;
         }
 
-        body.dark-theme {
-            --bg-color: #111827;
-            --text-color: #F9FAFB;
-            --sidebar-bg: #1F2937;
-            --border-color: #374151;
-            --nav-hover-bg: #374151;
-            --nav-active-bg: #374151;
-            --nav-active-text: #60A5FA;
-            --header-bg-start: #1E3A8A;
-            --header-bg-end: #172554;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -46,6 +34,24 @@
             display: flex;
             min-height: 100vh;
             transition: background-color 0.3s, color 0.3s;
+            margin-bottom: 0 !important;
+        }
+
+        html {
+            font-size: 14px;
+            position: relative;
+            min-height: 100%;
+        }
+
+        /* ОБЯЗАТЕЛЬНО двойное @@ для медиа-запросов в cshtml */
+        @@media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+            box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
         }
 
         .dashboard-container { display: flex; width: 100%; min-height: 100vh; }
@@ -98,9 +104,12 @@
         .footer-copyright { color: #6B7280; font-size: 15px; font-weight: 500; }
 
         /* Настройки модального окна */
-        .settings-modal .modal-content { background-color: var(--sidebar-bg); color: var(--text-color); border: 1px solid var(--border-color); }
-        .settings-modal .modal-header { border-bottom-color: var(--border-color); }
-        .settings-modal .form-control { background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color); }
+        .settings-modal .modal-content,
+        .password-modal .modal-content { background-color: var(--sidebar-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+        .settings-modal .modal-header,
+        .password-modal .modal-header { border-bottom-color: var(--border-color); }
+        .settings-modal .form-control,
+        .password-modal .form-control { background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color); }
 
         @@media (max-width: 768px) {
             .sidebar { width: 200px; } .main-content { margin-left: 200px; }
@@ -113,7 +122,314 @@
             .nav-item span { display: none; } .logo { font-size: 16px; padding: 16px 12px; text-align: center; }
         }
 
-        .logout-button, .settings-btn { width: 100%; background: none; border: none; text-align: left; cursor: pointer; }
+        .logout-button, .settings-btn, .profile-btn { width: 100%; background: none; border: none; text-align: left; cursor: pointer; }
+
+        .admin-table {
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-table th,
+        table.table.table-compact th {
+            background: #f9fafb;
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .admin-table td,
+        table.table.table-compact td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 13px;
+            color: #111827;
+            vertical-align: middle;
+        }
+
+        ul.list-group.list-compact .list-group-item {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        body.dark-theme {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --sidebar-bg: #1e293b;
+            --item-bg: #334155;
+            --item-hover: #475569;
+            --border-color: #475569;
+            --text-color: #f8fafc;
+            --text-muted: #cbd5e1; /* Яркий читаемый серый цвет для меню и вкладок */
+            --nav-hover-bg: #334155;
+            --nav-active-bg: #0f172a;
+            --nav-active-text: #60A5FA;
+        }
+
+        body.dark-theme,
+        body.dark-theme .main-content,
+        body.dark-theme .parent-content,
+        body.dark-theme .coaches-container,
+        body.dark-theme .coach-profile-container {
+            background-color: var(--bg-color) !important;
+            color: var(--text-color) !important;
+        }
+
+        body.dark-theme .page-header {
+            background: var(--card-bg) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        body.dark-theme .sidebar {
+            background-color: var(--sidebar-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        body.dark-theme .card,
+        body.dark-theme .profile-card,
+        body.dark-theme .table-container,
+        body.dark-theme .stats-box,
+        body.dark-theme .welcome-card,
+        body.dark-theme .filter-section,
+        body.dark-theme .filters,
+        body.dark-theme .legend,
+        body.dark-theme .page-top-header,
+        body.dark-theme .right-sidebar,
+        body.dark-theme .sidebar-header-wrapper,
+        body.dark-theme .sidebar-content,
+        body.dark-theme .sidebar-header,
+        body.dark-theme .content-section,
+        body.dark-theme .schedule-section,
+        body.dark-theme .results-section,
+        body.dark-theme .achievements-section,
+        body.dark-theme .modal-content,
+        body.dark-theme .modal-header,
+        body.dark-theme .modal-footer,
+        body.dark-theme .modal-body,
+        body.dark-theme .filters-panel,
+        body.dark-theme .calendar,
+        body.dark-theme .day-column,
+        body.dark-theme .day-view,
+        body.dark-theme .controls-wrapper,
+        body.dark-theme .welcome-section,
+        body.dark-theme .stat-card,
+        body.dark-theme .notifications-section,
+        body.dark-theme .quick-actions-section,
+        body.dark-theme .news-section,
+        body.dark-theme .login-card,
+        body.dark-theme .chart-canvas-container,
+        body.dark-theme .attendance-table,
+        body.dark-theme .tabs,
+        body.dark-theme .sidebar-tabs {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-color) !important;
+            box-shadow: none !important;
+        }
+
+        /* Карточки внутри секций (расписание, результаты, достижения) */
+        body.dark-theme .notification-item,
+        body.dark-theme .action-item,
+        body.dark-theme .news-item,
+        body.dark-theme .list-item-card,
+        body.dark-theme .group-card,
+        body.dark-theme .student-card,
+        body.dark-theme .subscription-card,
+        body.dark-theme .hall-card,
+        body.dark-theme .trainer-card,
+        body.dark-theme .group-card-item,
+        body.dark-theme .schedule-card,
+        body.dark-theme .result-item,
+        body.dark-theme .achievement-card,
+        body.dark-theme .award-card,
+        body.dark-theme .table-row,
+        body.dark-theme .view-toggle,
+        body.dark-theme .time-slot-day,
+        body.dark-theme input.form-control,
+        body.dark-theme select.form-control,
+        body.dark-theme select.form-select,
+        body.dark-theme input.search-input,
+        body.dark-theme input.search-input-large,
+        body.dark-theme .filter-select,
+        body.dark-theme input.date-input,
+        body.dark-theme select.select-input,
+        body.dark-theme textarea.form-control,
+        body.dark-theme .comment-input,
+        body.dark-theme .btn-secondary,
+        body.dark-theme .btn-icon,
+        body.dark-theme .action-btn,
+        body.dark-theme .history-btn,
+        body.dark-theme .close-sidebar,
+        body.dark-theme .btn-nav,
+        body.dark-theme .btn-edit,
+        body.dark-theme .icon-btn,
+        body.dark-theme .edit-button {
+            background-color: var(--item-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-color) !important;
+        }
+
+        /* Иконки в карточках */
+        body.dark-theme .schedule-card-icon,
+        body.dark-theme .achievement-icon-wrapper,
+        body.dark-theme .award-icon,
+        body.dark-theme .avatar-circle {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        body.dark-theme .event,
+        body.dark-theme .event-day {
+            background-color: #27374D !important;
+            border-top-color: var(--border-color) !important;
+            border-right-color: var(--border-color) !important;
+            border-bottom-color: var(--border-color) !important;
+            color: var(--text-color) !important;
+        }
+
+        body.dark-theme .event:hover,
+        body.dark-theme .event-day:hover {
+            background-color: #31445F !important;
+        }
+
+        body.dark-theme input,
+        body.dark-theme select,
+        body.dark-theme textarea {
+            color: var(--text-color) !important;
+        }
+
+        body.dark-theme ::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 0.8;
+        }
+
+        body.dark-theme table th,
+        body.dark-theme .table-header,
+        body.dark-theme .history-table th,
+        body.dark-theme thead,
+        body.dark-theme .admin-table th,
+        body.dark-theme .training-table th,
+        body.dark-theme .calendar-header,
+        body.dark-theme .day-header {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-muted) !important;
+        }
+
+        body.dark-theme table td,
+        body.dark-theme .table-row,
+        body.dark-theme .history-table td,
+        body.dark-theme .admin-table td,
+        body.dark-theme .training-table td,
+        body.dark-theme .time-slot-day {
+            border-color: var(--border-color) !important;
+            color: var(--text-color) !important;
+        }
+
+        body.dark-theme .action-item:hover,
+        body.dark-theme .group-card:hover,
+        body.dark-theme .student-card:hover,
+        body.dark-theme .subscription-card:hover,
+        body.dark-theme .trainer-card:hover,
+        body.dark-theme tr:hover,
+        body.dark-theme .table-row:hover,
+        body.dark-theme .admin-table tr:hover,
+        body.dark-theme .btn-secondary:hover,
+        body.dark-theme .btn-icon:hover,
+        body.dark-theme .action-btn:hover,
+        body.dark-theme .history-btn:hover,
+        body.dark-theme .close-sidebar:hover,
+        body.dark-theme .btn-nav:hover,
+        body.dark-theme .btn-edit:hover,
+        body.dark-theme .icon-btn:hover,
+        body.dark-theme .radio-option:hover {
+            background-color: var(--item-hover) !important;
+        }
+
+        /* === ТЕКСТОВЫЕ ЦВЕТА ДЛЯ ТЕМНОЙ ТЕМЫ === */
+        body.dark-theme h1, body.dark-theme h2, body.dark-theme h3,
+        body.dark-theme h4, body.dark-theme h5, body.dark-theme h6,
+        body.dark-theme .card-title, body.dark-theme .student-name,
+        body.dark-theme .profile-name, body.dark-theme .trainer-name,
+        body.dark-theme .info-value, body.dark-theme .value,
+        body.dark-theme .welcome-title, body.dark-theme .stat-value,
+        body.dark-theme .section-title, body.dark-theme .time-label,
+        body.dark-theme .modal-title, body.dark-theme label,
+        body.dark-theme .date-header, body.dark-theme .day-name,
+        body.dark-theme .legend-title, body.dark-theme .legend-item,
+        body.dark-theme .branch-details h3, body.dark-theme .form-label,
+        body.dark-theme .notification-text, body.dark-theme .news-text,
+        body.dark-theme table td, body.dark-theme .history-table td,
+        body.dark-theme .admin-table td, body.dark-theme .training-table td,
+        body.dark-theme .current-date-display, body.dark-theme .stats-title {
+            color: var(--text-color) !important;
+        }
+
+        /* Элементы, которые должны быть серыми, но читаемыми (var(--text-muted)) */
+        body.dark-theme p, body.dark-theme .text-muted,
+        body.dark-theme .info-label, body.dark-theme .card-info,
+        body.dark-theme .stat-label, body.dark-theme .subscription-label,
+        body.dark-theme .trainer-spec, body.dark-theme .age,
+        body.dark-theme .label, body.dark-theme .card-age,
+        body.dark-theme .welcome-subtitle, body.dark-theme .filter-label,
+        body.dark-theme .day-date, body.dark-theme .info-item,
+        body.dark-theme .hint-text, body.dark-theme .stats-text,
+        body.dark-theme table th, body.dark-theme .table-header,
+        body.dark-theme .history-table th, body.dark-theme thead,
+        body.dark-theme .admin-table th, body.dark-theme .training-table th,
+        body.dark-theme .calendar-header, body.dark-theme .day-header,
+        body.dark-theme .tab, body.dark-theme .sidebar-tab,
+        body.dark-theme .tab-btn, body.dark-theme .tab-button,
+        body.dark-theme .toggle-btn, body.dark-theme .nav-item,
+        body.dark-theme .schedule-details p, body.dark-theme .result-info p,
+        body.dark-theme .achievement-card p, body.dark-theme .achievement-date,
+        body.dark-theme .award-details p,
+        body.dark-theme .hall-info, body.dark-theme .hall-info span {
+            color: var(--text-muted) !important;
+        }
+
+        /* Сброс фона для табов и настройка цвета */
+        body.dark-theme .tab, body.dark-theme .sidebar-tab,
+        body.dark-theme .tab-btn, body.dark-theme .tab-button,
+        body.dark-theme .toggle-btn {
+            background-color: transparent !important;
+            border-color: var(--border-color) !important;
+        }
+
+        /* Активные состояния навигации и вкладок */
+        body.dark-theme .nav-item:hover,
+        body.dark-theme .nav-item.active {
+            background-color: var(--nav-hover-bg) !important;
+            color: var(--nav-active-text) !important;
+        }
+
+        body.dark-theme .tab.active, body.dark-theme .sidebar-tab.active,
+        body.dark-theme .tab-btn.active, body.dark-theme .tab-button.active,
+        body.dark-theme .toggle-btn.active {
+            background-color: var(--item-hover) !important;
+            color: var(--nav-active-text) !important;
+            border-bottom-color: var(--nav-active-text) !important;
+        }
+
+        body.dark-theme .btn-delete,
+        body.dark-theme .action-btn.delete,
+        body.dark-theme .action-link.delete {
+            background-color: #451a1a !important;
+            border-color: #7f1d1d !important;
+            color: #fca5a5 !important;
+        }
+
+        body.dark-theme .btn-delete:hover,
+        body.dark-theme .action-btn.delete:hover {
+            background-color: #7f1d1d !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
     </style>
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -144,18 +460,15 @@
                         <a asp-page="/Branches" class="nav-item"><i class="fas fa-building nav-icon"></i><span>Филиалы и площадки</span></a>
                         <a asp-page="/Schedule" class="nav-item"><i class="fas fa-calendar-alt nav-icon"></i><span>Расписание</span></a>
                         <a asp-page="/Subscriptions" class="nav-item"><i class="fas fa-id-card nav-icon"></i><span>Абонементы</span></a>
-                        <a asp-page="/Payments" class="nav-item"><i class="fas fa-credit-card nav-icon"></i><span>Платежи</span></a>
                     }
                     else if (User.IsInRole("Parent"))
                     {
                         <a asp-page="/Main_Pages/Index_Parent" class="nav-item"><i class="fas fa-home nav-icon"></i><span>Главная</span></a>
                         
-                        <!-- БЕЗ ID: Логика теперь внутри C# кода ChildProfile -->
                         <a asp-page="/ChildProfile" class="nav-item"><i class="fas fa-child nav-icon"></i><span>Профиль ребенка</span></a>
                         
                         <a asp-page="/Schedule" class="nav-item"><i class="fas fa-calendar-alt nav-icon"></i><span>Расписание</span></a>
                         <a asp-page="/Subscriptions" class="nav-item"><i class="fas fa-id-card nav-icon"></i><span>Абонементы</span></a>
-                        <a asp-page="/Payments" class="nav-item"><i class="fas fa-credit-card nav-icon"></i><span>Платежи</span></a>
                         <a asp-page="/Branches" class="nav-item"><i class="fas fa-map-marked-alt nav-icon"></i><span>Филиалы и площадки</span></a>
                     }
                 }
@@ -168,10 +481,11 @@
             <div class="sidebar-footer">
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <div class="nav-item" style="color: var(--nav-active-text); font-weight: 600;">
+                    <!-- Кнопка с именем пользователя (открывает модалку смены пароля) -->
+                    <button type="button" class="nav-item profile-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="color: var(--nav-active-text); font-weight: 600;">
                         <i class="fas fa-user-circle nav-icon"></i>
                         <span>@User.Identity.Name</span>
-                    </div>
+                    </button>
 
                     <button type="button" class="nav-item settings-btn" data-bs-toggle="modal" data-bs-target="#settingsModal">
                         <i class="fas fa-cog nav-icon"></i><span>Настройки</span>
@@ -196,13 +510,13 @@
             </div>
 
             <!-- Подвал -->
-            <footer class="page-footer">
+           <footer class="page-footer">
                 <div class="footer-content">
                     <a href="@homeUrl" class="footer-logo">FootballSchool</a>
                     <div class="footer-links">
-                        <a href="#" class="footer-link">О нас</a>
-                        <a href="#" class="footer-link">Контакты</a>
-                        <a href="#" class="footer-link">Политика</a>
+                        <a href="/About" class="footer-link">О нас</a>
+                        <a href="/Contacts" class="footer-link">Контакты</a>
+                        <a href="/Privacy" class="footer-link">Политика</a>
                     </div>
                     <div class="footer-copyright">&copy; 2025 FootballSchool.</div>
                 </div>
@@ -226,6 +540,63 @@
                             <label class="form-check-label" for="themeSwitch">Темная тема</label>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно смены пароля (Для авторизованных пользователей) -->
+    <div class="modal fade password-modal" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Смена пароля</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <!-- Стандартный вид: Смена пароля (если знает старый пароль) -->
+                    <div id="cpStandardView">
+                        <p class="text-muted" style="font-size: 14px;">Так как вы уже вошли в систему, для смены пароля достаточно ввести ваш текущий пароль.</p>
+                        
+                        <form id="changePasswordForm">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label fw-bold mb-0">Текущий пароль</label>
+                                    <a href="javascript:void(0);" onclick="showRecoveryView()" class="text-decoration-none" style="font-size: 12px; color: var(--nav-active-text);">Забыли пароль?</a>
+                                </div>
+                                <input type="password" id="cpCurrentPass" class="form-control" placeholder="Введите текущий пароль" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Новый пароль</label>
+                                <input type="password" id="cpNewPass" class="form-control" placeholder="Введите новый пароль" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Подтвердите новый пароль</label>
+                                <input type="password" id="cpConfirmPass" class="form-control" placeholder="Повторите новый пароль" required>
+                            </div>
+                            <button type="button" class="btn btn-primary w-100 py-2" onclick="saveNewPassword()">Сменить пароль</button>
+                        </form>
+                    </div>
+
+                    <!-- Вид: Восстановление пароля по Email (если забыл старый пароль) -->
+                    <div id="cpRecoveryView" style="display: none;">
+                        <p class="text-muted" style="font-size: 14px;">Введите email, привязанный к вашему аккаунту. Мы отправим на него ссылку для безопасного сброса пароля.</p>
+                        
+                        <form id="recoveryPasswordForm">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Email</label>
+                                <input type="email" id="cpEmail" class="form-control" placeholder="user@example.com" required>
+                            </div>
+                            <button type="button" class="btn btn-primary w-100 py-2 mb-3" onclick="sendRecoveryEmail()">Отправить ссылку</button>
+                            <div class="text-center">
+                                <a href="javascript:void(0);" onclick="showStandardView()" class="text-decoration-none text-muted" style="font-size: 14px;">
+                                    <i class="fas fa-arrow-left me-1"></i> Назад к смене пароля
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -256,6 +627,101 @@
                     }
                 });
             }
+        });
+
+        /* --- Логика модального окна смены/восстановления пароля --- */
+        
+        function showRecoveryView() {
+            document.getElementById('cpStandardView').style.display = 'none';
+            document.getElementById('cpRecoveryView').style.display = 'block';
+        }
+
+        function showStandardView() {
+            document.getElementById('cpStandardView').style.display = 'block';
+            document.getElementById('cpRecoveryView').style.display = 'none';
+        }
+
+        async function saveNewPassword() {
+            const currentPass = document.getElementById('cpCurrentPass').value;
+            const newPass = document.getElementById('cpNewPass').value;
+            const confirmPass = document.getElementById('cpConfirmPass').value;
+
+            if (!currentPass || !newPass || !confirmPass) {
+                alert('Пожалуйста, заполните все поля.');
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                alert('Новые пароли не совпадают!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/account/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ oldPassword: currentPass, newPassword: newPass })
+                });
+
+                if (response.ok) {
+                    alert('Пароль успешно изменен!');
+                    const modalEl = document.getElementById('changePasswordModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                    document.getElementById('changePasswordForm').reset();
+                } else {
+                    const errorText = await response.text();
+                    alert('Ошибка: ' + errorText);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Сбой сети при попытке отправить запрос.');
+            }
+        }
+
+        async function sendRecoveryEmail() {
+            const email = document.getElementById('cpEmail').value;
+            if (!email || !email.includes('@@')) {
+                alert('Пожалуйста, введите корректный Email.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/account/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+
+                if (response.ok) {
+                    alert(`Ссылка для сброса пароля успешно отправлена на ${email}!\nПожалуйста, проверьте вашу почту.`);
+                    const modalEl = document.getElementById('changePasswordModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                    document.getElementById('recoveryPasswordForm').reset();
+                    showStandardView();
+                } else {
+                    const errorText = await response.text();
+                    alert('Ошибка: ' + errorText);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Сбой сети при попытке отправить запрос.');
+            }
+        }
+
+        // Очистка формы при закрытии модального окна
+        document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('changePasswordForm').reset();
+            
+            const recoveryForm = document.getElementById('recoveryPasswordForm');
+            if(recoveryForm) recoveryForm.reset();
+            
+            showStandardView(); // Всегда возвращать стандартный вид при новом открытии
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

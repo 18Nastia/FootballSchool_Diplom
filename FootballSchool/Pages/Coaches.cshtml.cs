@@ -70,15 +70,61 @@ namespace FootballSchool.Pages
         {
             try
             {
+                // 1. Сохраняем тренера первым, чтобы получить сгенерированный БД CoachId
                 _context.Coaches.Add(NewCoach);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = $"Тренер {NewCoach.SurnameCoach} {NewCoach.NameCoach} успешно добавлен!";
+
+                // 2. Генерируем сложный пароль (длина 12 символов)
+                var password = GenerateComplexPassword(12);
+
+                // 3. Формируем логин: coach_имя_айди (убираем пробелы и переводим в нижний регистр)
+                string safeName = NewCoach.NameCoach?.Replace(" ", "").ToLower() ?? "coach";
+                var login = $"coach_{safeName}_{NewCoach.CoachId}";
+
+                var newUser = new User
+                {
+                    Login = login,
+                    Password = password,
+                    Role = "Coach"
+                };
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Тренер {NewCoach.SurnameCoach} {NewCoach.NameCoach} успешно добавлен! Данные для входа: Логин - {login}, Пароль - {password}";
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "Ошибка при добавлении тренера: " + (ex.InnerException?.Message ?? ex.Message);
             }
             return RedirectToPage();
+        }
+
+        // Вспомогательный метод для генерации сложного пароля
+        private string GenerateComplexPassword(int length)
+        {
+            const string lower = "abcdefghijklmnopqrstuvwxyz";
+            const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string number = "1234567890";
+            const string special = "!@#$%^&*";
+
+            var random = new Random();
+            var password = new char[length];
+
+            // Гарантируем наличие хотя бы одного символа из каждой обязательной группы
+            password[0] = lower[random.Next(lower.Length)];
+            password[1] = upper[random.Next(upper.Length)];
+            password[2] = number[random.Next(number.Length)];
+            password[3] = special[random.Next(special.Length)];
+
+            // Заполняем оставшиеся символы случайным образом
+            const string allChars = lower + upper + number + special;
+            for (int i = 4; i < length; i++)
+            {
+                password[i] = allChars[random.Next(allChars.Length)];
+            }
+
+            // Перемешиваем символы для непредсказуемости
+            return new string(password.OrderBy(x => random.Next()).ToArray());
         }
     }
 }

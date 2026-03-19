@@ -61,8 +61,37 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostSaveAsync(bool isBulkAdd)
         {
+            // Очистка навигационных свойств от ошибок валидации, чтобы не блокировать сохранение
+            ModelState.Remove("ModalTraining.Facility");
+            ModelState.Remove("ModalTraining.Coach");
+            ModelState.Remove("ModalTraining.Team");
+            ModelState.Remove("ModalTraining.Attendances");
+
             try
             {
+                // Проверка совпадения филиалов группы и площадки
+                var team = await _context.Teams.FindAsync(ModalTraining.TeamId);
+                var facility = await _context.Facilities.FindAsync(ModalTraining.FacilityId);
+
+                if (team != null && facility != null && team.BranchId != facility.BranchId)
+                {
+                    TempData["ErrorMessage"] = "Ошибка: Выбранная группа и площадка должны относиться к одному филиалу.";
+                    return RedirectToPage(new { FilterBranchId, FilterTeamId, CurrentDate = CurrentDate?.ToString("yyyy-MM-dd"), ViewType });
+                }
+
+                // Добавление предупреждения, если тренировка создается/переносится на прошедшую дату
+                // Проверяем строго дату (день), игнорируя время
+                var today = DateOnly.FromDateTime(DateTime.Today);
+
+                if (ModalTraining.DateTraining < today)
+                {
+                    TempData["WarningMessage"] = "Внимание: Тренировка сохранена на прошедшую дату!";
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = "Тренировка успешно сохранена!";
+                }
+
                 if (ModalTraining.TrainingId == 0)
                 {
                     var newTraining = new Training
@@ -103,6 +132,7 @@ namespace FootballSchool.Pages
             }
             catch (Exception ex)
             {
+                TempData["ErrorMessage"] = "Ошибка сохранения: " + (ex.InnerException?.Message ?? ex.Message);
                 Console.WriteLine("Ошибка сохранения: " + ex.Message);
             }
 
@@ -125,6 +155,7 @@ namespace FootballSchool.Pages
 
                 _context.Training.Remove(training);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Тренировка успешно удалена.";
             }
 
             return RedirectToPage(new

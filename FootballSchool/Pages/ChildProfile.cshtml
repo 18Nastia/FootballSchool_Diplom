@@ -17,33 +17,45 @@
         .info-item i { margin-top: 2px; color: #2563EB; width: 16px; text-align: center; flex-shrink: 0; }
         .info-label { font-size: 12px; color: #6B7280; margin-bottom: 4px; }
         .info-value { font-size: 16px; font-weight: 600; color: #111827; }
-        .tabs { display: flex; gap: 8px; background: white; padding: 16px 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); width: 100%; }
+        
+        /* Вкладки */
+        .tabs { display: flex; gap: 8px; background: white; padding: 16px 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); width: 100%; overflow-x: auto;}
         .tab-btn { display: flex; align-items: center; gap: 8px; padding: 12px 24px; background: transparent; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #6B7280; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
         .tab-btn:hover { background: #F9FAFB; }
         .tab-btn.active { background: #EFF6FF; color: #2563EB; }
-        .content-sections { display: grid; gap: 24px; grid-template-columns: 1fr; width: 100%; }
-        .schedule-section, .results-section, .comments-section, .achievements-section { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); width: 100%; display: none; }
-        .schedule-section.active, .results-section.active, .comments-section.active, .achievements-section.active { display: block; }
-        h3 { font-size: 24px; font-weight: 700; margin-bottom: 32px; color: #111827; }
         
-        .admin-actions {
-            position: absolute;
-            top: 32px;
-            right: 32px;
-            display: flex;
-            gap: 12px;
-        }
-        .btn-edit, .btn-delete {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid transparent;
-        }
+        /* Контент секций */
+        .content-sections { display: grid; gap: 24px; grid-template-columns: 1fr; width: 100%; }
+        .schedule-section, .results-section, .achievements-section { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); width: 100%; display: none; }
+        .schedule-section.active, .results-section.active, .achievements-section.active { display: block; }
+        h3 { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: #111827; border-bottom: 2px solid #F3F4F6; padding-bottom: 12px; }
+
+        /* Расписание */
+        .schedule-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+        .schedule-card { display: flex; align-items: center; gap: 16px; background: #F9FAFB; padding: 16px; border-radius: 12px; border: 1px solid #E5E7EB; border-left: 4px solid #2563EB; }
+        .schedule-card-icon { font-size: 24px; color: #2563EB; background: #DBEAFE; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
+        .schedule-details h4 { margin: 0; font-size: 16px; font-weight: 600; color: #111827; text-transform: capitalize; }
+        .schedule-details p { margin: 4px 0 0; font-size: 13px; color: #6B7280; }
+        .schedule-details .s-date { font-size: 12px; color: #2563EB; font-weight: 500; display: block; margin-bottom: 2px; }
+
+        /* Результаты */
+        .results-list { display: flex; flex-direction: column; gap: 12px; }
+        .result-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; }
+        .result-info h4 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #111827; }
+        .result-info p { margin: 0; font-size: 13px; color: #6B7280; }
+        .result-score { font-size: 18px; font-weight: 700; color: #059669; background: #D1FAE5; padding: 6px 16px; border-radius: 20px; white-space: nowrap;}
+
+        /* Достижения */
+        .achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .achievement-card { display: flex; flex-direction: column; border: 1px solid #E5E7EB; border-radius: 12px; background: #ffffff; transition: transform 0.2s; overflow: hidden; }
+        .achievement-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .achievement-icon-wrapper { width: 80px; height: 80px; margin: 0 auto 16px; background: #FEF3C7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #D97706; }
+        .achievement-card h4 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #111827; }
+        .achievement-card p { font-size: 13px; color: #6B7280; margin-bottom: auto; }
+        .achievement-date { font-size: 12px; font-weight: 500; color: #9CA3AF; margin-top: 12px; border-top: 1px dashed #E5E7EB; padding-top: 12px; }
+
+        .admin-actions { position: absolute; top: 32px; right: 32px; display: flex; gap: 12px; }
+        .btn-edit, .btn-delete { padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; border: 1px solid transparent; }
         .btn-edit { background: white; border-color: #D1D5DB; color: #374151; }
         .btn-edit:hover { background: #F3F4F6; }
         .btn-delete { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
@@ -132,7 +144,7 @@
             <div class="text-center py-5 text-muted w-100">
                 <h5>Ученик не найден</h5>
                 <p>Пожалуйста, выберите ученика из общего списка.</p>
-                <a href="/Students" class="btn btn-primary mt-3">Вернуться к списку</a>
+                <a href="/GroupsStudents" class="btn btn-primary mt-3">Вернуться к списку</a>
             </div>
         }
     </div>
@@ -142,24 +154,123 @@
         <!-- Вкладки -->
         <div class="tabs">
             <button class="tab-btn active" data-tab="schedule"><i class="fas fa-calendar-alt"></i> Расписание</button>
-            <button class="tab-btn" data-tab="results"><i class="fas fa-chart-line"></i> Результаты</button>
-            <button class="tab-btn" data-tab="achievements"><i class="fas fa-trophy"></i> Достижения</button>
+            <button class="tab-btn" data-tab="results"><i class="fas fa-chart-line"></i> Результаты тестирования</button>
+            <button class="tab-btn" data-tab="achievements"><i class="fas fa-medal"></i> Достижения</button>
         </div>
 
         <div class="content-sections">
+            
+            <!-- Секция Расписание -->
             <section class="schedule-section active" id="schedule-section">
-                <h3>Расписание занятий</h3>
-                <p class="text-muted">Здесь будет выводиться расписание группы @Model.StudentProfile.TeamName</p>
+                <h3>Ближайшие тренировки группы «@Model.StudentProfile.TeamName»</h3>
+                @if (Model.StudentProfile.Schedule.Any())
+                {
+                    <div class="schedule-grid">
+                        @foreach (var session in Model.StudentProfile.Schedule)
+                        {
+                            <div class="schedule-card">
+                                <div class="schedule-card-icon">
+                                    <i class="far fa-calendar-check"></i>
+                                </div>
+                                <div class="schedule-details">
+                                    <span class="s-date">@session.Date</span>
+                                    <h4>@session.DayOfWeek</h4>
+                                    <p>@session.Time | @session.Location</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Для данной группы будущих тренировок пока не запланировано.</p>
+                }
             </section>
 
+            <!-- Секция Результаты -->
             <section class="results-section" id="results-section">
-                <h3>Результаты</h3>
-                <p class="text-muted">Раздел в разработке</p>
+                <h3>Динамика и результаты нормативов</h3>
+                @if (Model.StudentProfile.Results.Any())
+                {
+                    <div class="results-list">
+                        @foreach (var result in Model.StudentProfile.Results)
+                        {
+                            <div class="result-item">
+                                <div class="result-info">
+                                    <h4>@result.MetricName</h4>
+                                    <p><i class="far fa-clock"></i> @result.Date | @result.Comment</p>
+                                </div>
+                                <div class="result-score">@result.Score</div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Результаты нормативов и тестов пока не добавлены тренером.</p>
+                }
             </section>
 
+            <!-- Секция Достижения -->
             <section class="achievements-section" id="achievements-section">
-                <h3>Достижения</h3>
-                <p class="text-muted">Раздел в разработке</p>
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <h3 class="m-0 border-0 pb-0">Личные достижения</h3>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAchievementModal" style="background-color: #2563EB; border: none; padding: 8px 16px; border-radius: 8px; color: white;">
+                            <i class="fas fa-plus me-1"></i> Добавить достижение
+                        </button>
+                    }
+                </div>
+
+                @if (Model.StudentProfile.Achievements.Any())
+                {
+                    <div class="achievements-grid">
+                        @foreach (var ach in Model.StudentProfile.Achievements)
+                        {
+                            <div class="achievement-card">
+                                @if (!string.IsNullOrEmpty(ach.PhotoPath))
+                                {
+                                    <img src="@ach.PhotoPath" alt="@ach.Title" style="width: 100%; height: 180px; object-fit: cover;" />
+                                    <div class="p-3 d-flex flex-column" style="flex: 1;">
+                                        <h4>@ach.Title</h4>
+                                        <p>@ach.Description</p>
+                                        <div class="achievement-date"><i class="far fa-calendar-alt me-1"></i> @ach.Date</div>
+                                        
+                                        @if (User.IsInRole("Admin") && ach.IsManual)
+                                        {
+                                            <form method="post" asp-page-handler="DeleteProgress" asp-route-progressId="@ach.Id" asp-route-studentId="@Model.StudentProfile.StudentId" onsubmit="return confirm('Вы уверены, что хотите удалить это достижение?');" class="mt-3">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="fas fa-trash"></i> Удалить</button>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="p-4 d-flex flex-column text-center" style="flex: 1;">
+                                        <div class="achievement-icon-wrapper">
+                                            <i class="@ach.IconClass"></i>
+                                        </div>
+                                        <h4>@ach.Title</h4>
+                                        <p>@ach.Description</p>
+                                        <div class="achievement-date"><i class="far fa-calendar-alt me-1"></i> @ach.Date</div>
+                                        
+                                        @if (User.IsInRole("Admin") && ach.IsManual)
+                                        {
+                                            <form method="post" asp-page-handler="DeleteProgress" asp-route-progressId="@ach.Id" asp-route-studentId="@Model.StudentProfile.StudentId" onsubmit="return confirm('Вы уверены, что хотите удалить это достижение?');" class="mt-3 w-100">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="fas fa-trash"></i> Удалить</button>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Здесь будут отображаться полученные достижения, сданные нормативы и медали.</p>
+                }
             </section>
         </div>
     }
@@ -167,6 +278,46 @@
 
 @if (Model.StudentProfile != null)
 {
+    @if (User.IsInRole("Admin"))
+    {
+        <!-- Модальное окно: Добавление достижения -->
+        <div class="modal fade" id="addAchievementModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="post" asp-page-handler="AddAchievement" enctype="multipart/form-data">
+                        <input type="hidden" name="studentId" value="@Model.StudentProfile.StudentId" />
+                        <div class="modal-header">
+                            <h5 class="modal-title">Новое достижение</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Заголовок (Событие)</label>
+                                <input asp-for="NewAchievement.Title" class="form-control" placeholder="Например: Победитель летнего кубка" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Дата получения</label>
+                                <input asp-for="NewAchievement.Date" type="date" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Описание</label>
+                                <textarea asp-for="NewAchievement.Description" class="form-control" rows="3" placeholder="Краткое описание за что получена награда..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Фотография (Медаль, Грамота, Кубок)</label>
+                                <input type="file" name="AchievementPhoto" class="form-control" accept="image/*" />
+                                <small class="text-muted">Загрузите фотографию для подтверждения. Это не обязательно.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none; width: 100%;">Сохранить достижение</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
     <!-- Модальное окно редактирования -->
     <div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">

@@ -207,7 +207,6 @@ namespace FootballSchool.Pages
             return RedirectToPage();
         }
 
-        // Новый метод для удаления результата
         public async Task<IActionResult> OnPostDeleteResultAsync(int resultId)
         {
             try

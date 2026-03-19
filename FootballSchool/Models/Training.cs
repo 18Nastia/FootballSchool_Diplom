@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FootballSchool.Models;
 
+[Table("Training")]
 public partial class Training
 {
     [Key]
@@ -25,6 +26,7 @@ public partial class Training
     public DateOnly DateTraining { get; set; }
 
     [Column("Time_training")]
+
     public TimeOnly TimeTraining { get; set; }
 
     [Column("Plan_training", TypeName = "text")]
@@ -42,6 +44,5 @@ public partial class Training
     public virtual Facility Facility { get; set; } = null!;
 
     [ForeignKey("TeamId")]
-    [InverseProperty("Training")]
-    public virtual Team Team { get; set; } = null!;
+    [InverseProperty("Training")]    public virtual Team Team { get; set; } = null!;
 }

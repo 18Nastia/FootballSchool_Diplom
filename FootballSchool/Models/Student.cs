@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation; // <-- Подключаем ValidateNever
 using Microsoft.EntityFrameworkCore;
 
 namespace FootballSchool.Models;
@@ -16,7 +17,6 @@ public partial class Student
     [Column("Team_ID")]
     public int? TeamId { get; set; }
 
-    // НОВОЕ ПОЛЕ: Связь с пользователем
     [Column("User_ID")]
     public int? UserId { get; set; }
 
@@ -107,19 +107,24 @@ public partial class Student
     public string? ApartmentStudent { get; set; }
 
     [InverseProperty("Student")]
+    [ValidateNever]
     public virtual ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
 
     [InverseProperty("Student")]
+    [ValidateNever]
     public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
 
     [InverseProperty("Student")]
+    [ValidateNever]
     public virtual ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
 
     [ForeignKey("TeamId")]
     [InverseProperty("Students")]
+    [ValidateNever]
     public virtual Team? Team { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("Students")]
+    [ValidateNever]
     public virtual User? User { get; set; }
 }

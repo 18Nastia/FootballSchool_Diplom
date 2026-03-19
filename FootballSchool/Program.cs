@@ -6,12 +6,15 @@ using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Настройка сервисов
+// Настройка сервисов для Razor Pages
 builder.Services.AddRazorPages(options =>
 {
     // Ограничиваем доступ ко всем страницам по умолчанию
     options.Conventions.AuthorizeFolder("/Main_Pages");
 });
+
+// Настройка сервисов для Controllers (API для смены пароля)
+builder.Services.AddControllers();
 
 builder.Services.Configure<FormOptions>(o =>
 {
@@ -60,6 +63,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers();
 
 // Редирект в зависимости от авторизации
 app.MapGet("/", async (HttpContext context) =>
@@ -72,6 +76,10 @@ app.MapGet("/", async (HttpContext context) =>
     if (context.User.IsInRole("Admin"))
     {
         return Results.Redirect("/Main_Pages/Index_Admin");
+    }
+    else if (context.User.IsInRole("Coach"))
+    {
+        return Results.Redirect("/Main_Pages/Index_Coach");
     }
     else
     {

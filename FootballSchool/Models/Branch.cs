@@ -39,9 +39,13 @@ public partial class Branch
     public string PhoneBranch { get; set; } = null!;
 
     [Column("Photo_branch")]
-    [StringLength(255)] 
+    [StringLength(255)]
     public string? PhotoBranch { get; set; }
 
     [InverseProperty("Branch")]
     public virtual ICollection<Facility> Facilities { get; set; } = new List<Facility>();
+
+    // Привязка групп (команд) к филиалу
+    [InverseProperty("Branch")]
+    public virtual ICollection<Team> Teams { get; set; } = new List<Team>();
 }

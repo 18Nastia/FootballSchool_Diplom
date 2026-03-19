@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FootballSchool.Models;
@@ -26,9 +27,23 @@ namespace FootballSchool.Pages
         public string Password { get; set; }
 
         public string ErrorMessage { get; set; }
+        public string InfoMessage { get; set; }
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
+            // Автоматическое создание админа при первом запуске
+            if (!await _context.Users.AnyAsync())
+            {
+                var admin = new User
+                {
+                    Login = "admin",
+                    Password = "admin",
+                    Role = "Admin"
+                };
+                _context.Users.Add(admin);
+                await _context.SaveChangesAsync();
+                InfoMessage = "Система инициализирована. Создан аккаунт администратора: Логин - admin, Пароль - admin. Рекомендуется сменить пароль после входа.";
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -40,7 +55,6 @@ namespace FootballSchool.Pages
             }
 
             // Ищем пользователя в БД
-            // Примечание: В реальном проекте используйте хеширование паролей!
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Login == Login && u.Password == Password);
 
@@ -52,6 +66,17 @@ namespace FootballSchool.Pages
                     new Claim(ClaimTypes.Role, user.Role),
                     new Claim("UserId", user.UserId.ToString())
                 };
+
+                if (user.Role == "Coach")
+                {
+                    // Извлекаем ID тренера из логина (формат: coach_имя_айди)
+                    var parts = user.Login.Split('_');
+                    if (parts.Length > 0)
+                    {
+                        var coachId = parts.Last(); // Берем последнюю часть после подчеркивания
+                        claims.Add(new Claim("CoachId", coachId));
+                    }
+                }
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -67,6 +92,8 @@ namespace FootballSchool.Pages
 
                 if (user.Role == "Admin")
                     return RedirectToPage("/Main_Pages/Index_Admin");
+                else if (user.Role == "Coach")
+                    return RedirectToPage("/Main_Pages/Index_Coach");
                 else
                     return RedirectToPage("/Main_Pages/Index_Parent");
             }

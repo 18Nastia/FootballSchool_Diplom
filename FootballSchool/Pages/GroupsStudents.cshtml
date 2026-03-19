@@ -525,6 +525,15 @@
                         <label class="form-label">Название группы</label>
                         <input asp-for="NewTeam.CategoryTeam" class="form-control" placeholder="Например: Юниоры U10" required />
                     </div>
+
+                    <!-- Выбор филиала при создании группы -->
+                    <div class="mb-3">
+                        <label class="form-label">Привязать к филиалу</label>
+                        <select asp-for="NewTeam.BranchId" asp-items="Model.BranchSelectList" class="form-select" required>
+                            <option value="">-- Выберите филиал --</option>
+                        </select>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Статус группы</label>
                         <select asp-for="NewTeam.StatusTeam" class="form-select" required>
@@ -589,7 +598,8 @@
                         <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewStudent.SurnameParent" class="form-control" required /></div>
                         <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewStudent.NameParent" class="form-control" required /></div>
                         <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewStudent.MiddleParent" class="form-control" /></div>
-                        <div class="col-md-12 mb-3"><label>Телефон родителя</label><input asp-for="NewStudent.ParentNumber" class="form-control" required placeholder="+7 (999) 000-00-00" /></div>
+                        <div class="col-md-6 mb-3"><label>Телефон родителя</label><input asp-for="NewStudent.ParentNumber" class="form-control" required placeholder="+7 (999) 000-00-00" /></div>
+                        <div class="col-md-6 mb-3"><label>Email родителя</label><input asp-for="ParentEmail" type="email" class="form-control" placeholder="example@mail.ru" /></div>
                     </div>
 
                     <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Адрес проживания</h6>

@@ -1,4 +1,4 @@
-п»їusing System.IO;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FootballSchool.Pages
 {
-    public class PrivacyModel : PageModel
+    public class AboutModel : PageModel
     {
         private readonly IWebHostEnvironment _env;
 
-        public PrivacyModel(IWebHostEnvironment env)
+        public AboutModel(IWebHostEnvironment env)
         {
             _env = env;
         }
@@ -18,7 +18,8 @@ namespace FootballSchool.Pages
         [BindProperty]
         public string PageContent { get; set; } = string.Empty;
 
-        private string FilePath => Path.Combine(_env.ContentRootPath, "TextContent", "Privacy.txt");
+        // Файл будет храниться в папке TextContent в корне проекта
+        private string FilePath => Path.Combine(_env.ContentRootPath, "TextContent", "About.txt");
 
         public async Task OnGetAsync()
         {
@@ -28,7 +29,7 @@ namespace FootballSchool.Pages
             }
             else
             {
-                PageContent = "РџРѕР»РёС‚РёРєР° РѕР±СЂР°Р±РѕС‚РєРё РїРµСЂСЃРѕРЅР°Р»СЊРЅС‹С… РґР°РЅРЅС‹С…...\nР—РґРµСЃСЊ Р±СѓРґРµС‚ СЂР°Р·РјРµС‰РµРЅ С‚РµРєСЃС‚ РїРѕР»РёС‚РёРєРё РєРѕРЅС„РёРґРµРЅС†РёР°Р»СЊРЅРѕСЃС‚Рё.";
+                PageContent = "Добро пожаловать в нашу футбольную школу! Здесь будет размещена информация о нас.";
             }
         }
 
@@ -43,7 +44,7 @@ namespace FootballSchool.Pages
             }
 
             await System.IO.File.WriteAllTextAsync(FilePath, PageContent ?? "");
-            TempData["SuccessMessage"] = "РўРµРєСЃС‚ СЃС‚СЂР°РЅРёС†С‹ В«РџРѕР»РёС‚РёРєР° РєРѕРЅС„РёРґРµРЅС†РёР°Р»СЊРЅРѕСЃС‚РёВ» СѓСЃРїРµС€РЅРѕ СЃРѕС…СЂР°РЅРµРЅ!";
+            TempData["SuccessMessage"] = "Текст страницы «О нас» успешно сохранен!";
             return RedirectToPage();
         }
     }

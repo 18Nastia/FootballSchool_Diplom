@@ -14,19 +14,51 @@
             font-size: 28px;
             font-weight: 600;
             color: #1a1a1a;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e5e5e7;
+        }
+
+        .tab-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #6e6e73;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+            .tab-link:hover {
+                color: #1d1d1f;
+            }
+
+            .tab-link.active {
+                color: #2563eb;
+                border-bottom-color: #2563eb;
+            }
 
         .filters {
             display: flex;
             gap: 24px;
             margin-bottom: 24px;
-            flex-wrap: wrap; /* Добавлено для адаптивности 3 полей */
+            flex-wrap: wrap; 
         }
 
         .filter-group {
             flex: 1;
-            min-width: 200px; /* Чтобы поля не сжимались слишком сильно */
+            min-width: 200px; 
         }
 
         .filter-label {
@@ -112,16 +144,6 @@
                 background-color: #dc2626;
             }
 
-        .hint-text {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 16px;
-            padding: 12px 16px;
-            background-color: #f8fafc;
-            border-radius: 6px;
-            border-left: 4px solid #3b82f6;
-        }
-
         .attendance-table {
             background-color: white;
             border-radius: 8px;
@@ -157,6 +179,10 @@
             .table-row:last-child {
                 border-bottom: none;
             }
+
+        .report-grid {
+            grid-template-columns: 2fr 1fr 1fr 1fr 2fr !important;
+        }
 
         .student-name {
             font-size: 15px;
@@ -268,7 +294,7 @@
             }
 
             .table-header {
-                display: none; /* Скрываем заголовки на мобилке */
+                display: none;
             }
 
             .table-row {
@@ -284,6 +310,15 @@
             .action-buttons, .bottom-actions {
                 flex-direction: column;
             }
+
+            .report-grid {
+                grid-template-columns: 1fr !important;
+                gap: 8px;
+            }
+            
+            .report-grid > div {
+                text-align: left !important;
+            }
         }
     </style>
 }
@@ -291,7 +326,8 @@
 <div class="attendance-page">
     <div class="main-content">
 
-        <!-- Вывод сообщения об успешном сохранении -->
+        <h1 class="page-title">Учет и статистика посещаемости</h1>
+
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success mb-4" style="background-color: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 16px; border-radius: 8px;">
@@ -299,121 +335,204 @@
             </div>
         }
 
-        <!-- Форма фильтров (отправляется GET запросом при изменении) -->
-        <form method="get" class="filters">
-            <div class="filter-group">
-                <label class="filter-label">Выберите группу</label>
-                <select asp-for="FilterTeamId" asp-items="Model.TeamList" class="select-input" onchange="this.form.submit()"></select>
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">Дата</label>
-                <input type="date" asp-for="FilterDate" class="date-input" onchange="this.form.submit()">
-            </div>
+        <!-- Навигация по вкладкам (Daily - Журнал, Report - Статистика) -->
+        <div class="tabs">
+            <a href="?ViewMode=Daily&FilterTeamId=@Model.FilterTeamId" class="tab-link @(Model.ViewMode == "Daily" ? "active" : "")">
+                <i class="fas fa-clipboard-check"></i> Журнал тренировок
+            </a>
+            <a href="?ViewMode=Report&FilterTeamId=@Model.FilterTeamId" class="tab-link @(Model.ViewMode == "Report" ? "active" : "")">
+                <i class="fas fa-chart-bar"></i> Статистика и отчеты
+            </a>
+        </div>
 
-            <!-- Блок выбора конкретной тренировки (если они есть) -->
-            @if (Model.AvailableTrainings != null && Model.AvailableTrainings.Any())
-            {
+        @if (Model.ViewMode == "Daily")
+        {
+            <!-- Вкладка: Ежедневный журнал -->
+            <form method="get" class="filters">
+                <input type="hidden" name="ViewMode" value="Daily" />
                 <div class="filter-group">
-                    <label class="filter-label">Выберите занятие</label>
-                    <select asp-for="SelectedTrainingId" class="select-input" onchange="this.form.submit()">
-                        <option value="">-- Выберите тренировку --</option>
-                        @foreach(var t in Model.AvailableTrainings)
-                        {
-                            var time = t.TimeTraining.ToString("HH:mm");
-                            var plan = string.IsNullOrEmpty(t.PlanTraining) ? "Тренировка" : t.PlanTraining;
-                            <option value="@t.TrainingId">@time - @plan</option>
-                        }
-                    </select>
+                    <label class="filter-label">Выберите группу</label>
+                    <select asp-for="FilterTeamId" asp-items="Model.TeamList" class="select-input" onchange="this.form.submit()"></select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Дата</label>
+                    <input type="date" asp-for="FilterDate" class="date-input" onchange="this.form.submit()">
+                </div>
+
+                @if (Model.AvailableTrainings != null && Model.AvailableTrainings.Any())
+                {
+                    <div class="filter-group">
+                        <label class="filter-label">Выберите занятие</label>
+                        <select asp-for="SelectedTrainingId" class="select-input" onchange="this.form.submit()">
+                            <option value="">-- Выберите тренировку --</option>
+                            @foreach(var t in Model.AvailableTrainings)
+                            {
+                                var time = t.TimeTraining.ToString("HH:mm");
+                                var plan = string.IsNullOrEmpty(t.PlanTraining) ? "Тренировка" : t.PlanTraining;
+                                var statusIcon = Model.FilledTrainingIds.Contains(t.TrainingId) ? "✅" : "⏳";
+                                <option value="@t.TrainingId">@statusIcon @time - @plan</option>
+                            }
+                        </select>
+                    </div>
+                }
+            </form>
+
+            @if (Model.AvailableTrainings == null || !Model.AvailableTrainings.Any())
+            {
+                <div class="no-data-alert">
+                    <i class="fas fa-calendar-times" style="font-size: 24px; margin-bottom: 12px; display: block;"></i>
+                    <strong>Тренировок не найдено.</strong><br/>
+                    На выбранную дату для данной группы тренировки не запланированы.
                 </div>
             }
-        </form>
+            else if (!Model.SelectedTrainingId.HasValue)
+            {
+                <div class="info-alert">
+                    <i class="fas fa-hand-pointer" style="font-size: 24px; margin-bottom: 12px; display: block; color: #64748b;"></i>
+                    <strong>Выберите тренировку</strong><br/>
+                    В выпадающем списке занятия отмечены иконками (✅ - заполнено, ⏳ - ожидает). Выберите занятие для продолжения.
+                </div>
+            }
+            else
+            {
+                <!-- Статус-баннер -->
+                @if (Model.IsAlreadyFilled)
+                {
+                    <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                        <i class="fas fa-check-circle me-2"></i> <strong>Журнал заполнен!</strong> Посещаемость для этой тренировки уже была отмечена. Вы можете внести изменения и сохранить их снова.
+                    </div>
+                }
+                else
+                {
+                    <div style="background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                        <i class="fas fa-exclamation-circle me-2"></i> <strong>Журнал не заполнен.</strong> Отметьте присутствующих учеников и нажмите "Сохранить".
+                    </div>
+                }
 
-        @if (Model.AvailableTrainings == null || !Model.AvailableTrainings.Any())
-        {
-            <div class="no-data-alert">
-                <i class="fas fa-calendar-times" style="font-size: 24px; margin-bottom: 12px; display: block;"></i>
-                <strong>Тренировок не найдено.</strong><br/>
-                На выбранную дату для данной группы тренировки не запланированы.
-            </div>
-        }
-        else if (!Model.SelectedTrainingId.HasValue)
-        {
-            <div class="info-alert">
-                <i class="fas fa-hand-pointer" style="font-size: 24px; margin-bottom: 12px; display: block; color: #64748b;"></i>
-                <strong>Выберите тренировку</strong><br/>
-                Пожалуйста, выберите конкретное занятие из списка выше, чтобы отметить посещаемость.
-            </div>
-        }
-        else
-        {
-            <div class="stats-box">
-                <div class="stats-title">Информация о тренировке</div>
-                <div class="stats-text mb-2">@Model.TrainingInfo</div>
-                <div class="stats-text" id="live-stats">Присутствует: <strong>0 из 0 учеников (0%)</strong></div>
-            </div>
-
-            <!-- Форма сохранения посещаемости -->
-            <form method="post" asp-page-handler="Save">
-                <input type="hidden" asp-for="SelectedTrainingId" />
-                <input type="hidden" asp-for="FilterTeamId" />
-                <input type="hidden" asp-for="FilterDate" />
-
-                <div class="action-buttons">
-                    <button type="button" class="btn-mark-all" onclick="markAllPresent()">
-                        <i class="fas fa-check-circle"></i>
-                        Отметить всех
-                    </button>
-                    <button type="button" class="btn-mark-none" onclick="markAllAbsent()">
-                        <i class="fas fa-times-circle"></i>
-                        Никого нет
-                    </button>
+                <div class="stats-box">
+                    <div class="stats-title">Информация о тренировке</div>
+                    <div class="stats-text mb-2">@Model.TrainingInfo</div>
+                    <div class="stats-text" id="live-stats">Присутствует: <strong>0 из 0 учеников (0%)</strong></div>
                 </div>
 
-                <div class="attendance-table">
-                    <div class="table-header">
-                        <div>Ученик</div>
-                        <div>Статус</div>
-                        <div>Комментарий</div>
+                <form method="post" asp-page-handler="Save">
+                    <input type="hidden" name="ViewMode" value="Daily" />
+                    <input type="hidden" asp-for="SelectedTrainingId" />
+                    <input type="hidden" asp-for="FilterTeamId" />
+                    <input type="hidden" asp-for="FilterDate" />
+
+                    <div class="action-buttons">
+                        <button type="button" class="btn-mark-all" onclick="markAllPresent()">
+                            <i class="fas fa-check-circle"></i>
+                            Отметить всех "Был"
+                        </button>
+                        <button type="button" class="btn-mark-none" onclick="markAllAbsent()">
+                            <i class="fas fa-times-circle"></i>
+                            Никого нет
+                        </button>
                     </div>
 
-                    @if (!Model.AttendanceItems.Any())
-                    {
-                        <div class="p-4 text-center text-muted">В данной группе пока нет учеников.</div>
-                    }
+                    <div class="attendance-table">
+                        <div class="table-header">
+                            <div>Ученик</div>
+                            <div>Статус</div>
+                            <div>Комментарий</div>
+                        </div>
 
-                    @for (int i = 0; i < Model.AttendanceItems.Count; i++)
-                    {
-                        <div class="table-row student-row">
-                            <input type="hidden" asp-for="AttendanceItems[i].StudentId" />
-                            
-                            <div class="student-name">@Model.AttendanceItems[i].StudentName</div>
-                            
-                            <div class="status-group">
-                                <label class="radio-option">
-                                    <input type="radio" asp-for="AttendanceItems[i].Status" value="Был" onchange="updateStatistics()" />
-                                    <span>Был</span>
-                                </label>
-                                <label class="radio-option absent">
-                                    <input type="radio" asp-for="AttendanceItems[i].Status" value="Не был" onchange="updateStatistics()" />
-                                    <span>Не был</span>
-                                </label>
+                        @if (!Model.AttendanceItems.Any())
+                        {
+                            <div class="p-4 text-center text-muted">В данной группе пока нет учеников.</div>
+                        }
+
+                        @for (int i = 0; i < Model.AttendanceItems.Count; i++)
+                        {
+                            <div class="table-row student-row">
+                                <input type="hidden" asp-for="AttendanceItems[i].StudentId" />
+                                
+                                <div class="student-name">@Model.AttendanceItems[i].StudentName</div>
+                                
+                                <div class="status-group">
+                                    <label class="radio-option">
+                                        <input type="radio" asp-for="AttendanceItems[i].Status" value="Был" onchange="updateStatistics()" />
+                                        <span>Был</span>
+                                    </label>
+                                    <label class="radio-option absent">
+                                        <input type="radio" asp-for="AttendanceItems[i].Status" value="Не был" onchange="updateStatistics()" />
+                                        <span>Не был</span>
+                                    </label>
+                                </div>
+                                
+                                <div>
+                                    <input type="text" asp-for="AttendanceItems[i].Comment" class="comment-input" placeholder="Комментарий (необязательно)">
+                                </div>
                             </div>
-                            
+                        }
+                    </div>
+
+                    <div class="bottom-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i>
+                            Сохранить журнал
+                        </button>
+                    </div>
+                </form>
+            }
+        }
+        else if (Model.ViewMode == "Report")
+        {
+            <!-- Вкладка: Статистика и отчеты -->
+            <form method="get" class="filters mb-4">
+                <input type="hidden" name="ViewMode" value="Report" />
+                <div class="filter-group">
+                    <label class="filter-label">Выберите группу</label>
+                    <select asp-for="FilterTeamId" asp-items="Model.TeamList" class="select-input" onchange="this.form.submit()"></select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Период для отчета</label>
+                    <select asp-for="ReportPeriod" class="select-input" onchange="this.form.submit()">
+                        <option value="week">За последние 7 дней</option>
+                        <option value="month">За последний месяц</option>
+                        <option value="year">За последний год</option>
+                        <option value="all">За все время</option>
+                    </select>
+                </div>
+            </form>
+
+            <div class="attendance-table">
+                <div class="table-header report-grid">
+                    <div>Ученик</div>
+                    <div class="text-center">Занятий всего</div>
+                    <div class="text-center" style="color: #16a34a;">Присутствовал</div>
+                    <div class="text-center" style="color: #dc2626;">Пропустил</div>
+                    <div>% Посещаемости</div>
+                </div>
+                
+                @if (!Model.ReportStats.Any())
+                {
+                    <div class="p-4 text-center text-muted" style="background-color: #f8fafc;">В выбранном периоде не было проведенных тренировок или в группе нет учеников.</div>
+                }
+                else
+                {
+                    @foreach (var stat in Model.ReportStats)
+                    {
+                        <div class="table-row report-grid">
+                            <div class="student-name">@stat.StudentName</div>
+                            <div class="text-center" style="font-weight: 600;">@stat.TotalTrainings</div>
+                            <div class="text-center" style="color: #16a34a; font-weight: 600;">@stat.Attended</div>
+                            <div class="text-center" style="color: #dc2626; font-weight: 600;">@stat.Absent</div>
                             <div>
-                                <input type="text" asp-for="AttendanceItems[i].Comment" class="comment-input" placeholder="Комментарий (необязательно)">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                        <div style="height: 100%; width: @stat.Percentage%; background: @(stat.Percentage >= 75 ? "#10b981" : stat.Percentage >= 50 ? "#f59e0b" : "#ef4444"); transition: width 0.5s ease;"></div>
+                                    </div>
+                                    <span style="font-size: 14px; font-weight: 600; width: 45px; text-align: right;">@stat.Percentage%</span>
+                                </div>
                             </div>
                         </div>
                     }
-                </div>
-
-                <div class="bottom-actions">
-                    <button type="submit" class="btn-save">
-                        <i class="fas fa-save"></i>
-                        Сохранить
-                    </button>
-                </div>
-            </form>
+                }
+            </div>
         }
 
     </div>
@@ -436,8 +555,11 @@
             });
 
             const percentage = Math.round((presentCount / totalStudents) * 100);
-            document.getElementById('live-stats').innerHTML =
-                `Присутствует: <strong>${presentCount} из ${totalStudents} учеников (${percentage}%)</strong>`;
+            
+            const statsElement = document.getElementById('live-stats');
+            if(statsElement) {
+                statsElement.innerHTML = `Присутствует: <strong>${presentCount} из ${totalStudents} учеников (${percentage}%)</strong>`;
+            }
         }
 
         function markAllPresent() {

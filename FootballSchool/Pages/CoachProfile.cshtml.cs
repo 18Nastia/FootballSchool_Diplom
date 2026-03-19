@@ -30,6 +30,7 @@ namespace FootballSchool.Pages
             public string Schedule { get; set; } = string.Empty;
             public string Salary { get; set; } = string.Empty;
             public List<CoachGroupDto> Groups { get; set; } = new List<CoachGroupDto>();
+            public List<CoachAwardDto> Awards { get; set; } = new List<CoachAwardDto>();
         }
 
         public class CoachGroupDto
@@ -37,6 +38,14 @@ namespace FootballSchool.Pages
             public string CategoryName { get; set; } = string.Empty;
             public int StudentsCount { get; set; }
             public string ScheduleInfo { get; set; } = string.Empty;
+        }
+
+        public class CoachAwardDto
+        {
+            public string Title { get; set; } = string.Empty;
+            public string Date { get; set; } = string.Empty;
+            public string Description { get; set; } = string.Empty;
+            public string IconClass { get; set; } = "fas fa-medal";
         }
 
         public CoachProfileDto Profile { get; set; } = default!;
@@ -54,21 +63,76 @@ namespace FootballSchool.Pages
 
             if (coach == null) return NotFound();
 
-            var activeGroups = coach.Training.Where(t => t.Team != null).GroupBy(t => t.Team).ToList();
+            // 1. ДИНАМИЧЕСКИЕ ГРУППЫ ТРЕНЕРА
+            // Выбираем только те команды, для которых у тренера есть будущие/текущие тренировки,
+            // либо если их нет - вообще все исторические группы.
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var activeTrainings = coach.Training.Where(t => t.Team != null && t.DateTraining >= today).ToList();
+
+            // Если нет будущих тренировок, показываем все закрепленные группы из истории
+            if (!activeTrainings.Any())
+            {
+                activeTrainings = coach.Training.Where(t => t.Team != null).ToList();
+            }
+
+            var groupedTeams = activeTrainings.GroupBy(t => t.Team).ToList();
             var groupsDto = new List<CoachGroupDto>();
 
-            foreach (var g in activeGroups)
+            var culture = new System.Globalization.CultureInfo("ru-RU");
+
+            foreach (var g in groupedTeams)
             {
                 var team = g.Key;
-                var days = g.Select(tr => tr.DateTraining.ToString("ddd")).Distinct();
+                // Собираем уникальные дни недели для этой группы
+                var days = g.Select(tr => culture.DateTimeFormat.GetAbbreviatedDayName(tr.DateTraining.DayOfWeek)).Distinct();
                 string daysStr = string.Join(", ", days);
-                var firstTime = g.FirstOrDefault()?.TimeTraining.ToString("HH:mm") ?? "";
+                var firstTime = g.OrderBy(tr => tr.TimeTraining).FirstOrDefault()?.TimeTraining.ToString("HH:mm") ?? "";
 
                 groupsDto.Add(new CoachGroupDto
                 {
                     CategoryName = team.CategoryTeam,
                     StudentsCount = team.Students.Count,
-                    ScheduleInfo = $"{daysStr} {firstTime}"
+                    ScheduleInfo = string.IsNullOrEmpty(daysStr) ? "Расписание уточняется" : $"{daysStr} в {firstTime}"
+                });
+            }
+
+            // 2. ДИНАМИЧЕСКИЕ НАГРАДЫ / ДОСТИЖЕНИЯ
+            var awardsList = new List<CoachAwardDto>();
+
+            if (!string.IsNullOrWhiteSpace(coach.QualificationCoach))
+            {
+                awardsList.Add(new CoachAwardDto
+                {
+                    Title = "Квалификация",
+                    Description = coach.QualificationCoach,
+                    Date = "Подтверждено",
+                    IconClass = "fas fa-certificate text-primary"
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(coach.SpecialtyCoach))
+            {
+                awardsList.Add(new CoachAwardDto
+                {
+                    Title = "Специализация",
+                    Description = coach.SpecialtyCoach,
+                    Date = "Профиль",
+                    IconClass = "fas fa-star text-warning"
+                });
+            }
+
+            int trainingCount = coach.Training.Count;
+            if (trainingCount > 0)
+            {
+                string countTitle = trainingCount > 20 ? "Легендарный наставник" : (trainingCount >= 5 ? "Опытный тренер" : "Начало пути");
+                string icon = trainingCount > 20 ? "fas fa-crown text-warning" : (trainingCount >= 5 ? "fas fa-trophy text-success" : "fas fa-seedling text-info");
+
+                awardsList.Add(new CoachAwardDto
+                {
+                    Title = countTitle,
+                    Description = $"Проведено тренировок в школе: {trainingCount}",
+                    Date = "Достижение",
+                    IconClass = icon
                 });
             }
 
@@ -82,11 +146,12 @@ namespace FootballSchool.Pages
                 Initials = (surnameInitial + nameInitial).ToUpper(),
                 Specialty = coach.SpecialtyCoach,
                 Qualification = coach.QualificationCoach,
-                StatusText = groupsDto.Any() ? "Занят" : "Свободен",
+                StatusText = groupsDto.Any() ? "Занят (ведет группы)" : "Свободен",
                 StatusClass = groupsDto.Any() ? "status-busy" : "status-free",
                 Schedule = coach.ScheduleCoach ?? "Не указан",
-                Salary = coach.SalaryCoach?.ToString("N2") ?? "Не указана",
-                Groups = groupsDto
+                Salary = coach.SalaryCoach?.ToString("N0") ?? "Не указана",
+                Groups = groupsDto,
+                Awards = awardsList
             };
 
             EditCoach = coach;

@@ -213,7 +213,6 @@
                         <img src="@photoPath" alt="@Model.StudentData.NameStudent" class="profile-photo">
                         
                         <h3 class="profile-name">@Model.StudentData.NameStudent @Model.StudentData.SurnameStudent</h3>
-                        @* Исправлено: используем CategoryTeam вместо TeamName *@
                         <p class="profile-info">Группа: @(Model.StudentData.Team?.CategoryTeam ?? "Не назначена")</p>
                         
                         <a asp-page="/ChildProfile" asp-route-id="@Model.StudentData.StudentId" class="btn-primary">
@@ -240,7 +239,6 @@
                                 @foreach (var training in Model.UpcomingTrainings)
                                 {
                                     <tr>
-                                        @* Исправлено: используем DateTraining, TimeTraining и NameFacility *@
                                         <td>@training.DateTraining.ToString("dd.MM.yyyy")</td>
                                         <td>@training.TimeTraining.ToString("HH:mm")</td>
                                         <td>@(training.Facility?.NameFacility ?? "Площадка")</td>
@@ -266,14 +264,12 @@
                             <div class="subscription-row">
                                 <span class="subscription-label">Тип:</span>
                                 <div class="subscription-value">
-                                    @* Исправлено: используем TypeSubscription *@
                                     <span class="subscription-name">@Model.ActiveSubscription.TypeSubscription</span>
                                     <span class="subscription-status">✓</span>
                                 </div>
                             </div>
                             <div class="subscription-row">
                                 <span class="subscription-label">Стоимость:</span>
-                                @* Исправлено: используем CostSubscription *@
                                 <span class="subscription-date">@(Model.ActiveSubscription.CostSubscription?.ToString("N0") ?? "0") ₽</span>
                             </div>
                             <div class="subscription-row">
