@@ -60,10 +60,28 @@ namespace FootballSchool.Pages
 
         public async Task OnGetAsync()
         {
-            var students = await _context.Students
+            var studentsQuery = _context.Students
                 .Include(s => s.Team)
                 .Include(s => s.Progresses)
-                .ToListAsync();
+                .AsQueryable();
+
+            // Логика: Тренер может оценивать только учеников из своих групп
+            if (User.IsInRole("Coach"))
+            {
+                var coachIdStr = User.FindFirst("CoachId")?.Value;
+                if (int.TryParse(coachIdStr, out int coachId))
+                {
+                    var coachTeamIds = await _context.Training
+                        .Where(t => t.CoachId == coachId)
+                        .Select(t => t.TeamId)
+                        .Distinct()
+                        .ToListAsync();
+
+                    studentsQuery = studentsQuery.Where(s => s.TeamId.HasValue && coachTeamIds.Contains(s.TeamId.Value));
+                }
+            }
+
+            var students = await studentsQuery.ToListAsync();
 
             var today = DateOnly.FromDateTime(DateTime.Today);
             var random = new Random();

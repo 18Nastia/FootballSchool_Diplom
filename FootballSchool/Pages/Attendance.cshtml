@@ -499,6 +499,7 @@
                 </div>
             </form>
 
+            <!-- ИСПРАВЛЕНИЕ: Добавлен оборачивающий тег div.attendance-table -->
             <div class="attendance-table">
                 <div class="table-header report-grid">
                     <div>Ученик</div>
@@ -510,7 +511,7 @@
                 
                 @if (!Model.ReportStats.Any())
                 {
-                    <div class="p-4 text-center text-muted" style="background-color: #f8fafc;">В выбранном периоде не было проведенных тренировок или в группе нет учеников.</div>
+                    <div class="p-4 text-center text-muted empty-report-alert" style="background-color: #f8fafc; border-radius: 8px;">В выбранном периоде не было проведенных тренировок или в группе нет учеников.</div>
                 }
                 else
                 {
@@ -532,7 +533,7 @@
                         </div>
                     }
                 }
-            </div>
+            </div> <!-- Этот закрывающий div теперь имеет свою "пару" -->
         }
 
     </div>

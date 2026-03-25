@@ -27,6 +27,11 @@ public partial class User
     [StringLength(100)]
     public string? Email { get; set; }
 
+    // Связь 1 к 1 со студентом
     [InverseProperty("User")]
-    public virtual ICollection<Student> Students { get; set; } = new List<Student>();
+    public virtual Student? Student { get; set; }
+
+    // Связь 1 к 1 с тренером
+    [InverseProperty("User")]
+    public virtual Coach? Coach { get; set; }
 }

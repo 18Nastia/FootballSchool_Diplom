@@ -203,12 +203,31 @@
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            margin-top: 16px;
             transition: background-color 0.2s;
         }
 
             .view-button:hover {
                 background-color: #dbeafe;
+            }
+
+        /* Кнопка быстрого добавления ученика в группу */
+        .quick-add-btn {
+            padding: 10px 14px;
+            background-color: white;
+            color: #2563eb;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .quick-add-btn:hover {
+                background-color: #eff6ff;
+                border-color: #2563eb;
             }
 
         /* Students View */
@@ -272,12 +291,33 @@
             margin-bottom: 20px;
         }
 
-            .student-header h3 {
-                font-size: 18px;
-                font-weight: 600;
-                color: #1d1d1f;
-                margin: 0;
-            }
+        .student-header-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .student-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4b5563;
+            font-weight: bold;
+            font-size: 16px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .student-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin: 0;
+        }
 
         .age {
             font-size: 14px;
@@ -359,35 +399,40 @@
 
         /* Responsive */
         @@media (max-width: 1024px) {
-            .cards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            }
+            .cards-grid
+
+        {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+
         }
 
         @@media (max-width: 768px) {
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
+            .page-header
 
-            .filter-section {
-                flex-direction: column;
-            }
-
-            .filter-group {
-                max-width: 100%;
-            }
-
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .student-info {
-                grid-template-columns: 1fr;
-            }
+        {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
         }
-    </style>
+
+        .filter-section {
+            flex-direction: column;
+        }
+
+        .filter-group {
+            max-width: 100%;
+        }
+
+        .cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .student-info {
+            grid-template-columns: 1fr;
+        }
+
+        }</style>
 }
 
 <div class="groups-students-page">
@@ -401,10 +446,14 @@
             <div class="alert alert-danger mb-4"><i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]</div>
         }
 
-        <button class="btn-primary" id="addButton">
-            <i class="fas fa-plus"></i>
-            <span id="addButtonText">Добавить группу</span>
-        </button>
+        <!-- КНОПКА ДОБАВЛЕНИЯ ТОЛЬКО ДЛЯ АДМИНА -->
+        @if (User.IsInRole("Admin"))
+        {
+            <button class="btn-primary" id="addButton">
+                <i class="fas fa-plus"></i>
+                <span id="addButtonText">Добавить группу</span>
+            </button>
+        }
 
         <div class="tabs">
             <button class="tab active" data-view="groups">
@@ -413,7 +462,7 @@
             </button>
             <button class="tab" data-view="students">
                 <i class="fas fa-user tab-icon"></i>
-                Все ученики
+                Ученики
             </button>
         </div>
 
@@ -438,9 +487,14 @@
                         <div class="card group-card-item">
                             <div class="card-header">
                                 <h3 class="card-title">@team.CategoryName</h3>
-                                <button class="edit-button" title="Редактировать">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+
+                                <!-- РЕДАКТИРОВАНИЕ ГРУППЫ ТОЛЬКО ДЛЯ АДМИНА -->
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <button class="edit-button" title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                }
                             </div>
                             <p class="card-age">Статус: @team.Status</p>
                             <div class="card-students">
@@ -448,7 +502,18 @@
                                 <span>@team.StudentsCount учеников</span>
                             </div>
                             <p class="card-info">Тренер: @team.CoachName</p>
-                            <button class="view-button" onclick="switchToStudentsTab('@team.CategoryName')">Просмотреть учеников</button>
+
+                            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                                <button class="view-button" style="margin-top: 0; flex: 1;" onclick="switchToStudentsTab('@team.CategoryName')">Состав группы</button>
+
+                                <!-- БЫСТРОЕ ДОБАВЛЕНИЕ УЧЕНИКА ТОЛЬКО ДЛЯ АДМИНА -->
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <button type="button" class="quick-add-btn" onclick="openAssignStudentModal('@team.TeamId', '@team.CategoryName')" title="Добавить ученика в эту группу">
+                                        <i class="fas fa-user-plus"></i>
+                                    </button>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
@@ -459,7 +524,7 @@
         <div class="students-view" id="studentsView">
             <div class="section-header">
                 <h2>Список учеников</h2>
-                <p class="section-subtitle">Управление профилями всех учащихся школы</p>
+                <p class="section-subtitle">Управление профилями учащихся</p>
             </div>
 
             <div class="search-bar">
@@ -476,7 +541,17 @@
                 {
                     <div class="student-card student-list-item" data-team="@student.TeamName">
                         <div class="student-header">
-                            <h3 class="student-name">@student.FullName</h3>
+                            <div class="student-header-info">
+                                @if (!string.IsNullOrEmpty(student.PhotoPath))
+                                {
+                                    <img src="@student.PhotoPath" alt="@student.FullName" class="student-avatar" onerror="this.onerror=null;this.src='/img/default-avatar.png'; this.parentElement.innerHTML='<div class=\'student-avatar\'>@student.Initials</div>';">
+                                }
+                                else
+                                {
+                                    <div class="student-avatar">@student.Initials</div>
+                                }
+                                <h3 class="student-name">@student.FullName</h3>
+                            </div>
                             <span class="age">@student.Age лет</span>
                         </div>
                         <div class="progress-section">
@@ -511,112 +586,154 @@
     </div>
 </div>
 
-<!-- Модальное окно: Добавление группы -->
-<div class="modal fade" id="addTeamModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" asp-page-handler="AddTeam">
-                <div class="modal-header">
-                    <h5 class="modal-title">Создание новой группы</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Название группы</label>
-                        <input asp-for="NewTeam.CategoryTeam" class="form-control" placeholder="Например: Юниоры U10" required />
+<!-- МОДАЛЬНЫЕ ОКНА РЕНДЕРЯТСЯ ТОЛЬКО ДЛЯ АДМИНОВ -->
+@if (User.IsInRole("Admin"))
+{
+    <!-- Модальное окно: Добавление (регистрация) группы -->
+    <div class="modal fade" id="addTeamModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="AddTeam">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Создание новой группы</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Название группы</label>
+                            <input asp-for="NewTeam.CategoryTeam" class="form-control" placeholder="Например: Юниоры U10" required />
+                        </div>
 
-                    <!-- Выбор филиала при создании группы -->
-                    <div class="mb-3">
-                        <label class="form-label">Привязать к филиалу</label>
-                        <select asp-for="NewTeam.BranchId" asp-items="Model.BranchSelectList" class="form-select" required>
-                            <option value="">-- Выберите филиал --</option>
-                        </select>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Привязать к филиалу</label>
+                            <select asp-for="NewTeam.BranchId" asp-items="Model.BranchSelectList" class="form-select" required>
+                                <option value="">-- Выберите филиал --</option>
+                            </select>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Статус группы</label>
-                        <select asp-for="NewTeam.StatusTeam" class="form-select" required>
-                            <option value="Активна">Активна</option>
-                            <option value="Набор закрыт">Набор закрыт</option>
-                            <option value="Расформирована">Расформирована</option>
-                        </select>
+                        <div class="mb-3">
+                            <label class="form-label">Статус группы</label>
+                            <select asp-for="NewTeam.StatusTeam" class="form-select" required>
+                                <option value="Активна">Активна</option>
+                                <option value="Набор закрыт">Набор закрыт</option>
+                                <option value="Расформирована">Расформирована</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Создать группу</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Создать группу</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Модальное окно: Добавление ученика -->
-<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form method="post" asp-page-handler="AddStudent">
-                <div class="modal-header">
-                    <h5 class="modal-title">Регистрация нового ученика</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные ученика</h6>
-                    <div class="row">
-                        <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewStudent.SurnameStudent" class="form-control" required /></div>
-                        <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewStudent.NameStudent" class="form-control" required /></div>
-                        <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewStudent.MiddleStudent" class="form-control" /></div>
-
-                        <div class="col-md-4 mb-3"><label>Дата рождения</label><input asp-for="NewStudent.BirthStudent" type="date" class="form-control" required /></div>
-                        <div class="col-md-4 mb-3">
-                            <label>Пол</label>
-                            <select asp-for="NewStudent.GenderStudent" class="form-select" required>
-                                <option value="Мужской">Мужской</option>
-                                <option value="Женский">Женский</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label>Уровень подготовки</label>
-                            <select asp-for="NewStudent.LevelStudent" class="form-select" required>
-                                <option value="Новичок">Новичок</option>
-                                <option value="Любитель">Любитель</option>
-                                <option value="Продвинутый">Продвинутый</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <label>Определение в группу</label>
-                            <select asp-for="NewStudent.TeamId" asp-items="Model.TeamSelectList" class="form-select">
-                                <option value="">Оставить без группы (Резерв)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12 mb-3"><label>Медицинские показания</label><textarea asp-for="NewStudent.MedicalStudent" class="form-control" rows="2" placeholder="Аллергии, травмы и т.д."></textarea></div>
+    <!-- Модальное окно: Назначение существующего ученика в группу -->
+    <div class="modal fade" id="assignStudentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="AssignStudentToTeam">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="assignStudentModalTitle">Добавление ученика в группу</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+                    <div class="modal-body">
+                        <!-- Скрытое поле для передачи ID выбранной группы -->
+                        <input type="hidden" id="AssignStudent_TeamId" name="TeamId" value="" />
 
-                    <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Данные родителя (опекуна)</h6>
-                    <div class="row">
-                        <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewStudent.SurnameParent" class="form-control" required /></div>
-                        <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewStudent.NameParent" class="form-control" required /></div>
-                        <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewStudent.MiddleParent" class="form-control" /></div>
-                        <div class="col-md-6 mb-3"><label>Телефон родителя</label><input asp-for="NewStudent.ParentNumber" class="form-control" required placeholder="+7 (999) 000-00-00" /></div>
-                        <div class="col-md-6 mb-3"><label>Email родителя</label><input asp-for="ParentEmail" type="email" class="form-control" placeholder="example@mail.ru" /></div>
+                        <div class="mb-3">
+                            <label class="form-label">Выберите ученика</label>
+                            <select name="StudentId" class="form-select" required>
+                                <option value="">-- Выберите ученика из списка --</option>
+                                @foreach (var s in Model.Students)
+                                {
+                                    <option value="@s.StudentId">@s.FullName (Текущая группа: @s.TeamName)</option>
+                                }
+                            </select>
+                            <div class="form-text mt-2 text-muted">Выбранный ученик будет переведен в указанную группу.</div>
+                        </div>
                     </div>
-
-                    <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Адрес проживания</h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-3"><label>Город</label><input asp-for="NewStudent.CityStudent" class="form-control" required /></div>
-                        <div class="col-md-6 mb-3"><label>Улица</label><input asp-for="NewStudent.StreetStudent" class="form-control" required /></div>
-                        <div class="col-md-6 mb-3"><label>Дом</label><input asp-for="NewStudent.HouseStudent" class="form-control" required /></div>
-                        <div class="col-md-6 mb-3"><label>Квартира</label><input asp-for="NewStudent.ApartmentStudent" class="form-control" /></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Назначить</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Зарегистрировать ученика</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Модальное окно: Регистрация нового ученика (полная форма) -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="AddStudent" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Регистрация нового ученика</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные ученика</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewStudent.SurnameStudent" class="form-control" required /></div>
+                            <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewStudent.NameStudent" class="form-control" required /></div>
+                            <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewStudent.MiddleStudent" class="form-control" /></div>
+
+                            <div class="col-md-4 mb-3"><label>Дата рождения</label><input asp-for="NewStudent.BirthStudent" type="date" class="form-control" required /></div>
+                            <div class="col-md-4 mb-3">
+                                <label>Пол</label>
+                                <select asp-for="NewStudent.GenderStudent" class="form-select" required>
+                                    <option value="Мужской">Мужской</option>
+                                    <option value="Женский">Женский</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Уровень подготовки</label>
+                                <select asp-for="NewStudent.LevelStudent" class="form-select" required>
+                                    <option value="Новичок">Новичок</option>
+                                    <option value="Любитель">Любитель</option>
+                                    <option value="Продвинутый">Продвинутый</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label>Фотография ученика</label>
+                                <input type="file" name="StudentPhotoUpload" class="form-control" accept="image/*" />
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label>Определение в группу</label>
+                                <select asp-for="NewStudent.TeamId" asp-items="Model.TeamSelectList" class="form-select">
+                                    <option value="">Оставить без группы (Резерв)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3"><label>Медицинские показания</label><textarea asp-for="NewStudent.MedicalStudent" class="form-control" rows="2" placeholder="Аллергии, травмы и т.д."></textarea></div>
+                        </div>
+
+                        <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Данные родителя (опекуна)</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewStudent.SurnameParent" class="form-control" required /></div>
+                            <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewStudent.NameParent" class="form-control" required /></div>
+                            <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewStudent.MiddleParent" class="form-control" /></div>
+                            <div class="col-md-6 mb-3"><label>Телефон родителя</label><input asp-for="NewStudent.ParentNumber" class="form-control" required placeholder="+7 (999) 000-00-00" /></div>
+                            <div class="col-md-6 mb-3"><label>Email родителя</label><input asp-for="ParentEmail" type="email" class="form-control" placeholder="example@mail.ru" /></div>
+                        </div>
+
+                        <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Адрес проживания</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3"><label>Город</label><input asp-for="NewStudent.CityStudent" class="form-control" required /></div>
+                            <div class="col-md-6 mb-3"><label>Улица</label><input asp-for="NewStudent.StreetStudent" class="form-control" required /></div>
+                            <div class="col-md-6 mb-3"><label>Дом</label><input asp-for="NewStudent.HouseStudent" class="form-control" required /></div>
+                            <div class="col-md-6 mb-3"><label>Квартира</label><input asp-for="NewStudent.ApartmentStudent" class="form-control" /></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Зарегистрировать ученика</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
 
 @section Scripts {
     <script>
@@ -637,7 +754,7 @@
                     if (view === 'groups') {
                         groupsView.style.display = 'block';
                         studentsView.style.display = 'none';
-                        addButtonText.textContent = 'Добавить группу';
+                        if (addButtonText) addButtonText.textContent = 'Добавить группу';
 
                         // Сброс поиска учеников при возврате к группам
                         document.getElementById('searchStudent').value = '';
@@ -645,24 +762,28 @@
                     } else {
                         groupsView.style.display = 'none';
                         studentsView.style.display = 'block';
-                        addButtonText.textContent = 'Добавить ученика';
+                        if (addButtonText) addButtonText.textContent = 'Добавить ученика';
                     }
                 });
             });
 
-            // Обработчик кнопки "Добавить..." с использованием jQuery (встроен в ASP.NET)
-            addButton.addEventListener('click', function() {
-                const activeTab = document.querySelector('.tab.active');
-                if (activeTab.getAttribute('data-view') === 'groups') {
-                    // Открываем модалку для группы
-                    $('#addTeamModal').modal('show');
-                } else {
-                    // Открываем модалку для ученика
-                    $('#addStudentModal').modal('show');
-                }
-            });
+            // Обработчик кнопки "Добавить..." (Слева вверху), есть проверка на null для Тренеров
+            if (addButton) {
+                addButton.addEventListener('click', function() {
+                    const activeTab = document.querySelector('.tab.active');
+                    if (activeTab.getAttribute('data-view') === 'groups') {
+                        // Открываем модалку для группы
+                        $('#addTeamModal').modal('show');
+                    } else {
+                        // Открываем модалку для ученика (регистрация нового) и сбрасываем выбранную группу
+                        const select = document.getElementById('NewStudent_TeamId');
+                        if (select) select.value = "";
+                        $('#addStudentModal').modal('show');
+                    }
+                });
+            }
 
-            // Поиск по группам (JS-фильтрация)
+            // Поиск по группам
             document.getElementById('searchGroup').addEventListener('input', function(e) {
                 const term = e.target.value.toLowerCase();
                 document.querySelectorAll('.group-card-item').forEach(card => {
@@ -671,7 +792,7 @@
                 });
             });
 
-            // Поиск по ученикам (JS-фильтрация)
+            // Поиск по ученикам
             document.getElementById('searchStudent').addEventListener('input', function(e) {
                 filterStudents(e.target.value.toLowerCase());
             });
@@ -685,7 +806,7 @@
             });
         }
 
-        // Функция для кнопки "Просмотреть учеников" в карточке группы
+        // Функция для кнопки "Посмотреть учеников"
         function switchToStudentsTab(teamName) {
             document.querySelector('.tab[data-view="students"]').click();
 
@@ -694,6 +815,13 @@
             filterStudents(teamName.toLowerCase());
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Функция открытия окна назначения уже существующего ученика
+        function openAssignStudentModal(teamId, teamName) {
+            document.getElementById('AssignStudent_TeamId').value = teamId;
+            document.getElementById('assignStudentModalTitle').innerText = 'Добавление ученика в группу: ' + teamName;
+            $('#assignStudentModal').modal('show');
         }
     </script>
 }

@@ -61,6 +61,9 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostSaveAsync(bool isBulkAdd)
         {
+            // ѕроверка прав: только администратор может добавл€ть или измен€ть расписание
+            if (!User.IsInRole("Admin")) return RedirectToPage("/AccessDenied");
+
             // ќчистка навигационных свойств от ошибок валидации, чтобы не блокировать сохранение
             ModelState.Remove("ModalTraining.Facility");
             ModelState.Remove("ModalTraining.Coach");
@@ -80,7 +83,6 @@ namespace FootballSchool.Pages
                 }
 
                 // ƒобавление предупреждени€, если тренировка создаетс€/переноситс€ на прошедшую дату
-                // ѕровер€ем строго дату (день), игнориру€ врем€
                 var today = DateOnly.FromDateTime(DateTime.Today);
 
                 if (ModalTraining.DateTraining < today)
@@ -147,6 +149,9 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
+            // ѕроверка прав: только администратор может удал€ть тренировки
+            if (!User.IsInRole("Admin")) return RedirectToPage("/AccessDenied");
+
             var training = await _context.Training.FindAsync(id);
             if (training != null)
             {
@@ -187,6 +192,16 @@ namespace FootballSchool.Pages
                 .Include(t => t.Coach)
                 .Include(t => t.Facility)
                 .AsQueryable();
+
+            // Ћогика: “ренер видит только свои тренировки
+            if (User.IsInRole("Coach"))
+            {
+                var coachIdStr = User.FindFirst("CoachId")?.Value;
+                if (int.TryParse(coachIdStr, out int coachId))
+                {
+                    query = query.Where(t => t.CoachId == coachId);
+                }
+            }
 
             if (FilterTeamId.HasValue)
                 query = query.Where(t => t.TeamId == FilterTeamId.Value);

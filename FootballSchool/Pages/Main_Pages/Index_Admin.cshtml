@@ -228,8 +228,17 @@
     </style>
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success m-3"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger m-3"><i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]</div>
+}
+
 <div class="welcome-section">
-    <h1 class="welcome-title">Добро пожаловать, Администратор!</h1>
+    <h1 class="welcome-title">Добро пожаловать, <span id="secretTrigger" style="cursor: text; user-select: none;" title=":)">Администратор</span>!</h1>
     <p class="welcome-subtitle">
         Сегодня: <strong>@Model.TodayTrainingsCount</strong> тренировок,
         всего в школе: <strong>@Model.TotalStudentsCount</strong> учеников.
@@ -305,3 +314,49 @@
         </div>
     </div>
 </div>
+
+<!-- Скрытое модальное окно для добавления администратора -->
+<div class="modal fade" id="addAdminModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="AddAdmin">
+                <div class="modal-header">
+                    <h5 class="modal-title">Регистрация администратора</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Логин <span class="text-danger">*</span></label>
+                        <input type="text" name="adminLogin" class="form-control" required autocomplete="off" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Пароль <span class="text-danger">*</span></label>
+                        <input type="text" name="adminPassword" class="form-control" required autocomplete="off" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="adminEmail" class="form-control" autocomplete="off" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Зарегистрировать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Скрытный триггер: двойной клик по слову "Администратор"
+        document.getElementById('secretTrigger').addEventListener('dblclick', function () {
+            if (typeof bootstrap !== 'undefined') {
+                var myModal = new bootstrap.Modal(document.getElementById('addAdminModal'));
+                myModal.show();
+            } else {
+                console.error("Bootstrap JS не загружен, невозможно открыть окно.");
+            }
+        });
+    </script>
+}

@@ -61,6 +61,7 @@ namespace FootballSchool.Pages
             public int StudentId { get; set; }
             public string FullName { get; set; } = string.Empty;
             public string Initials { get; set; } = string.Empty;
+            public string PhotoPath { get; set; } = string.Empty;
             public int Age { get; set; }
             public string TeamName { get; set; } = string.Empty;
             public string CoachName { get; set; } = string.Empty;
@@ -210,6 +211,7 @@ namespace FootballSchool.Pages
                 StudentId = student.StudentId,
                 FullName = $"{student.SurnameStudent} {student.NameStudent} {student.MiddleStudent}".Trim(),
                 Initials = initials.ToUpper(),
+                PhotoPath = student.PhotoStudent ?? "",
                 Age = age,
                 TeamName = student.Team?.CategoryTeam ?? "Без группы",
                 CoachName = coach != null ? $"{coach.SurnameCoach} {coach.NameCoach}" : "Не назначен",

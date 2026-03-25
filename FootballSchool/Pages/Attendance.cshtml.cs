@@ -71,7 +71,25 @@ namespace FootballSchool.Pages
 
         public async Task OnGetAsync()
         {
-            var teams = await _context.Teams.ToListAsync();
+            var teamsQuery = _context.Teams.AsQueryable();
+
+            // Логика: Выводим тренеру только те группы, с которыми у него есть тренировки
+            if (User.IsInRole("Coach"))
+            {
+                var coachIdStr = User.FindFirst("CoachId")?.Value;
+                if (int.TryParse(coachIdStr, out int coachId))
+                {
+                    var coachTeamIds = await _context.Training
+                        .Where(t => t.CoachId == coachId)
+                        .Select(t => t.TeamId)
+                        .Distinct()
+                        .ToListAsync();
+
+                    teamsQuery = teamsQuery.Where(t => coachTeamIds.Contains(t.TeamId));
+                }
+            }
+
+            var teams = await teamsQuery.ToListAsync();
             TeamList = new SelectList(teams, "TeamId", "CategoryTeam");
 
             if (!FilterTeamId.HasValue && teams.Any())
@@ -88,10 +106,22 @@ namespace FootballSchool.Pages
                 {
                     var dateOnly = DateOnly.FromDateTime(date);
 
-                    AvailableTrainings = await _context.Training
+                    var trainingsQuery = _context.Training
                         .Include(t => t.Coach)
                         .Include(t => t.Facility)
-                        .Where(t => t.TeamId == FilterTeamId && t.DateTraining == dateOnly)
+                        .Where(t => t.TeamId == FilterTeamId && t.DateTraining == dateOnly);
+
+                    // Логика: Для выбора занятия доступны только тренировки текущего тренера
+                    if (User.IsInRole("Coach"))
+                    {
+                        var coachIdStr = User.FindFirst("CoachId")?.Value;
+                        if (int.TryParse(coachIdStr, out int coachId))
+                        {
+                            trainingsQuery = trainingsQuery.Where(t => t.CoachId == coachId);
+                        }
+                    }
+
+                    AvailableTrainings = await trainingsQuery
                         .OrderBy(t => t.TimeTraining)
                         .ToListAsync();
 

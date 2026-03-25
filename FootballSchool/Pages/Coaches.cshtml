@@ -132,6 +132,7 @@
             color: #2563EB;
             font-weight: bold;
             flex-shrink: 0;
+            object-fit: cover;
         }
 
         .trainer-info {
@@ -189,9 +190,14 @@
 
     <div class="page-top-header">
         <h1>Тренерский состав</h1>
-        <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addCoachModal">
-            <i class="fas fa-plus"></i> Добавить тренера
-        </button>
+
+        <!-- КНОПКА ДОБАВЛЕНИЯ ВИДНА ТОЛЬКО АДМИНУ -->
+        @if (User.IsInRole("Admin"))
+        {
+            <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addCoachModal">
+                <i class="fas fa-plus"></i> Добавить тренера
+            </button>
+        }
     </div>
 
     <div class="coaches-content">
@@ -238,7 +244,15 @@
                 @foreach (var coach in Model.CoachesList)
                 {
                     <a href="/CoachProfile/@coach.CoachId" class="trainer-card" data-specialty="@coach.Specialty.ToLower()" data-status="@coach.StatusClass">
-                        <div class="trainer-avatar">@coach.Initials</div>
+                        @if (!string.IsNullOrEmpty(coach.PhotoPath))
+                        {
+                            <img src="@coach.PhotoPath" class="trainer-avatar" alt="@coach.FullName" onerror="this.onerror=null;this.src='/img/default-avatar.png'; this.parentElement.innerHTML='<div class=\'trainer-avatar\'>@coach.Initials</div>';">
+                        }
+                        else
+                        {
+                            <div class="trainer-avatar">@coach.Initials</div>
+                        }
+
                         <div class="trainer-info">
                             <div class="trainer-name">@coach.FullName</div>
                             <div class="trainer-spec">@coach.Specialty</div>
@@ -254,38 +268,46 @@
     </div>
 </div>
 
-<div class="modal fade" id="addCoachModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form method="post" asp-page-handler="AddCoach">
-                <div class="modal-header">
-                    <h5 class="modal-title">Регистрация нового тренера</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные</h6>
-                    <div class="row">
-                        <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewCoach.SurnameCoach" class="form-control" required /></div>
-                        <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewCoach.NameCoach" class="form-control" required /></div>
-                        <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewCoach.MiddleCoach" class="form-control" /></div>
-
-                        <div class="col-md-6 mb-3"><label>Специализация</label><input asp-for="NewCoach.SpecialtyCoach" class="form-control" placeholder="Например: Силовые тренировки" required /></div>
-                        <div class="col-md-6 mb-3"><label>Квалификация</label><input asp-for="NewCoach.QualificationCoach" class="form-control" placeholder="Например: КМС, Высшее образование" required /></div>
+<!-- МОДАЛЬНОЕ ОКНО РЕНДЕРИТСЯ ТОЛЬКО ДЛЯ АДМИНА -->
+@if (User.IsInRole("Admin"))
+{
+    <div class="modal fade" id="addCoachModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="AddCoach" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Регистрация нового тренера</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
+                    <div class="modal-body">
+                        <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewCoach.SurnameCoach" class="form-control" required /></div>
+                            <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewCoach.NameCoach" class="form-control" required /></div>
+                            <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewCoach.MiddleCoach" class="form-control" /></div>
 
-                    <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Условия работы</h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-3"><label>Ставка / Зарплата (₽)</label><input asp-for="NewCoach.SalaryCoach" type="number" step="0.01" class="form-control" /></div>
-                        <div class="col-md-6 mb-3"><label>График работы</label><input asp-for="NewCoach.ScheduleCoach" class="form-control" placeholder="Пн, Ср, Пт 18:00-21:00" /></div>
+                            <div class="col-md-6 mb-3"><label>Специализация</label><input asp-for="NewCoach.SpecialtyCoach" class="form-control" placeholder="Например: Силовые тренировки" required /></div>
+                            <div class="col-md-6 mb-3"><label>Квалификация</label><input asp-for="NewCoach.QualificationCoach" class="form-control" placeholder="Например: КМС, Высшее образование" required /></div>
+                            <div class="col-md-12 mb-3">
+                                <label>Фотография тренера</label>
+                                <input type="file" name="CoachPhotoUpload" class="form-control" accept="image/*" />
+                            </div>
+                        </div>
+
+                        <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Условия работы</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3"><label>Ставка / Зарплата (₽)</label><input asp-for="NewCoach.SalaryCoach" type="number" step="0.01" class="form-control" /></div>
+                            <div class="col-md-6 mb-3"><label>График работы</label><input asp-for="NewCoach.ScheduleCoach" class="form-control" placeholder="Пн, Ср, Пт 18:00-21:00" /></div>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Зарегистрировать тренера</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Зарегистрировать тренера</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+}
 
 @section Scripts {
     <script>

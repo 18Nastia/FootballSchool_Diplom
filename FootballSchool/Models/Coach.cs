@@ -13,6 +13,10 @@ public partial class Coach
     [Column("Coach_ID")]
     public int CoachId { get; set; }
 
+    // Добавлено поле внешнего ключа для связи с User
+    [Column("User_ID")]
+    public int? UserId { get; set; }
+
     [Column("Surname_coach")]
     [StringLength(50)]
     [Unicode(false)]
@@ -44,6 +48,17 @@ public partial class Coach
     [Column("Salary_coach", TypeName = "decimal(10, 2)")]
     public decimal? SalaryCoach { get; set; }
 
+    // Новое поле для хранения изображения/фото тренера
+    [Column("Photo_coach")]
+    [StringLength(255)] // Длина 255 символов подходит для хранения пути к загруженному файлу
+    [Unicode(false)]
+    public string? PhotoCoach { get; set; }
+
     [InverseProperty("Coach")]
     public virtual ICollection<Training> Training { get; set; } = new List<Training>();
+
+    // Связь 1 к 1 с пользователем
+    [ForeignKey("UserId")]
+    [InverseProperty("Coach")]
+    public virtual User? User { get; set; }
 }

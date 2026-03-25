@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation; // <-- Подключаем ValidateNever
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 
 namespace FootballSchool.Models;
@@ -61,8 +61,9 @@ public partial class Student
     [Unicode(false)]
     public string LevelStudent { get; set; } = null!;
 
+    // Поле для фото уже существовало, оставляем для хранения пути к файлу
     [Column("Photo_student")]
-    [StringLength(50)]
+    [StringLength(255)] // Рекомендую увеличить до 255 для надежного хранения длинных путей к файлам
     [Unicode(false)]
     public string? PhotoStudent { get; set; }
 
@@ -123,8 +124,9 @@ public partial class Student
     [ValidateNever]
     public virtual Team? Team { get; set; }
 
+    // Связь 1 к 1 с пользователем
     [ForeignKey("UserId")]
-    [InverseProperty("Students")]
+    [InverseProperty("Student")]
     [ValidateNever]
     public virtual User? User { get; set; }
 }

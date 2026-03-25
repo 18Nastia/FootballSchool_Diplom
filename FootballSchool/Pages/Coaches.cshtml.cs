@@ -6,16 +6,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using FootballSchool.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace FootballSchool.Pages
 {
     public class CoachesModel : PageModel
     {
         private readonly FootballSchoolContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public CoachesModel(FootballSchoolContext context)
+        public CoachesModel(FootballSchoolContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         public class CoachListDto
@@ -27,6 +32,7 @@ namespace FootballSchool.Pages
             public string Qualification { get; set; } = string.Empty;
             public string StatusText { get; set; } = string.Empty;
             public string StatusClass { get; set; } = string.Empty;
+            public string PhotoPath { get; set; } = string.Empty;
         }
 
         public List<CoachListDto> CoachesList { get; set; } = new List<CoachListDto>();
@@ -34,6 +40,9 @@ namespace FootballSchool.Pages
 
         [BindProperty]
         public Coach NewCoach { get; set; } = new Coach();
+
+        [BindProperty]
+        public IFormFile? CoachPhotoUpload { get; set; }
 
         public async Task OnGetAsync()
         {
@@ -61,26 +70,62 @@ namespace FootballSchool.Pages
                     Specialty = c.SpecialtyCoach,
                     Qualification = c.QualificationCoach,
                     StatusText = activeGroups > 0 ? "Занят" : "Свободен",
-                    StatusClass = activeGroups > 0 ? "status-busy" : "status-free"
+                    StatusClass = activeGroups > 0 ? "status-busy" : "status-free",
+                    PhotoPath = c.PhotoCoach ?? ""
                 });
             }
         }
 
         public async Task<IActionResult> OnPostAddCoachAsync()
         {
+            // Исключаем из валидации навигационные свойства, так как они не заполняются формой
+            ModelState.Remove("NewCoach.User");
+            ModelState.Remove("NewCoach.Training");
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Пожалуйста, проверьте правильность заполнения формы.";
+                return RedirectToPage();
+            }
+
+            // Начинаем транзакцию, чтобы в случае сбоя откатить изменения
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // 1. Сохраняем тренера первым, чтобы получить сгенерированный БД CoachId
-                _context.Coaches.Add(NewCoach);
-                await _context.SaveChangesAsync();
+                // Сохранение картинки тренера (если была загружена)
+                if (CoachPhotoUpload != null)
+                {
+                    string wwwRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    string uploadsFolder = Path.Combine(wwwRootPath, "uploads", "coaches");
+                    Directory.CreateDirectory(uploadsFolder);
 
-                // 2. Генерируем сложный пароль (длина 12 символов)
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + CoachPhotoUpload.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await CoachPhotoUpload.CopyToAsync(fileStream);
+                    }
+                    NewCoach.PhotoCoach = "/uploads/coaches/" + uniqueFileName;
+                }
+
+                // 1. Генерируем сложный пароль (длина 12 символов)
                 var password = GenerateComplexPassword(12);
 
-                // 3. Формируем логин: coach_имя_айди (убираем пробелы и переводим в нижний регистр)
+                // 2. Формируем логин без использования ID
                 string safeName = NewCoach.NameCoach?.Replace(" ", "").ToLower() ?? "coach";
-                var login = $"coach_{safeName}_{NewCoach.CoachId}";
+                string baseLogin = $"coach_{safeName}";
+                string login = baseLogin;
 
+                // Проверяем логин на уникальность в БД (если занят - добавляем цифру)
+                int counter = 1;
+                while (await _context.Users.AnyAsync(u => u.Login == login))
+                {
+                    login = $"{baseLogin}{counter}";
+                    counter++;
+                }
+
+                // 3. Создаем учетную запись пользователя первой
                 var newUser = new User
                 {
                     Login = login,
@@ -90,10 +135,20 @@ namespace FootballSchool.Pages
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
+                // 4. Связываем тренера с только что созданным пользователем и сохраняем
+                NewCoach.UserId = newUser.UserId;
+                _context.Coaches.Add(NewCoach);
+                await _context.SaveChangesAsync();
+
+                // 5. Подтверждаем транзакцию (все данные успешно сохранены)
+                await transaction.CommitAsync();
+
                 TempData["SuccessMessage"] = $"Тренер {NewCoach.SurnameCoach} {NewCoach.NameCoach} успешно добавлен! Данные для входа: Логин - {login}, Пароль - {password}";
             }
             catch (Exception ex)
             {
+                // Если произошла ошибка - откатываем все операции базы данных
+                await transaction.RollbackAsync();
                 TempData["ErrorMessage"] = "Ошибка при добавлении тренера: " + (ex.InnerException?.Message ?? ex.Message);
             }
             return RedirectToPage();
@@ -110,20 +165,17 @@ namespace FootballSchool.Pages
             var random = new Random();
             var password = new char[length];
 
-            // Гарантируем наличие хотя бы одного символа из каждой обязательной группы
             password[0] = lower[random.Next(lower.Length)];
             password[1] = upper[random.Next(upper.Length)];
             password[2] = number[random.Next(number.Length)];
             password[3] = special[random.Next(special.Length)];
 
-            // Заполняем оставшиеся символы случайным образом
             const string allChars = lower + upper + number + special;
             for (int i = 4; i < length; i++)
             {
                 password[i] = allChars[random.Next(allChars.Length)];
             }
 
-            // Перемешиваем символы для непредсказуемости
             return new string(password.OrderBy(x => random.Next()).ToArray());
         }
     }

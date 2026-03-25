@@ -25,7 +25,7 @@ public partial class FootballSchoolContext : DbContext
     public virtual DbSet<Subscription> Subscriptions { get; set; }
     public virtual DbSet<Team> Teams { get; set; }
     public virtual DbSet<Training> Training { get; set; }
-    public virtual DbSet<User> Users { get; set; } // Добавлено
+    public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Server=DESKTOP-56H7VB7\\SQLEXPRESS;Database=FootballSchool;Trusted_Connection=True;TrustServerCertificate=True;");
@@ -53,6 +53,15 @@ public partial class FootballSchoolContext : DbContext
         modelBuilder.Entity<Coach>(entity =>
         {
             entity.HasKey(e => e.CoachId).HasName("PK__Coach__BDB636274675589F");
+
+            // Уникальный индекс для связи 1:1
+            entity.HasIndex(e => e.UserId).IsUnique().HasFilter("[User_ID] IS NOT NULL");
+
+            // Настройка связи 1:1 с User
+            entity.HasOne(d => d.User)
+                  .WithOne(p => p.Coach)
+                  .HasForeignKey<Coach>(d => d.UserId)
+                  .HasConstraintName("FK_Coach_User");
         });
 
         modelBuilder.Entity<Facility>(entity =>
@@ -76,8 +85,17 @@ public partial class FootballSchoolContext : DbContext
         modelBuilder.Entity<Student>(entity =>
         {
             entity.HasKey(e => e.StudentId).HasName("PK__Student__A2F4E9AC4021C8FB");
+
+            // Уникальный индекс для связи 1:1
+            entity.HasIndex(e => e.UserId).IsUnique().HasFilter("[User_ID] IS NOT NULL");
+
             entity.HasOne(d => d.Team).WithMany(p => p.Students).OnDelete(DeleteBehavior.SetNull).HasConstraintName("FK_Student_Team");
-            entity.HasOne(d => d.User).WithMany(p => p.Students).HasConstraintName("FK_Student_User"); // Связь с пользователем
+
+            // Настройка связи 1:1 с User
+            entity.HasOne(d => d.User)
+                  .WithOne(p => p.Student)
+                  .HasForeignKey<Student>(d => d.UserId)
+                  .HasConstraintName("FK_Student_User");
         });
 
         modelBuilder.Entity<Subscription>(entity =>

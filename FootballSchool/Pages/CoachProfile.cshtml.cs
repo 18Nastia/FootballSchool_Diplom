@@ -23,6 +23,7 @@ namespace FootballSchool.Pages
             public int CoachId { get; set; }
             public string FullName { get; set; } = string.Empty;
             public string Initials { get; set; } = string.Empty;
+            public string PhotoPath { get; set; } = string.Empty;
             public string Specialty { get; set; } = string.Empty;
             public string Qualification { get; set; } = string.Empty;
             public string StatusText { get; set; } = string.Empty;
@@ -63,13 +64,9 @@ namespace FootballSchool.Pages
 
             if (coach == null) return NotFound();
 
-            // 1. ДИНАМИЧЕСКИЕ ГРУППЫ ТРЕНЕРА
-            // Выбираем только те команды, для которых у тренера есть будущие/текущие тренировки,
-            // либо если их нет - вообще все исторические группы.
             var today = DateOnly.FromDateTime(DateTime.Today);
             var activeTrainings = coach.Training.Where(t => t.Team != null && t.DateTraining >= today).ToList();
 
-            // Если нет будущих тренировок, показываем все закрепленные группы из истории
             if (!activeTrainings.Any())
             {
                 activeTrainings = coach.Training.Where(t => t.Team != null).ToList();
@@ -83,7 +80,6 @@ namespace FootballSchool.Pages
             foreach (var g in groupedTeams)
             {
                 var team = g.Key;
-                // Собираем уникальные дни недели для этой группы
                 var days = g.Select(tr => culture.DateTimeFormat.GetAbbreviatedDayName(tr.DateTraining.DayOfWeek)).Distinct();
                 string daysStr = string.Join(", ", days);
                 var firstTime = g.OrderBy(tr => tr.TimeTraining).FirstOrDefault()?.TimeTraining.ToString("HH:mm") ?? "";
@@ -96,7 +92,6 @@ namespace FootballSchool.Pages
                 });
             }
 
-            // 2. ДИНАМИЧЕСКИЕ НАГРАДЫ / ДОСТИЖЕНИЯ
             var awardsList = new List<CoachAwardDto>();
 
             if (!string.IsNullOrWhiteSpace(coach.QualificationCoach))
@@ -144,6 +139,7 @@ namespace FootballSchool.Pages
                 CoachId = coach.CoachId,
                 FullName = $"{coach.SurnameCoach} {coach.NameCoach} {coach.MiddleCoach}".Trim(),
                 Initials = (surnameInitial + nameInitial).ToUpper(),
+                PhotoPath = coach.PhotoCoach ?? "",
                 Specialty = coach.SpecialtyCoach,
                 Qualification = coach.QualificationCoach,
                 StatusText = groupsDto.Any() ? "Занят (ведет группы)" : "Свободен",

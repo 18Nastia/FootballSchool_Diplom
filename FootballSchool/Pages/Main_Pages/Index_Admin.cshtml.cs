@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using FootballSchool.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,6 +79,47 @@ namespace FootballSchool.Pages.Main_Pages
             {
                 Notifications.Add("На ближайшее время нет запланированных событий.");
             }
+        }
+
+        // Обработчик скрытой формы добавления администратора
+        public async Task<IActionResult> OnPostAddAdminAsync(string adminLogin, string adminPassword, string? adminEmail)
+        {
+            if (string.IsNullOrWhiteSpace(adminLogin) || string.IsNullOrWhiteSpace(adminPassword))
+            {
+                TempData["ErrorMessage"] = "Логин и пароль обязательны для заполнения.";
+                return RedirectToPage();
+            }
+
+            // Проверяем, существует ли уже пользователь с таким логином
+            bool userExists = await _context.Users.AnyAsync(u => u.Login == adminLogin);
+            if (userExists)
+            {
+                TempData["ErrorMessage"] = "Пользователь с таким логином уже существует.";
+                return RedirectToPage();
+            }
+
+            try
+            {
+                var newAdmin = new User
+                {
+                    Login = adminLogin,
+                    Password = adminPassword,
+                    Email = adminEmail,
+                    Role = "Admin"
+                };
+
+                _context.Users.Add(newAdmin);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Новый администратор «{adminLogin}» успешно зарегистрирован.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при добавлении администратора.");
+                TempData["ErrorMessage"] = $"Произошла ошибка при регистрации: {ex.Message}";
+            }
+
+            return RedirectToPage();
         }
     }
 }

@@ -162,7 +162,7 @@
             --item-hover: #475569;
             --border-color: #475569;
             --text-color: #f8fafc;
-            --text-muted: #cbd5e1; /* Яркий читаемый серый цвет для меню и вкладок */
+            --text-muted: #cbd5e1;
             --nav-hover-bg: #334155;
             --nav-active-bg: #0f172a;
             --nav-active-text: #60A5FA;
@@ -222,7 +222,14 @@
         body.dark-theme .chart-canvas-container,
         body.dark-theme .attendance-table,
         body.dark-theme .tabs,
-        body.dark-theme .sidebar-tabs {
+        body.dark-theme .sidebar-tabs,
+        body.dark-theme .trainings-card,
+        body.dark-theme .statistics-card,
+        body.dark-theme .news-card,
+        body.dark-theme .action-card,
+        body.dark-theme .info-alert,
+        body.dark-theme .no-data-alert,
+        body.dark-theme .empty-report-alert {
             background-color: var(--card-bg) !important;
             border-color: var(--border-color) !important;
             color: var(--text-color) !important;
@@ -265,7 +272,9 @@
         body.dark-theme .btn-nav,
         body.dark-theme .btn-edit,
         body.dark-theme .icon-btn,
-        body.dark-theme .edit-button {
+        body.dark-theme .edit-button,
+        body.dark-theme .age,
+        body.dark-theme .news-icon {
             background-color: var(--item-bg) !important;
             border-color: var(--border-color) !important;
             color: var(--text-color) !important;
@@ -363,7 +372,10 @@
         body.dark-theme .notification-text, body.dark-theme .news-text,
         body.dark-theme table td, body.dark-theme .history-table td,
         body.dark-theme .admin-table td, body.dark-theme .training-table td,
-        body.dark-theme .current-date-display, body.dark-theme .stats-title {
+        body.dark-theme .current-date-display, body.dark-theme .stats-title,
+        body.dark-theme .action-title,
+        body.dark-theme .card-students,
+        body.dark-theme .progress-label span {
             color: var(--text-color) !important;
         }
 
@@ -382,11 +394,13 @@
         body.dark-theme .calendar-header, body.dark-theme .day-header,
         body.dark-theme .tab, body.dark-theme .sidebar-tab,
         body.dark-theme .tab-btn, body.dark-theme .tab-button,
-        body.dark-theme .toggle-btn, body.dark-theme .nav-item,
-        body.dark-theme .schedule-details p, body.dark-theme .result-info p,
-        body.dark-theme .achievement-card p, body.dark-theme .achievement-date,
-        body.dark-theme .award-details p,
-        body.dark-theme .hall-info, body.dark-theme .hall-info span {
+        body.dark-theme .toggle-btn,
+        body.dark-theme .action-desc {
+            color: var(--text-muted) !important;
+        }
+
+        /* ИСПРАВЛЕНИЕ: Делаем пункты меню навигации видимыми в темной теме */
+        body.dark-theme .nav-item {
             color: var(--text-muted) !important;
         }
 
@@ -438,7 +452,9 @@
         string homeUrl = "/Login";
         if (User.Identity.IsAuthenticated)
         {
-            homeUrl = User.IsInRole("Admin") ? "/Main_Pages/Index_Admin" : "/Main_Pages/Index_Parent";
+            if (User.IsInRole("Admin")) homeUrl = "/Main_Pages/Index_Admin";
+            else if (User.IsInRole("Parent")) homeUrl = "/Main_Pages/Index_Parent";
+            else if (User.IsInRole("Coach")) homeUrl = "/Main_Pages/Index_Coach";
         }
     }
 
@@ -464,11 +480,24 @@
                     else if (User.IsInRole("Parent"))
                     {
                         <a asp-page="/Main_Pages/Index_Parent" class="nav-item"><i class="fas fa-home nav-icon"></i><span>Главная</span></a>
-                        
                         <a asp-page="/ChildProfile" class="nav-item"><i class="fas fa-child nav-icon"></i><span>Профиль ребенка</span></a>
-                        
                         <a asp-page="/Schedule" class="nav-item"><i class="fas fa-calendar-alt nav-icon"></i><span>Расписание</span></a>
                         <a asp-page="/Subscriptions" class="nav-item"><i class="fas fa-id-card nav-icon"></i><span>Абонементы</span></a>
+                        <a asp-page="/Branches" class="nav-item"><i class="fas fa-map-marked-alt nav-icon"></i><span>Филиалы и площадки</span></a>
+                    }
+                    else if (User.IsInRole("Coach"))
+                    {
+                        var coachIdStr = User.FindFirst("CoachId")?.Value;
+                        <a asp-page="/Main_Pages/Index_Coach" class="nav-item"><i class="fas fa-home nav-icon"></i><span>Главная</span></a>
+                        if (!string.IsNullOrEmpty(coachIdStr))
+                        {
+                            <a asp-page="/CoachProfile" asp-route-id="@coachIdStr" class="nav-item"><i class="fas fa-user-tie nav-icon"></i><span>Мой профиль</span></a>
+                        }
+                        <a asp-page="/Coaches" class="nav-item"><i class="fas fa-users-cog nav-icon"></i><span>Список тренеров</span></a>
+                        <a asp-page="/Schedule" class="nav-item"><i class="fas fa-calendar-alt nav-icon"></i><span>Расписание</span></a>
+                        <a asp-page="/Attendance" class="nav-item"><i class="fas fa-calendar-check nav-icon"></i><span>Посещаемость</span></a>
+                        <a asp-page="/GroupsStudents" class="nav-item"><i class="fas fa-users nav-icon"></i><span>Группы и ученики</span></a>
+                        <a asp-page="/TrainingResults" class="nav-item"><i class="fas fa-chart-line nav-icon"></i><span>Результаты тренировок</span></a>
                         <a asp-page="/Branches" class="nav-item"><i class="fas fa-map-marked-alt nav-icon"></i><span>Филиалы и площадки</span></a>
                     }
                 }

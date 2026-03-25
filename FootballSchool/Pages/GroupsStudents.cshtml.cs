@@ -8,16 +8,21 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FootballSchool.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace FootballSchool.Pages
 {
     public class GroupsStudentsModel : PageModel
     {
         private readonly FootballSchoolContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public GroupsStudentsModel(FootballSchoolContext context)
+        public GroupsStudentsModel(FootballSchoolContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         public class TeamDto
@@ -33,11 +38,13 @@ namespace FootballSchool.Pages
         {
             public int StudentId { get; set; }
             public string FullName { get; set; } = string.Empty;
+            public string Initials { get; set; } = string.Empty;
             public int Age { get; set; }
             public string ParentName { get; set; } = string.Empty;
             public string Phone { get; set; } = string.Empty;
             public string TeamName { get; set; } = string.Empty;
             public int ProgressPercentage { get; set; }
+            public string PhotoPath { get; set; } = string.Empty;
         }
 
         public List<TeamDto> Teams { get; set; } = new List<TeamDto>();
@@ -52,6 +59,9 @@ namespace FootballSchool.Pages
         [BindProperty]
         public string? ParentEmail { get; set; }
 
+        [BindProperty]
+        public IFormFile? StudentPhotoUpload { get; set; }
+
         public SelectList TeamSelectList { get; set; } = default!;
 
         // Список филиалов для привязки к группе
@@ -61,12 +71,37 @@ namespace FootballSchool.Pages
         {
             NewStudent.BirthStudent = new DateOnly(DateTime.Today.Year - 8, 1, 1);
 
-            var teamsData = await _context.Teams
+            // Базовые запросы
+            var teamsQuery = _context.Teams
                 .Include(t => t.Students)
-                        .Include(t => t.Training)
+                .Include(t => t.Training)
                     .ThenInclude(tr => tr.Coach)
-                .ToListAsync();
+                .AsQueryable();
 
+            var studentsQuery = _context.Students
+                .Include(s => s.Team)
+                .AsQueryable();
+
+            // ЛОГИКА ДЛЯ ТРЕНЕРА: Видит только свои группы и учеников
+            if (User.IsInRole("Coach"))
+            {
+                var coachIdStr = User.FindFirst("CoachId")?.Value;
+                if (int.TryParse(coachIdStr, out int coachId))
+                {
+                    // Находим ID групп, которые ведет этот тренер
+                    var coachTeamIds = await _context.Training
+                        .Where(t => t.CoachId == coachId)
+                        .Select(t => t.TeamId)
+                        .Distinct()
+                        .ToListAsync();
+
+                    // Фильтруем группы и студентов
+                    teamsQuery = teamsQuery.Where(t => coachTeamIds.Contains(t.TeamId));
+                    studentsQuery = studentsQuery.Where(s => s.TeamId.HasValue && coachTeamIds.Contains(s.TeamId.Value));
+                }
+            }
+
+            var teamsData = await teamsQuery.ToListAsync();
             TeamSelectList = new SelectList(teamsData, "TeamId", "CategoryTeam");
 
             // Загружаем филиалы
@@ -88,10 +123,7 @@ namespace FootballSchool.Pages
                 });
             }
 
-            var studentsData = await _context.Students
-                .Include(s => s.Team)
-                .ToListAsync();
-
+            var studentsData = await studentsQuery.ToListAsync();
             var today = DateOnly.FromDateTime(DateTime.Today);
             var random = new Random();
 
@@ -100,21 +132,29 @@ namespace FootballSchool.Pages
                 var age = today.Year - s.BirthStudent.Year;
                 if (s.BirthStudent > today.AddYears(-age)) age--;
 
+                string surnameInit = string.IsNullOrEmpty(s.SurnameStudent) ? "" : s.SurnameStudent[0].ToString();
+                string nameInit = string.IsNullOrEmpty(s.NameStudent) ? "" : s.NameStudent[0].ToString();
+
                 Students.Add(new StudentDto
                 {
                     StudentId = s.StudentId,
                     FullName = $"{s.SurnameStudent} {s.NameStudent}",
+                    Initials = (surnameInit + nameInit).ToUpper(),
                     Age = age,
                     ParentName = $"{s.SurnameParent} {s.NameParent}",
                     Phone = s.ParentNumber ?? "Не указан",
                     TeamName = s.Team?.CategoryTeam ?? "Без группы",
-                    ProgressPercentage = random.Next(40, 95)
+                    ProgressPercentage = random.Next(40, 95),
+                    PhotoPath = s.PhotoStudent ?? ""
                 });
             }
         }
 
+        // БЕЗОПАСНОСТЬ: Защищаем POST-методы, чтобы тренер не смог отправить форму в обход UI
         public async Task<IActionResult> OnPostAddTeamAsync()
         {
+            if (!User.IsInRole("Admin")) return RedirectToPage("/AccessDenied");
+
             ModelState.Clear();
             TryValidateModel(NewTeam, nameof(NewTeam));
 
@@ -142,6 +182,8 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostAddStudentAsync()
         {
+            if (!User.IsInRole("Admin")) return RedirectToPage("/AccessDenied");
+
             ModelState.Clear();
             TryValidateModel(NewStudent, nameof(NewStudent));
 
@@ -155,6 +197,23 @@ namespace FootballSchool.Pages
 
             try
             {
+                // Сохранение картинки ученика (если была загружена)
+                if (StudentPhotoUpload != null)
+                {
+                    string wwwRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    string uploadsFolder = Path.Combine(wwwRootPath, "uploads", "students");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + StudentPhotoUpload.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await StudentPhotoUpload.CopyToAsync(fileStream);
+                    }
+                    NewStudent.PhotoStudent = "/uploads/students/" + uniqueFileName;
+                }
+
                 // 1. Генерируем сложный пароль (длина 12 символов)
                 var password = GenerateComplexPassword(12);
 
@@ -186,6 +245,32 @@ namespace FootballSchool.Pages
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "Ошибка при добавлении ученика: " + (ex.InnerException?.Message ?? ex.Message);
+            }
+
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostAssignStudentToTeamAsync(int StudentId, int TeamId)
+        {
+            if (!User.IsInRole("Admin")) return RedirectToPage("/AccessDenied");
+
+            try
+            {
+                var student = await _context.Students.FindAsync(StudentId);
+                if (student == null)
+                {
+                    TempData["ErrorMessage"] = "Ученик не найден.";
+                    return RedirectToPage();
+                }
+
+                student.TeamId = TeamId;
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Ученик {student.SurnameStudent} {student.NameStudent} успешно переведен в выбранную группу!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Ошибка при переводе ученика: " + ex.Message;
             }
 
             return RedirectToPage();
@@ -228,20 +313,17 @@ namespace FootballSchool.Pages
             var random = new Random();
             var password = new char[length];
 
-            // Гарантируем наличие хотя бы одного символа из каждой обязательной группы
             password[0] = lower[random.Next(lower.Length)];
             password[1] = upper[random.Next(upper.Length)];
             password[2] = number[random.Next(number.Length)];
             password[3] = special[random.Next(special.Length)];
 
-            // Заполняем оставшиеся символы случайным образом
             const string allChars = lower + upper + number + special;
             for (int i = 4; i < length; i++)
             {
                 password[i] = allChars[random.Next(allChars.Length)];
             }
 
-            // Перемешиваем символы для непредсказуемости
             return new string(password.OrderBy(x => random.Next()).ToArray());
         }
     }
