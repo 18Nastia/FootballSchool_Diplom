@@ -335,7 +335,7 @@
             </div>
         }
 
-        <!-- Навигация по вкладкам (Daily - Журнал, Report - Статистика) -->
+        <!-- Навигация по вкладкам -->
         <div class="tabs">
             <a href="?ViewMode=Daily&FilterTeamId=@Model.FilterTeamId" class="tab-link @(Model.ViewMode == "Daily" ? "active" : "")">
                 <i class="fas fa-clipboard-check"></i> Журнал тренировок
@@ -499,7 +499,12 @@
                 </div>
             </form>
 
-            <!-- ИСПРАВЛЕНИЕ: Добавлен оборачивающий тег div.attendance-table -->
+            <div class="mb-4">
+                <a href="?handler=ExportReport&teamId=@(Model.FilterTeamId ?? 0)&period=@Model.ReportPeriod" class="btn-save" style="background-color: #10b981; text-decoration: none; width: fit-content; display: inline-flex;">
+                    <i class="fas fa-file-excel"></i> Экспорт в Excel
+                </a>
+            </div>
+
             <div class="attendance-table">
                 <div class="table-header report-grid">
                     <div>Ученик</div>
@@ -533,7 +538,7 @@
                         </div>
                     }
                 }
-            </div> <!-- Этот закрывающий div теперь имеет свою "пару" -->
+            </div>
         }
 
     </div>

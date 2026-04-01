@@ -63,15 +63,12 @@ namespace FootballSchool.Pages
         public IFormFile? StudentPhotoUpload { get; set; }
 
         public SelectList TeamSelectList { get; set; } = default!;
-
-        // Список филиалов для привязки к группе
         public SelectList BranchSelectList { get; set; } = default!;
 
         public async Task OnGetAsync()
         {
             NewStudent.BirthStudent = new DateOnly(DateTime.Today.Year - 8, 1, 1);
 
-            // Базовые запросы
             var teamsQuery = _context.Teams
                 .Include(t => t.Students)
                 .Include(t => t.Training)
@@ -80,22 +77,21 @@ namespace FootballSchool.Pages
 
             var studentsQuery = _context.Students
                 .Include(s => s.Team)
+                .Include(s => s.Attendances)
+                    .ThenInclude(a => a.Training)
                 .AsQueryable();
 
-            // ЛОГИКА ДЛЯ ТРЕНЕРА: Видит только свои группы и учеников
             if (User.IsInRole("Coach"))
             {
                 var coachIdStr = User.FindFirst("CoachId")?.Value;
                 if (int.TryParse(coachIdStr, out int coachId))
                 {
-                    // Находим ID групп, которые ведет этот тренер
                     var coachTeamIds = await _context.Training
                         .Where(t => t.CoachId == coachId)
                         .Select(t => t.TeamId)
                         .Distinct()
                         .ToListAsync();
 
-                    // Фильтруем группы и студентов
                     teamsQuery = teamsQuery.Where(t => coachTeamIds.Contains(t.TeamId));
                     studentsQuery = studentsQuery.Where(s => s.TeamId.HasValue && coachTeamIds.Contains(s.TeamId.Value));
                 }
@@ -104,7 +100,6 @@ namespace FootballSchool.Pages
             var teamsData = await teamsQuery.ToListAsync();
             TeamSelectList = new SelectList(teamsData, "TeamId", "CategoryTeam");
 
-            // Загружаем филиалы
             var branchesData = await _context.Branches.ToListAsync();
             BranchSelectList = new SelectList(branchesData, "BranchId", "NameBranch");
 
@@ -125,7 +120,6 @@ namespace FootballSchool.Pages
 
             var studentsData = await studentsQuery.ToListAsync();
             var today = DateOnly.FromDateTime(DateTime.Today);
-            var random = new Random();
 
             foreach (var s in studentsData)
             {
@@ -134,6 +128,20 @@ namespace FootballSchool.Pages
 
                 string surnameInit = string.IsNullOrEmpty(s.SurnameStudent) ? "" : s.SurnameStudent[0].ToString();
                 string nameInit = string.IsNullOrEmpty(s.NameStudent) ? "" : s.NameStudent[0].ToString();
+
+                // ЛОГИКА РАСЧЕТА ПРОГРЕССА НА ОСНОВЕ ПОСЕЩАЕМОСТИ ЗА МЕСЯЦ
+                int progressPercentage = 0;
+                var monthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
+
+                var recentAttendances = s.Attendances
+                    .Where(a => a.Training != null && a.Training.DateTraining >= monthAgo)
+                    .ToList();
+
+                if (recentAttendances.Any())
+                {
+                    int attendedCount = recentAttendances.Count(a => a.StatusAttendance == "Был");
+                    progressPercentage = (int)Math.Round((double)attendedCount / recentAttendances.Count * 100);
+                }
 
                 Students.Add(new StudentDto
                 {
@@ -144,13 +152,12 @@ namespace FootballSchool.Pages
                     ParentName = $"{s.SurnameParent} {s.NameParent}",
                     Phone = s.ParentNumber ?? "Не указан",
                     TeamName = s.Team?.CategoryTeam ?? "Без группы",
-                    ProgressPercentage = random.Next(40, 95),
+                    ProgressPercentage = progressPercentage,
                     PhotoPath = s.PhotoStudent ?? ""
                 });
             }
         }
 
-        // БЕЗОПАСНОСТЬ: Защищаем POST-методы, чтобы тренер не смог отправить форму в обход UI
         public async Task<IActionResult> OnPostAddTeamAsync()
         {
             if (!User.IsInRole("Admin")) return RedirectToPage("/AccessDenied");
@@ -197,7 +204,6 @@ namespace FootballSchool.Pages
 
             try
             {
-                // Сохранение картинки ученика (если была загружена)
                 if (StudentPhotoUpload != null)
                 {
                     string wwwRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
@@ -214,10 +220,8 @@ namespace FootballSchool.Pages
                     NewStudent.PhotoStudent = "/uploads/students/" + uniqueFileName;
                 }
 
-                // 1. Генерируем сложный пароль (длина 12 символов)
                 var password = GenerateComplexPassword(12);
 
-                // 2. Формируем логин: parent_фамилия_перваябукваимени_цифры с применением транслитерации
                 string surname = Transliterate(NewStudent.SurnameParent);
                 string firstLetter = Transliterate(!string.IsNullOrWhiteSpace(NewStudent.NameParent) ? NewStudent.NameParent.Substring(0, 1) : "x");
                 string randomNum = new Random().Next(1000, 9999).ToString();
@@ -232,9 +236,8 @@ namespace FootballSchool.Pages
                     Email = ParentEmail
                 };
                 _context.Users.Add(newUser);
-                await _context.SaveChangesAsync(); // Сохраняем, чтобы получить UserId
+                await _context.SaveChangesAsync();
 
-                // 3. Привязываем аккаунт к ученику
                 NewStudent.UserId = newUser.UserId;
 
                 _context.Students.Add(NewStudent);
@@ -276,7 +279,6 @@ namespace FootballSchool.Pages
             return RedirectToPage();
         }
 
-        // Вспомогательный метод для транслитерации кириллицы в латиницу
         private string Transliterate(string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return "parent";
@@ -302,7 +304,6 @@ namespace FootballSchool.Pages
             return string.IsNullOrEmpty(finalString) ? "parent" : finalString;
         }
 
-        // Вспомогательный метод для генерации сложного пароля
         private string GenerateComplexPassword(int length)
         {
             const string lower = "abcdefghijklmnopqrstuvwxyz";

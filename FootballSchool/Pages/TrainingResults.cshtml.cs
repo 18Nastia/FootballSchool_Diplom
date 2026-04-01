@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using FootballSchool.Models;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace FootballSchool.Pages
 {
@@ -58,14 +60,39 @@ namespace FootballSchool.Pages
         [BindProperty]
         public string? CoachComments { get; set; }
 
+        // Добавляем свойства для фильтрации по группе
+        [BindProperty(SupportsGet = true)]
+        public int? FilterTeamId { get; set; }
+
+        public Microsoft.AspNetCore.Mvc.Rendering.SelectList TeamList { get; set; } = default!;
+
         public async Task OnGetAsync()
         {
+            // Загружаем список групп для выпадающего списка (с учетом прав тренера)
+            var teamsQuery = _context.Teams.AsQueryable();
+            if (User.IsInRole("Coach"))
+            {
+                var coachIdStr = User.FindFirst("CoachId")?.Value;
+                if (int.TryParse(coachIdStr, out int coachId))
+                {
+                    var coachTeamIds = await _context.Training
+                        .Where(t => t.CoachId == coachId)
+                        .Select(t => t.TeamId)
+                        .Distinct()
+                        .ToListAsync();
+                    teamsQuery = teamsQuery.Where(t => coachTeamIds.Contains(t.TeamId));
+                }
+            }
+            var teams = await teamsQuery.ToListAsync();
+            TeamList = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(teams, "TeamId", "CategoryTeam");
+
             var studentsQuery = _context.Students
                 .Include(s => s.Team)
                 .Include(s => s.Progresses)
+                .Include(s => s.Attendances)
+                    .ThenInclude(a => a.Training)
                 .AsQueryable();
 
-            // Логика: Тренер может оценивать только учеников из своих групп
             if (User.IsInRole("Coach"))
             {
                 var coachIdStr = User.FindFirst("CoachId")?.Value;
@@ -81,10 +108,15 @@ namespace FootballSchool.Pages
                 }
             }
 
+            // Применяем фильтр по группе, если он выбран
+            if (FilterTeamId.HasValue)
+            {
+                studentsQuery = studentsQuery.Where(s => s.TeamId == FilterTeamId.Value);
+            }
+
             var students = await studentsQuery.ToListAsync();
 
             var today = DateOnly.FromDateTime(DateTime.Today);
-            var random = new Random();
             var historyDict = new Dictionary<int, List<object>>();
 
             foreach (var s in students)
@@ -112,7 +144,6 @@ namespace FootballSchool.Pages
                             valStr = valParts[0];
                             unit = valParts.Length > 1 ? valParts[1] : "";
 
-                            //Принудительный парсинг чисел, понимающий любой формат (с точкой или запятой)
                             double.TryParse(valStr.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out val);
                         }
                     }
@@ -151,6 +182,20 @@ namespace FootballSchool.Pages
                     testDate = latestProgress.DateProgress.ToString("dd.MM.yyyy");
                 }
 
+                // ЛОГИКА РАСЧЕТА ПРОГРЕССА НА ОСНОВЕ ПОСЕЩАЕМОСТИ ЗА МЕСЯЦ
+                int progressPercentage = 0;
+                var monthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
+
+                var recentAttendances = s.Attendances
+                    .Where(a => a.Training != null && a.Training.DateTraining >= monthAgo)
+                    .ToList();
+
+                if (recentAttendances.Any())
+                {
+                    int attendedCount = recentAttendances.Count(a => a.StatusAttendance == "Был");
+                    progressPercentage = (int)Math.Round((double)attendedCount / recentAttendances.Count * 100);
+                }
+
                 StudentsList.Add(new StudentProgressDto
                 {
                     StudentId = s.StudentId,
@@ -161,7 +206,7 @@ namespace FootballSchool.Pages
                     LatestTestName = testName,
                     LatestTestDate = testDate,
                     LatestTestResult = testResultStr,
-                    ProgressPercentage = random.Next(40, 95)
+                    ProgressPercentage = progressPercentage
                 });
             }
 
@@ -182,7 +227,6 @@ namespace FootballSchool.Pages
 
                 if (EditingResultId > 0)
                 {
-                    // Редактирование существующего результата
                     var progress = await _context.Progresses.FindAsync(EditingResultId);
                     if (progress != null)
                     {
@@ -201,7 +245,6 @@ namespace FootballSchool.Pages
                 }
                 else
                 {
-                    // Создание нового результата
                     var progress = new Progress
                     {
                         StudentId = SelectedStudentId,
@@ -247,6 +290,156 @@ namespace FootballSchool.Pages
             }
 
             return RedirectToPage();
+        }
+
+        // --- ЭКСПОРТ В EXCEL ---
+        public async Task<IActionResult> OnGetExportAsync()
+        {
+            await OnGetAsync();
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Результаты тестов");
+
+                worksheet.Cell(1, 1).Value = "Ученик";
+                worksheet.Cell(1, 2).Value = "Группа";
+                worksheet.Cell(1, 3).Value = "Возраст";
+                worksheet.Cell(1, 4).Value = "Последний тест";
+                worksheet.Cell(1, 5).Value = "Дата теста";
+                worksheet.Cell(1, 6).Value = "Результат";
+                worksheet.Cell(1, 7).Value = "Дисциплина (Прогресс %)";
+
+                worksheet.Range("A1:G1").Style.Font.Bold = true;
+                worksheet.Range("A1:G1").Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+                int row = 2;
+                foreach (var student in StudentsList)
+                {
+                    worksheet.Cell(row, 1).Value = student.FullName;
+                    worksheet.Cell(row, 2).Value = student.TeamName;
+                    worksheet.Cell(row, 3).Value = student.Age;
+                    worksheet.Cell(row, 4).Value = student.LatestTestName;
+                    worksheet.Cell(row, 5).Value = student.LatestTestDate;
+                    worksheet.Cell(row, 6).Value = student.LatestTestResult;
+                    worksheet.Cell(row, 7).Value = student.ProgressPercentage + "%";
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+                    string groupName = FilterTeamId.HasValue ? $"_Группа_{FilterTeamId.Value}" : "_Все";
+                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Сводка_тестов{groupName}_{DateTime.Now:dd.MM.yyyy}.xlsx");
+                }
+            }
+        }
+
+        // --- ДЕТАЛЬНЫЙ ЭКСПОРТ (ВСЯ ИСТОРИЯ ТЕСТОВ ГРУППЫ ИЛИ УЧЕНИКА) ---
+        public async Task<IActionResult> OnGetExportDetailedAsync(int? teamId, int? studentId)
+        {
+            var progressesQuery = _context.Progresses
+                .Include(p => p.Student)
+                    .ThenInclude(s => s.Team)
+                .AsQueryable();
+
+            string reportName = "История_результатов";
+
+            // Если передан ID ученика - фильтруем по нему
+            if (studentId.HasValue)
+            {
+                progressesQuery = progressesQuery.Where(p => p.StudentId == studentId.Value);
+                var student = await _context.Students.FindAsync(studentId.Value);
+                if (student != null)
+                {
+                    reportName += $"_{student.SurnameStudent}_{student.NameStudent}";
+                }
+            }
+            // Если передан ID группы - фильтруем по ней
+            else if (teamId.HasValue)
+            {
+                progressesQuery = progressesQuery.Where(p => p.Student.TeamId == teamId.Value);
+                var team = await _context.Teams.FindAsync(teamId.Value);
+                if (team != null)
+                {
+                    reportName += $"_Группа_{team.CategoryTeam}";
+                }
+            }
+
+            // Ограничения доступа для тренера
+            if (User.IsInRole("Coach"))
+            {
+                var coachIdStr = User.FindFirst("CoachId")?.Value;
+                if (int.TryParse(coachIdStr, out int coachId))
+                {
+                    var coachTeamIds = await _context.Training
+                        .Where(t => t.CoachId == coachId)
+                        .Select(t => t.TeamId)
+                        .Distinct()
+                        .ToListAsync();
+
+                    progressesQuery = progressesQuery.Where(p => p.Student.TeamId.HasValue && coachTeamIds.Contains(p.Student.TeamId.Value));
+                }
+            }
+
+            var progresses = await progressesQuery.OrderByDescending(p => p.DateProgress).ToListAsync();
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Результаты");
+
+                worksheet.Cell(1, 1).Value = "Дата";
+                worksheet.Cell(1, 2).Value = "Группа";
+                worksheet.Cell(1, 3).Value = "Ученик";
+                worksheet.Cell(1, 4).Value = "Дисциплина (Тест)";
+                worksheet.Cell(1, 5).Value = "Результат";
+                worksheet.Cell(1, 6).Value = "Примечание";
+                worksheet.Cell(1, 7).Value = "Комментарий тренера";
+
+                worksheet.Range("A1:G1").Style.Font.Bold = true;
+                worksheet.Range("A1:G1").Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                int row = 2;
+                foreach (var p in progresses)
+                {
+                    string testType = "Тест";
+                    string testValue = p.TestsProgress ?? "";
+
+                    if (!string.IsNullOrEmpty(p.TestsProgress))
+                    {
+                        var parts = p.TestsProgress.Split('|');
+                        if (parts.Length == 2)
+                        {
+                            testType = parts[0];
+                            testValue = parts[1];
+                        }
+                    }
+
+                    worksheet.Cell(row, 1).Value = p.DateProgress.ToString("dd.MM.yyyy");
+                    worksheet.Cell(row, 2).Value = p.Student?.Team?.CategoryTeam ?? "Без группы";
+                    worksheet.Cell(row, 3).Value = $"{p.Student?.SurnameStudent} {p.Student?.NameStudent}";
+                    worksheet.Cell(row, 4).Value = testType;
+                    worksheet.Cell(row, 5).Value = testValue;
+                    worksheet.Cell(row, 6).Value = p.PlanProgress ?? "";
+                    worksheet.Cell(row, 7).Value = p.CommentProgress ?? "";
+
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+
+                    reportName = reportName.Replace(" ", "_");
+
+                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{reportName}_{DateTime.Now:dd_MM_yyyy}.xlsx");
+                }
+            }
         }
     }
 }

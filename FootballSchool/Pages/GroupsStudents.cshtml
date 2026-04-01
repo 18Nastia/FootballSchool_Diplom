@@ -369,7 +369,6 @@
 
         .progress-fill {
             height: 100%;
-            background: #2563eb;
             border-radius: 3px;
             transition: width 0.3s ease;
         }
@@ -399,40 +398,35 @@
 
         /* Responsive */
         @@media (max-width: 1024px) {
-            .cards-grid
-
-        {
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        }
-
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
         }
 
         @@media (max-width: 768px) {
-            .page-header
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
 
-        {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
+            .filter-section {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                max-width: 100%;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .student-info {
+                grid-template-columns: 1fr;
+            }
         }
-
-        .filter-section {
-            flex-direction: column;
-        }
-
-        .filter-group {
-            max-width: 100%;
-        }
-
-        .cards-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .student-info {
-            grid-template-columns: 1fr;
-        }
-
-        }</style>
+    </style>
 }
 
 <div class="groups-students-page">
@@ -554,15 +548,15 @@
                             </div>
                             <span class="age">@student.Age лет</span>
                         </div>
-                        <div class="progress-section">
+                        <div class="progress-section" title="Посещаемость за 30 дней: @student.ProgressPercentage%">
                             <div class="progress-label">
-                                <span>Прогресс</span>
+                                <span>Посещаемость</span>
                                 <a href="/ChildProfile/@student.StudentId" class="details-link">
                                     Открыть профиль <i class="fas fa-arrow-right" style="font-size:10px;"></i>
                                 </a>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: @student.ProgressPercentage%"></div>
+                                <div class="progress-fill" style="width: @student.ProgressPercentage%; background: @(student.ProgressPercentage >= 75 ? "#10b981" : student.ProgressPercentage >= 50 ? "#f59e0b" : "#ef4444");"></div>
                             </div>
                         </div>
                         <div class="student-info">
@@ -737,7 +731,6 @@
 
 @section Scripts {
     <script>
-        // Переключение вкладок
         document.addEventListener('DOMContentLoaded', function() {
             const tabs = document.querySelectorAll('.tab');
             const groupsView = document.getElementById('groupsView');
@@ -756,7 +749,6 @@
                         studentsView.style.display = 'none';
                         if (addButtonText) addButtonText.textContent = 'Добавить группу';
 
-                        // Сброс поиска учеников при возврате к группам
                         document.getElementById('searchStudent').value = '';
                         filterStudents('');
                     } else {
@@ -767,15 +759,12 @@
                 });
             });
 
-            // Обработчик кнопки "Добавить..." (Слева вверху), есть проверка на null для Тренеров
             if (addButton) {
                 addButton.addEventListener('click', function() {
                     const activeTab = document.querySelector('.tab.active');
                     if (activeTab.getAttribute('data-view') === 'groups') {
-                        // Открываем модалку для группы
                         $('#addTeamModal').modal('show');
                     } else {
-                        // Открываем модалку для ученика (регистрация нового) и сбрасываем выбранную группу
                         const select = document.getElementById('NewStudent_TeamId');
                         if (select) select.value = "";
                         $('#addStudentModal').modal('show');
@@ -783,7 +772,6 @@
                 });
             }
 
-            // Поиск по группам
             document.getElementById('searchGroup').addEventListener('input', function(e) {
                 const term = e.target.value.toLowerCase();
                 document.querySelectorAll('.group-card-item').forEach(card => {
@@ -792,7 +780,6 @@
                 });
             });
 
-            // Поиск по ученикам
             document.getElementById('searchStudent').addEventListener('input', function(e) {
                 filterStudents(e.target.value.toLowerCase());
             });
@@ -806,7 +793,6 @@
             });
         }
 
-        // Функция для кнопки "Посмотреть учеников"
         function switchToStudentsTab(teamName) {
             document.querySelector('.tab[data-view="students"]').click();
 
@@ -817,7 +803,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Функция открытия окна назначения уже существующего ученика
         function openAssignStudentModal(teamId, teamName) {
             document.getElementById('AssignStudent_TeamId').value = teamId;
             document.getElementById('assignStudentModalTitle').innerText = 'Добавление ученика в группу: ' + teamName;
