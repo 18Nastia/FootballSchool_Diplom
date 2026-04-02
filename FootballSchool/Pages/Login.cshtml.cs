@@ -54,27 +54,31 @@ namespace FootballSchool.Pages
                 return Page();
             }
 
-            // Ищем пользователя в БД
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Login == Login && u.Password == Password);
 
             if (user != null)
             {
                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Login),
-                    new Claim(ClaimTypes.Role, user.Role),
-                    new Claim("UserId", user.UserId.ToString())
-                };
+        {
+            new Claim(ClaimTypes.Name, user.Login),
+            new Claim(ClaimTypes.Role, user.Role),
+            new Claim("UserId", user.UserId.ToString())
+        };
 
                 if (user.Role == "Coach")
                 {
-                    // Извлекаем ID тренера из логина (формат: coach_имя_айди)
-                    var parts = user.Login.Split('_');
-                    if (parts.Length > 0)
+                    var coach = await _context.Coaches
+                        .FirstOrDefaultAsync(c => c.UserId == user.UserId);
+
+                    if (coach != null)
                     {
-                        var coachId = parts.Last(); // Берем последнюю часть после подчеркивания
-                        claims.Add(new Claim("CoachId", coachId));
+                        claims.Add(new Claim("CoachId", coach.CoachId.ToString()));
+                    }
+                    else
+                    {
+                        ErrorMessage = "Для данного аккаунта тренера не найден связанный профиль.";
+                        return Page();
                     }
                 }
 
@@ -101,7 +105,6 @@ namespace FootballSchool.Pages
             ErrorMessage = "Неверный логин или пароль.";
             return Page();
         }
-
         public async Task<IActionResult> OnPostLogoutAsync()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

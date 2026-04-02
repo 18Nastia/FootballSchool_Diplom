@@ -5,136 +5,121 @@
 }
 
 @section Styles {
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        .page-header { display: none; }
-        .page-content { padding: 0 !important; margin: 0 !important; }
-
-        .coach-profile-container { background-color: #ffffff; min-height: 100vh; position: relative; }
-        .profile-banner { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); height: 180px; position: relative; }
-        .profile-section { padding: 0 40px; position: relative; }
-        
-        .profile-avatar {
-            width: 140px; height: 140px; border-radius: 50%; border: 5px solid #ffffff;
-            position: absolute; top: -70px; left: 40px;
-            background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 36px; color: #2563EB; font-weight: bold;
-            object-fit: cover;
-        }
-
-        .profile-info {
-            padding-top: 90px; display: flex; justify-content: space-between; align-items: flex-start;
-            padding-bottom: 24px; border-bottom: 1px solid #e5e7eb; position: relative;
-        }
-
-        .profile-details h2 { font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px; }
-        .profile-details p { font-size: 14px; color: #6b7280; margin-bottom: 4px; }
-        .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; display: inline-block; margin-bottom: 12px; }
-        .status-free { background-color: #d1fae5; color: #065f46; }
-        .status-busy { background-color: #fce7f3; color: #6b21a8; }
-
-        .admin-actions { display: flex; gap: 12px; position: absolute; right: 0; top: 90px; }
-        .btn-edit, .btn-delete {
-            padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
-            cursor: pointer; display: flex; align-items: center; gap: 6px; border: 1px solid transparent;
-        }
-        .btn-edit { background: white; border-color: #D1D5DB; color: #374151; }
-        .btn-edit:hover { background: #F3F4F6; }
-        .btn-delete { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
-        .btn-delete:hover { background: #FCA5A5; color: white; }
-
-        .tabs { display: flex; gap: 40px; padding: 0 40px; margin-top: 24px; border-bottom: 1px solid #e5e7eb; }
-        .tab { padding: 12px 0; font-size: 14px; font-weight: 500; color: #6b7280; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; margin-bottom: -1px; }
-        .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
-
-        .content-section { padding: 32px 40px; display: none; }
-        .content-section.active { display: block; }
-        .section-title { font-size: 20px; font-weight: 600; color: #111827; margin-bottom: 24px; }
-
-        .group-card { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; transition: transform 0.2s; }
-        .group-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .group-card h3 { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 8px; text-transform: capitalize; }
-        .group-info { font-size: 14px; color: #6b7280; margin-bottom: 4px; text-transform: capitalize; }
-
-        /* Стили для наград */
-        .awards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
-        .award-card { display: flex; align-items: center; gap: 16px; background: white; border: 1px solid #e5e7eb; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .award-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        .award-icon { width: 56px; height: 56px; border-radius: 50%; background: #F8FAFC; border: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
-        .award-details h4 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #111827; }
-        .award-details .award-date { font-size: 12px; color: #2563EB; font-weight: 500; margin-bottom: 4px; }
-        .award-details p { margin: 0; font-size: 14px; color: #6B7280; line-height: 1.4; }
-    </style>
+    <link rel="stylesheet" href="~/css/coach-profile.css" asp-append-version="true" />
 }
 
-<div class="coach-profile-container">
+<div class="coach-profile-page">
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success m-3 position-absolute w-100" style="z-index: 100; top: 0;"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+        <div class="alert alert-success mb-3">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
     }
-
-    <div class="profile-banner"></div>
 
     @if (Model.Profile != null)
     {
-        <div class="profile-section">
-            @if (!string.IsNullOrEmpty(Model.Profile.PhotoPath))
-            {
-                <img src="@Model.Profile.PhotoPath" alt="@Model.Profile.FullName" class="profile-avatar" style="cursor: pointer;" onclick="previewImage(this.src)" onerror="this.onerror=null;this.src='/img/default-avatar.png'; this.parentElement.innerHTML='<div class=\'profile-avatar\'>@Model.Profile.Initials</div>';">
-            }
-            else
-            {
-                <div class="profile-avatar">@Model.Profile.Initials</div>
-            }
-
-            <div class="profile-info">
-                <div class="profile-details">
-                    <span class="status-badge @Model.Profile.StatusClass">@Model.Profile.StatusText</span>
-                    <h2>@Model.Profile.FullName</h2>
-                    <p><strong>Специализация:</strong> @Model.Profile.Specialty</p>
-                    <p><strong>Квалификация:</strong> @Model.Profile.Qualification</p>
-                    <p><strong>График:</strong> @Model.Profile.Schedule</p>
-                    <p><strong>Ставка:</strong> @Model.Profile.Salary ₽</p>
-                </div>
-                
-                @if (User.IsInRole("Admin"))
+        <div class="profile-card">
+            <div class="profile-avatar-block">
+                @if (!string.IsNullOrEmpty(Model.Profile.PhotoPath))
                 {
-                    <div class="admin-actions">
-                        <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editCoachModal">
-                            <i class="fas fa-edit"></i> Изменить
-                        </button>
-                        <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Profile.CoachId" onsubmit="return confirm('Удалить профиль тренера безвозвратно?');">
-                            <button type="submit" class="btn-delete">
-                                <i class="fas fa-trash"></i> Удалить
-                            </button>
-                        </form>
+                    <div class="avatar-circle" onclick="previewImage('@Model.Profile.PhotoPath')">
+                        <img src="@Model.Profile.PhotoPath"
+                             alt="@Model.Profile.FullName"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='@Model.Profile.Initials';" />
                     </div>
                 }
+                else
+                {
+                    <div class="avatar-circle">@Model.Profile.Initials</div>
+                }
+
+                <span class="status-badge @Model.Profile.StatusClass">@Model.Profile.StatusText</span>
             </div>
+
+            <div class="profile-info">
+                <div class="profile-name">@Model.Profile.FullName</div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-futbol"></i>
+                        <div>
+                            <div class="info-label">Специализация</div>
+                            <div class="info-value">@Model.Profile.Specialty</div>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-certificate"></i>
+                        <div>
+                            <div class="info-label">Квалификация</div>
+                            <div class="info-value">@Model.Profile.Qualification</div>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <div class="info-label">График работы</div>
+                            <div class="info-value">@Model.Profile.Schedule</div>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-wallet"></i>
+                        <div>
+                            <div class="info-label">Ставка / зарплата</div>
+                            <div class="info-value">@Model.Profile.Salary ₽</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="admin-actions">
+                    <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editCoachModal">
+                        <i class="fas fa-edit"></i> Изменить
+                    </button>
+
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Profile.CoachId" onsubmit="return confirm('Удалить профиль тренера безвозвратно?');">
+                        <button type="submit" class="btn-delete">
+                            <i class="fas fa-trash"></i> Удалить
+                        </button>
+                    </form>
+                </div>
+            }
         </div>
 
         <div class="tabs">
-            <div class="tab active" data-tab="groups">Закрепленные группы</div>
-            <div class="tab" data-tab="achievements">Квалификация и достижения</div>
+            <button class="tab-btn active" type="button" data-tab="groups-section">
+                <i class="fas fa-users"></i> Закрепленные группы
+            </button>
+            <button class="tab-btn" type="button" data-tab="achievements-section">
+                <i class="fas fa-award"></i> Квалификация и достижения
+            </button>
         </div>
 
         <div class="content-section active" id="groups-section">
-            <h2 class="section-title">Группы под руководством тренера</h2>
-            
+            <h3 class="section-title">Группы под руководством тренера</h3>
+
             @if (!Model.Profile.Groups.Any())
             {
                 <p class="text-muted">У данного тренера пока нет закрепленных групп с запланированными тренировками.</p>
             }
             else
             {
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                <div class="groups-grid">
                     @foreach (var group in Model.Profile.Groups)
                     {
                         <div class="group-card">
-                            <h3>@group.CategoryName</h3>
-                            <div class="group-info"><i class="fas fa-users text-primary me-2"></i> @group.StudentsCount участников</div>
-                            <div class="group-info"><i class="fas fa-clock text-primary me-2"></i> @group.ScheduleInfo</div>
+                            <div class="group-card-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="group-details">
+                                <h4>@group.CategoryName</h4>
+                                <p>@group.StudentsCount участников</p>
+                                <p>@group.ScheduleInfo</p>
+                            </div>
                         </div>
                     }
                 </div>
@@ -142,7 +127,8 @@
         </div>
 
         <div class="content-section" id="achievements-section">
-            <h2 class="section-title">Профиль достижений</h2>
+            <h3 class="section-title">Профиль достижений</h3>
+
             @if (!Model.Profile.Awards.Any())
             {
                 <p class="text-muted">У данного тренера пока не заполнены квалификации или отсутствуют проведенные тренировки.</p>
@@ -158,7 +144,7 @@
                             </div>
                             <div class="award-details">
                                 <h4>@award.Title</h4>
-                                <div class="award-date"><i class="far fa-check-circle"></i> @award.Date</div>
+                                <div class="award-date">@award.Date</div>
                                 <p>@award.Description</p>
                             </div>
                         </div>
@@ -176,79 +162,100 @@
     }
 </div>
 
-@if (Model.Profile != null)
+@if (Model.Profile != null && User.IsInRole("Admin"))
 {
-    @if (User.IsInRole("Admin"))
-    {
-        <div class="modal fade" id="editCoachModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <form method="post" asp-page-handler="Edit">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Редактирование профиля</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <input type="hidden" asp-for="EditCoach.CoachId" />
-                            <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные</h6>
-                            <div class="row">
-                                <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="EditCoach.SurnameCoach" class="form-control" required /></div>
-                                <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="EditCoach.NameCoach" class="form-control" required /></div>
-                                <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="EditCoach.MiddleCoach" class="form-control" /></div>
+    <div class="modal fade" id="editCoachModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="Edit">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Редактирование профиля</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" asp-for="EditCoach.CoachId" />
 
-                                <div class="col-md-6 mb-3"><label>Специализация</label><input asp-for="EditCoach.SpecialtyCoach" class="form-control" required /></div>
-                                <div class="col-md-6 mb-3"><label>Квалификация</label><input asp-for="EditCoach.QualificationCoach" class="form-control" required /></div>
+                        <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Фамилия</label>
+                                <input asp-for="EditCoach.SurnameCoach" class="form-control" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Имя</label>
+                                <input asp-for="EditCoach.NameCoach" class="form-control" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Отчество</label>
+                                <input asp-for="EditCoach.MiddleCoach" class="form-control" />
                             </div>
 
-                            <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Условия работы</h6>
-                            <div class="row">
-                                <div class="col-md-6 mb-3"><label>Ставка / Зарплата (₽)</label><input asp-for="EditCoach.SalaryCoach" type="number" step="0.01" class="form-control" /></div>
-                                <div class="col-md-6 mb-3"><label>График работы</label><input asp-for="EditCoach.ScheduleCoach" class="form-control" /></div>
+                            <div class="col-md-6 mb-3">
+                                <label>Специализация</label>
+                                <input asp-for="EditCoach.SpecialtyCoach" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Квалификация</label>
+                                <input asp-for="EditCoach.QualificationCoach" class="form-control" required />
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Сохранить изменения</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    }
 
-    <!-- Модальное окно: Увеличенный просмотр изображения -->
-    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content bg-transparent border-0">
-                <div class="modal-header border-0 p-0 justify-content-end mb-2">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white; border-radius: 50%; opacity: 0.8; padding: 10px;"></button>
-                </div>
-                <div class="modal-body text-center p-0">
-                    <img id="fullSizeImage" src="" alt="Preview" style="max-width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
-                </div>
+                        <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Условия работы</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Ставка / Зарплата (₽)</label>
+                                <input asp-for="EditCoach.SalaryCoach" type="number" step="0.01" class="form-control" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>График работы</label>
+                                <input asp-for="EditCoach.ScheduleCoach" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary profile-submit-btn">
+                            Сохранить изменения
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 }
 
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-header border-0 p-0 justify-content-end mb-2">
+                <button type="button" class="btn-close image-preview-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="fullSizeImage" src="" alt="Preview" class="full-size-image" />
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
                 this.classList.add('active');
+
                 document.querySelectorAll('.content-section').forEach(section => {
                     section.classList.remove('active');
                 });
-                const tabName = this.getAttribute('data-tab');
-                document.getElementById(tabName + '-section').classList.add('active');
+
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
             });
         });
 
-        // Функция для увеличения изображений по клику
         function previewImage(src) {
             if (!src) return;
             document.getElementById('fullSizeImage').src = src;
-            var previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
             previewModal.show();
         }
     </script>

@@ -1,0 +1,433 @@
+﻿.schedule-page .main-content {
+    margin-left: 0 !important;
+    background: #f4f7f6;
+    min-height: 100vh;
+    padding-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #2c3e50;
+}
+
+.controls-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.view-toggle {
+    display: flex;
+    gap: 4px;
+    background: #edf2f7;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.toggle-btn {
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    color: #7f8c8d;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+    .toggle-btn.active {
+        background: white;
+        color: #2980b9;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+.date-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.current-date-display {
+    min-width: 190px;
+    text-align: center;
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+.btn-nav {
+    background: #fff;
+    border: 1px solid #dfe6e9;
+    color: #34495e;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .btn-nav:hover {
+        background: #f1f2f6;
+        color: #2980b9;
+    }
+
+.add-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #2980b9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .add-btn:hover {
+        background: #2471a3;
+    }
+
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.filter-select {
+    padding: 8px 32px 8px 12px;
+    border: 1px solid #dfe6e9;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #2c3e50;
+    background: white;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237f8c8d' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.calendar {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    overflow: hidden;
+    display: none;
+}
+
+    .calendar.active {
+        display: block;
+    }
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 2px solid #edf2f7;
+    background: #fafbfc;
+}
+
+.day-header {
+    padding: 16px 12px;
+    text-align: center;
+    border-right: 1px solid #edf2f7;
+}
+
+    .day-header:last-child {
+        border-right: none;
+    }
+
+.day-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #34495e;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.day-date {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.day-column {
+    border-right: 1px solid #edf2f7;
+    min-height: 400px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #ffffff;
+}
+
+    .day-column:last-child {
+        border-right: none;
+    }
+
+.event {
+    position: relative;
+    border-radius: 8px;
+    padding: 10px;
+    background: white;
+    color: #2c3e50;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #edf2f7;
+    border-left-width: 4px;
+    border-left-style: solid;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+}
+
+    .event:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+.border-blue {
+    border-left-color: #3498db !important;
+}
+
+.border-green {
+    border-left-color: #2ecc71 !important;
+}
+
+.border-orange {
+    border-left-color: #f39c12 !important;
+}
+
+.border-purple {
+    border-left-color: #9b59b6 !important;
+}
+
+.border-red {
+    border-left-color: #e74c3c !important;
+}
+
+.bg-blue {
+    background-color: #3498db !important;
+}
+
+.bg-green {
+    background-color: #2ecc71 !important;
+}
+
+.bg-orange {
+    background-color: #f39c12 !important;
+}
+
+.bg-purple {
+    background-color: #9b59b6 !important;
+}
+
+.bg-red {
+    background-color: #e74c3c !important;
+}
+
+.event-icon {
+    display: inline-block;
+    width: 14px;
+    text-align: center;
+    margin-right: 4px;
+    opacity: 0.7;
+}
+
+.event-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: none;
+    gap: 4px;
+    z-index: 10;
+}
+
+.event:hover .event-actions,
+.event-day:hover .event-actions {
+    display: flex;
+}
+
+.btn-icon {
+    background: #f1f2f6;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 6px;
+    color: #7f8c8d;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .btn-icon:hover {
+        background: #e0e6ed;
+        color: #2c3e50;
+    }
+
+.day-view {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    display: none;
+}
+
+    .day-view.active {
+        display: block;
+    }
+
+.date-header {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #edf2f7;
+    text-transform: capitalize;
+}
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.time-slot-day {
+    display: flex;
+    min-height: 80px;
+    border-bottom: 1px solid #f1f2f6;
+    padding: 12px 0;
+}
+
+.time-label {
+    width: 80px;
+    padding: 0 16px 0 0;
+    font-size: 14px;
+    color: #7f8c8d;
+    font-weight: 600;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.event-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-left: 16px;
+    border-left: 2px solid #edf2f7;
+}
+
+.event-day {
+    border-radius: 8px;
+    padding: 12px 16px;
+    background: white;
+    color: #2c3e50;
+    font-size: 13px;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    border: 1px solid #edf2f7;
+    border-left-width: 4px;
+    border-left-style: solid;
+    transition: transform 0.2s;
+}
+
+    .event-day:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+.legend {
+    margin-top: 32px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.legend-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.legend-items {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #34495e;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+@@media (max-width: 768px) {
+    .controls-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-navigation {
+        order: -1;
+        margin-bottom: 10px;
+    }
+
+    .calendar-header {
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .days-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .day-column {
+        border-right: none;
+        border-bottom: 2px solid #edf2f7;
+        min-height: auto;
+    }
+
+    .day-header {
+        font-size: 10px;
+        padding: 10px 4px;
+    }
+
+    .day-name {
+        font-size: 11px;
+    }
+}

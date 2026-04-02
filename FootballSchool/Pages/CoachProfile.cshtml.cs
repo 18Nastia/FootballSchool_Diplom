@@ -175,25 +175,56 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
+            if (!User.IsInRole("Admin"))
+                return RedirectToPage("/AccessDenied");
+
             var coach = await _context.Coaches
                 .Include(c => c.Training)
                     .ThenInclude(t => t.Attendances)
                 .FirstOrDefaultAsync(c => c.CoachId == id);
 
-            if (coach != null)
+            if (coach == null)
             {
-                if (coach.Training.Any())
+                TempData["ErrorMessage"] = "Тренер не найден.";
+                return RedirectToPage("/Coaches");
+            }
+
+            try
+            {
+                var userId = coach.UserId;
+
+                if (coach.Training != null && coach.Training.Any())
                 {
-                    foreach (var tr in coach.Training)
+                    foreach (var training in coach.Training)
                     {
-                        _context.Attendances.RemoveRange(tr.Attendances);
+                        if (training.Attendances != null && training.Attendances.Any())
+                        {
+                            _context.Attendances.RemoveRange(training.Attendances);
+                        }
                     }
+
                     _context.Training.RemoveRange(coach.Training);
                 }
+
                 _context.Coaches.Remove(coach);
+
+                if (userId.HasValue)
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId.Value);
+                    if (user != null)
+                    {
+                        _context.Users.Remove(user);
+                    }
+                }
+
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Тренер был удален.";
+                TempData["SuccessMessage"] = "Тренер и его аккаунт успешно удалены.";
             }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Ошибка при удалении тренера: " + (ex.InnerException?.Message ?? ex.Message);
+            }
+
             return RedirectToPage("/Coaches");
         }
     }

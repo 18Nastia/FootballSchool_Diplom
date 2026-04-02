@@ -327,5 +327,108 @@ namespace FootballSchool.Pages
 
             return new string(password.OrderBy(x => random.Next()).ToArray());
         }
+        public async Task<IActionResult> OnPostDeleteStudentAsync(int id)
+        {
+            if (!User.IsInRole("Admin"))
+                return RedirectToPage("/AccessDenied");
+
+            var student = await _context.Students
+                .Include(s => s.Attendances)
+                .Include(s => s.Progresses)
+                .Include(s => s.Subscriptions)
+                    .ThenInclude(sub => sub.Payments)
+                .FirstOrDefaultAsync(s => s.StudentId == id);
+
+            if (student == null)
+            {
+                TempData["ErrorMessage"] = "Ученик не найден.";
+                return RedirectToPage();
+            }
+
+            try
+            {
+                var userId = student.UserId;
+
+                if (student.Subscriptions != null && student.Subscriptions.Any())
+                {
+                    foreach (var sub in student.Subscriptions)
+                    {
+                        if (sub.Payments != null && sub.Payments.Any())
+                            _context.Payments.RemoveRange(sub.Payments);
+                    }
+
+                    _context.Subscriptions.RemoveRange(student.Subscriptions);
+                }
+
+                if (student.Progresses != null && student.Progresses.Any())
+                    _context.Progresses.RemoveRange(student.Progresses);
+
+                if (student.Attendances != null && student.Attendances.Any())
+                    _context.Attendances.RemoveRange(student.Attendances);
+
+                _context.Students.Remove(student);
+
+                if (userId.HasValue)
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId.Value);
+                    if (user != null)
+                        _context.Users.Remove(user);
+                }
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Ученик и его аккаунт успешно удалены.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Ошибка при удалении ученика: " + (ex.InnerException?.Message ?? ex.Message);
+            }
+
+            return RedirectToPage();
+        }
+        public async Task<IActionResult> OnPostDeleteTeamAsync(int id)
+        {
+            if (!User.IsInRole("Admin"))
+                return RedirectToPage("/AccessDenied");
+
+            var team = await _context.Teams
+                .Include(t => t.Students)
+                .Include(t => t.Training)
+                    .ThenInclude(tr => tr.Attendances)
+                .FirstOrDefaultAsync(t => t.TeamId == id);
+
+            if (team == null)
+            {
+                TempData["ErrorMessage"] = "Группа не найдена.";
+                return RedirectToPage();
+            }
+
+            try
+            {
+                foreach (var student in team.Students)
+                {
+                    student.TeamId = null;
+                }
+
+                foreach (var training in team.Training)
+                {
+                    if (training.Attendances.Any())
+                        _context.Attendances.RemoveRange(training.Attendances);
+                }
+
+                if (team.Training.Any())
+                    _context.Training.RemoveRange(team.Training);
+
+                _context.Teams.Remove(team);
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Группа «{team.CategoryTeam}» успешно удалена.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Ошибка при удалении группы: " + (ex.InnerException?.Message ?? ex.Message);
+            }
+
+            return RedirectToPage();
+        }
     }
 }

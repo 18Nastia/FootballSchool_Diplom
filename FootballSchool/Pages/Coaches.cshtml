@@ -5,176 +5,7 @@
 }
 
 @section Styles {
-    <style>
-        .coaches-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            background: #F9FAFB;
-        }
-
-        .page-top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 24px 32px;
-            background: white;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-            .page-top-header h1 {
-                font-size: 24px;
-                font-weight: 700;
-                margin: 0;
-                color: #111827;
-            }
-
-        .btn-add {
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-            .btn-add:hover {
-                background-color: #1d4ed8;
-            }
-
-        .coaches-content {
-            display: flex;
-            flex: 1;
-        }
-
-        .filters-panel {
-            width: 300px;
-            padding: 24px;
-            background: white;
-            border-right: 1px solid #e0e0e0;
-        }
-
-        .filter-section {
-            margin-bottom: 32px;
-        }
-
-            .filter-section h3, .filter-section h4 {
-                font-size: 14px;
-                font-weight: 600;
-                margin-bottom: 16px;
-                color: #374151;
-            }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            cursor: pointer;
-        }
-
-            .filter-option input[type="radio"] {
-                width: 16px;
-                height: 16px;
-                margin-right: 10px;
-                cursor: pointer;
-            }
-
-            .filter-option label {
-                font-size: 14px;
-                color: #4B5563;
-                cursor: pointer;
-            }
-
-        .trainers-list {
-            flex: 1;
-            padding: 24px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 16px;
-            align-content: start;
-        }
-
-        .trainer-card {
-            background-color: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid #e5e7eb;
-            text-decoration: none;
-            color: inherit;
-        }
-
-            .trainer-card:hover {
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-                border-color: #93C5FD;
-                transform: translateY(-2px);
-            }
-
-        .trainer-avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            margin-right: 16px;
-            background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: #2563EB;
-            font-weight: bold;
-            flex-shrink: 0;
-            object-fit: cover;
-        }
-
-        .trainer-info {
-            flex: 1;
-        }
-
-        .trainer-name {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #111827;
-        }
-
-        .trainer-spec {
-            font-size: 13px;
-            color: #6B7280;
-            margin-bottom: 10px;
-        }
-
-        .trainer-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-free {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-busy {
-            background-color: #fce7f3;
-            color: #6b21a8;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/coaches.css" asp-append-version="true" />
 }
 
 <div class="coaches-container">
@@ -191,7 +22,6 @@
     <div class="page-top-header">
         <h1>Тренерский состав</h1>
 
-        <!-- КНОПКА ДОБАВЛЕНИЯ ВИДНА ТОЛЬКО АДМИНУ -->
         @if (User.IsInRole("Admin"))
         {
             <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addCoachModal">
@@ -210,9 +40,10 @@
                 </div>
                 @foreach (var spec in Model.Specialties)
                 {
+                    var safeSpecId = spec.Replace(" ", "-").Replace("/", "-").Replace("\\", "-").ToLower();
                     <div class="filter-option">
-                        <input type="radio" id="spec-@spec" name="specialization" value="@spec.ToLower()">
-                        <label for="spec-@spec">@spec</label>
+                        <input type="radio" id="spec-@safeSpecId" name="specialization" value="@spec.ToLower()">
+                        <label for="spec-@safeSpecId">@spec</label>
                     </div>
                 }
             </div>
@@ -243,32 +74,62 @@
             {
                 @foreach (var coach in Model.CoachesList)
                 {
-                    <a href="/CoachProfile/@coach.CoachId" class="trainer-card" data-specialty="@coach.Specialty.ToLower()" data-status="@coach.StatusClass">
-                        @if (!string.IsNullOrEmpty(coach.PhotoPath))
+                    <div class="trainer-card"
+                         data-specialty="@coach.Specialty.ToLower()"
+                         data-status="@coach.StatusClass">
+
+                        @if (User.IsInRole("Admin"))
                         {
-                            <img src="@coach.PhotoPath" class="trainer-avatar" alt="@coach.FullName" onerror="this.onerror=null;this.src='/img/default-avatar.png'; this.parentElement.innerHTML='<div class=\'trainer-avatar\'>@coach.Initials</div>';">
-                        }
-                        else
-                        {
-                            <div class="trainer-avatar">@coach.Initials</div>
+                            <div class="trainer-card-actions">
+                                <a href="/CoachProfile/@coach.CoachId"
+                                   class="btn btn-sm btn-light"
+                                   title="Открыть профиль"
+                                   onclick="event.stopPropagation();">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <form method="post"
+                                      asp-page-handler="DeleteCoach"
+                                      asp-route-id="@coach.CoachId"
+                                      onsubmit="event.stopPropagation(); return confirm('Удалить тренера? Все его тренировки и посещения по ним будут удалены.');">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-delete-coach"
+                                            title="Удалить тренера">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         }
 
-                        <div class="trainer-info">
-                            <div class="trainer-name">@coach.FullName</div>
-                            <div class="trainer-spec">@coach.Specialty</div>
-                            <div class="trainer-meta">
-                                <span class="status-badge @coach.StatusClass">@coach.StatusText</span>
-                                <span class="text-muted" style="font-size:12px;">@coach.Qualification</span>
+                        <a href="/CoachProfile/@coach.CoachId" class="trainer-link">
+                            @if (!string.IsNullOrEmpty(coach.PhotoPath))
+                            {
+                                <img src="@coach.PhotoPath"
+                                     class="trainer-avatar"
+                                     alt="@coach.FullName"
+                                     onerror="this.onerror=null; this.outerHTML='<div class=&quot;trainer-avatar&quot;>@coach.Initials</div>';" />
+                            }
+                            else
+                            {
+                                <div class="trainer-avatar">@coach.Initials</div>
+                            }
+
+                            <div class="trainer-info">
+                                <div class="trainer-name">@coach.FullName</div>
+                                <div class="trainer-spec">@coach.Specialty</div>
+                                <div class="trainer-meta">
+                                    <span class="status-badge @coach.StatusClass">@coach.StatusText</span>
+                                    <span class="trainer-qualification">@coach.Qualification</span>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
                 }
             }
         </div>
     </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО РЕНДЕРИТСЯ ТОЛЬКО ДЛЯ АДМИНА -->
 @if (User.IsInRole("Admin"))
 {
     <div class="modal fade" id="addCoachModal" tabindex="-1" aria-hidden="true">
@@ -282,12 +143,27 @@
                     <div class="modal-body">
                         <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные</h6>
                         <div class="row">
-                            <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="NewCoach.SurnameCoach" class="form-control" required /></div>
-                            <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="NewCoach.NameCoach" class="form-control" required /></div>
-                            <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="NewCoach.MiddleCoach" class="form-control" /></div>
+                            <div class="col-md-4 mb-3">
+                                <label>Фамилия</label>
+                                <input asp-for="NewCoach.SurnameCoach" class="form-control" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Имя</label>
+                                <input asp-for="NewCoach.NameCoach" class="form-control" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Отчество</label>
+                                <input asp-for="NewCoach.MiddleCoach" class="form-control" />
+                            </div>
 
-                            <div class="col-md-6 mb-3"><label>Специализация</label><input asp-for="NewCoach.SpecialtyCoach" class="form-control" placeholder="Например: Силовые тренировки" required /></div>
-                            <div class="col-md-6 mb-3"><label>Квалификация</label><input asp-for="NewCoach.QualificationCoach" class="form-control" placeholder="Например: КМС, Высшее образование" required /></div>
+                            <div class="col-md-6 mb-3">
+                                <label>Специализация</label>
+                                <input asp-for="NewCoach.SpecialtyCoach" class="form-control" placeholder="Например: Силовые тренировки" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Квалификация</label>
+                                <input asp-for="NewCoach.QualificationCoach" class="form-control" placeholder="Например: КМС, Высшее образование" required />
+                            </div>
                             <div class="col-md-12 mb-3">
                                 <label>Фотография тренера</label>
                                 <input type="file" name="CoachPhotoUpload" class="form-control" accept="image/*" />
@@ -296,12 +172,18 @@
 
                         <h6 class="mb-3 mt-3 text-primary border-bottom pb-2">Условия работы</h6>
                         <div class="row">
-                            <div class="col-md-6 mb-3"><label>Ставка / Зарплата (₽)</label><input asp-for="NewCoach.SalaryCoach" type="number" step="0.01" class="form-control" /></div>
-                            <div class="col-md-6 mb-3"><label>График работы</label><input asp-for="NewCoach.ScheduleCoach" class="form-control" placeholder="Пн, Ср, Пт 18:00-21:00" /></div>
+                            <div class="col-md-6 mb-3">
+                                <label>Ставка / Зарплата (₽)</label>
+                                <input asp-for="NewCoach.SalaryCoach" type="number" step="0.01" class="form-control" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>График работы</label>
+                                <input asp-for="NewCoach.ScheduleCoach" class="form-control" placeholder="Пн, Ср, Пт 18:00-21:00" />
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Зарегистрировать тренера</button>
+                        <button type="submit" class="btn btn-primary btn-save-coach">Зарегистрировать тренера</button>
                     </div>
                 </form>
             </div>
@@ -312,7 +194,7 @@
 @section Scripts {
     <script>
         document.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', function() {
+            radio.addEventListener('change', function () {
                 const specVal = document.querySelector('input[name="specialization"]:checked').value;
                 const statVal = document.querySelector('input[name="status"]:checked').value;
 
@@ -323,7 +205,7 @@
                     const matchSpec = specVal === 'all' || cardSpec.includes(specVal);
                     const matchStat = statVal === 'all' || cardStat === statVal;
 
-                    card.style.display = matchSpec && matchStat ? 'flex' : 'none';
+                    card.style.display = (matchSpec && matchStat) ? 'flex' : 'none';
                 });
             });
         });

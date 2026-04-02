@@ -340,7 +340,8 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
-            if (!User.IsInRole("Admin")) return Forbid();
+            if (!User.IsInRole("Admin"))
+                return RedirectToPage("/AccessDenied");
 
             var student = await _context.Students
                 .Include(s => s.Attendances)
@@ -349,23 +350,54 @@ namespace FootballSchool.Pages
                     .ThenInclude(sub => sub.Payments)
                 .FirstOrDefaultAsync(s => s.StudentId == id);
 
-            if (student != null)
+            if (student == null)
             {
-                if (student.Subscriptions.Any())
+                TempData["ErrorMessage"] = "Ученик не найден.";
+                return RedirectToPage("/GroupsStudents");
+            }
+
+            try
+            {
+                var userId = student.UserId;
+
+                if (student.Subscriptions != null && student.Subscriptions.Any())
                 {
-                    foreach (var sub in student.Subscriptions)
+                    foreach (var subscription in student.Subscriptions)
                     {
-                        _context.Payments.RemoveRange(sub.Payments);
+                        if (subscription.Payments != null && subscription.Payments.Any())
+                        {
+                            _context.Payments.RemoveRange(subscription.Payments);
+                        }
                     }
+
                     _context.Subscriptions.RemoveRange(student.Subscriptions);
                 }
-                if (student.Progresses.Any()) _context.Progresses.RemoveRange(student.Progresses);
-                if (student.Attendances.Any()) _context.Attendances.RemoveRange(student.Attendances);
+
+                if (student.Progresses != null && student.Progresses.Any())
+                    _context.Progresses.RemoveRange(student.Progresses);
+
+                if (student.Attendances != null && student.Attendances.Any())
+                    _context.Attendances.RemoveRange(student.Attendances);
 
                 _context.Students.Remove(student);
+
+                if (userId.HasValue)
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId.Value);
+                    if (user != null)
+                    {
+                        _context.Users.Remove(user);
+                    }
+                }
+
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Ученик был полностью удален.";
+                TempData["SuccessMessage"] = "Ученик и его аккаунт успешно удалены.";
             }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Ошибка при удалении ученика: " + (ex.InnerException?.Message ?? ex.Message);
+            }
+
             return RedirectToPage("/GroupsStudents");
         }
     }

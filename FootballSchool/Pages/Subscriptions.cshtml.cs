@@ -65,7 +65,9 @@ namespace FootballSchool.Pages
                 .Include(s => s.Payments);
 
             IQueryable<Student> studentsQuery = _context.Students;
-            IQueryable<Payment> paymentsQuery = _context.Payments.Include(p => p.Subscription).ThenInclude(s => s.Student);
+            IQueryable<Payment> paymentsQuery = _context.Payments
+                .Include(p => p.Subscription)
+                .ThenInclude(s => s.Student);
 
             if (User.IsInRole("Parent"))
             {
@@ -78,25 +80,34 @@ namespace FootballSchool.Pages
                 }
             }
 
-            // 1. Загрузка абонементов
             var subs = await query.ToListAsync();
-            var students = await studentsQuery.Select(s => new { s.StudentId, FullName = $"{s.SurnameStudent} {s.NameStudent}" }).ToListAsync();
+
+            var students = await studentsQuery
+                .Select(s => new
+                {
+                    s.StudentId,
+                    FullName = $"{s.SurnameStudent} {s.NameStudent}"
+                })
+                .ToListAsync();
+
             StudentsList = new SelectList(students, "StudentId", "FullName");
 
             foreach (var s in subs)
             {
-                string status = s.DaysSubscription > 0 ? "Активен" : "Истёк";
-                string statusClass = s.DaysSubscription > 0 ? "badge-active" : "badge-expired";
+                string status = (s.DaysSubscription ?? 0) > 0 ? "Активен" : "Истёк";
+                string statusClass = (s.DaysSubscription ?? 0) > 0 ? "badge-active" : "badge-expired";
 
-                if (s.DaysSubscription > 0)
+                if ((s.DaysSubscription ?? 0) > 0)
                 {
                     ActiveCount++;
                     TotalRevenue += s.CostSubscription ?? 0;
                 }
 
-                // Логика расчета статуса оплаты на основе связанных платежей
-                decimal totalPaid = s.Payments?.Where(p => p.StatusPayment == "Оплачен").Sum(p => p.AmountPayment) ?? 0;
                 decimal cost = s.CostSubscription ?? 0;
+
+                decimal totalPaid = s.Payments?
+                    .Where(p => (p.StatusPayment ?? "").Trim() == "Оплачен")
+                    .Sum(p => p.AmountPayment) ?? 0;
 
                 string payStatus = "Не оплачен";
                 string payClass = "error";
@@ -116,15 +127,13 @@ namespace FootballSchool.Pages
                     payStatus = "Бесплатно";
                     payClass = "success";
                 }
-                else if (s.Payments != null && s.Payments.Any(p => p.StatusPayment == "В обработке"))
+                else if (s.Payments != null && s.Payments.Any(p => (p.StatusPayment ?? "").Trim() == "В обработке"))
                 {
-                    // Если нет оплат, но есть платеж в обработке
                     payStatus = "В обработке";
                     payClass = "warning";
                 }
-                else if (s.Payments != null && s.Payments.Any(p => p.StatusPayment == "Ошибка"))
+                else if (s.Payments != null && s.Payments.Any(p => (p.StatusPayment ?? "").Trim() == "Ошибка"))
                 {
-                    // Если нет оплат и последний платеж выдал ошибку
                     payStatus = "Ошибка оплаты";
                     payClass = "error";
                 }
@@ -132,7 +141,9 @@ namespace FootballSchool.Pages
                 SubscriptionsList.Add(new SubDto
                 {
                     SubscriptionId = s.SubscriptionId,
-                    StudentName = s.Student != null ? $"{s.Student.SurnameStudent} {s.Student.NameStudent}" : "Неизвестно",
+                    StudentName = s.Student != null
+                        ? $"{s.Student.SurnameStudent} {s.Student.NameStudent}"
+                        : "Неизвестно",
                     Type = s.TypeSubscription,
                     Terms = s.TermsSubscription ?? "Стандартные",
                     DaysCount = s.DaysSubscription ?? 0,
@@ -140,17 +151,22 @@ namespace FootballSchool.Pages
                     Status = status,
                     StatusClass = statusClass,
                     PaymentStatus = payStatus,
-                    PaymentStatusClass = payClass 
+                    PaymentStatusClass = payClass
                 });
             }
 
-            // 2. Загрузка платежей
-            var payments = await paymentsQuery.OrderByDescending(p => p.DatePayment).ToListAsync();
+            var payments = await paymentsQuery
+                .OrderByDescending(p => p.DatePayment)
+                .ToListAsync();
 
-            var activeSubs = await query.Select(s => new {
-                s.SubscriptionId,
-                DisplayText = $"{(s.Student != null ? s.Student.SurnameStudent : "")} - {s.TypeSubscription} ({s.CostSubscription} ₽)"
-            }).ToListAsync();
+            var activeSubs = await query
+                .Select(s => new
+                {
+                    s.SubscriptionId,
+                    DisplayText = $"{(s.Student != null ? s.Student.SurnameStudent : "")} - {s.TypeSubscription} ({s.CostSubscription} ₽)"
+                })
+                .ToListAsync();
+
             ActiveSubscriptionsList = new SelectList(activeSubs, "SubscriptionId", "DisplayText");
 
             foreach (var p in payments)
@@ -159,19 +175,23 @@ namespace FootballSchool.Pages
                 {
                     PaymentId = p.PaymentId,
                     SubscriptionId = p.SubscriptionId,
-                    StudentName = p.Subscription?.Student != null ? $"{p.Subscription.Student.SurnameStudent} {p.Subscription.Student.NameStudent}" : "Неизвестно",
+                    StudentName = p.Subscription?.Student != null
+                        ? $"{p.Subscription.Student.SurnameStudent} {p.Subscription.Student.NameStudent}"
+                        : "Неизвестно",
                     SubscriptionInfo = p.Subscription?.TypeSubscription ?? "Неизвестный абонемент",
                     Amount = p.AmountPayment,
                     Date = new DateTime(p.DatePayment.Year, p.DatePayment.Month, p.DatePayment.Day),
                     Method = p.MethodPayment,
-                    Status = p.StatusPayment ?? "В обработке"
+                    Status = (p.StatusPayment ?? "В обработке").Trim()
                 });
             }
         }
 
         public async Task<IActionResult> OnPostSaveSubAsync()
         {
-            if (!User.IsInRole("Admin")) return Forbid();
+            if (!User.IsInRole("Admin"))
+                return Forbid();
+
             ModelState.Clear();
 
             try
@@ -191,33 +211,49 @@ namespace FootballSchool.Pages
                         existing.TermsSubscription = ModalSub.TermsSubscription;
                         existing.DaysSubscription = ModalSub.DaysSubscription;
                         existing.CostSubscription = ModalSub.CostSubscription;
+
                         _context.Subscriptions.Update(existing);
                         TempData["SuccessMessage"] = "Данные абонемента обновлены!";
                     }
                 }
+
                 await _context.SaveChangesAsync();
             }
-            catch (Exception ex) { TempData["ErrorMessage"] = "Ошибка: " + (ex.InnerException?.Message ?? ex.Message); }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Ошибка: " + (ex.InnerException?.Message ?? ex.Message);
+            }
+
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostDeleteSubAsync(int id)
         {
-            if (!User.IsInRole("Admin")) return Forbid();
-            var sub = await _context.Subscriptions.Include(s => s.Payments).FirstOrDefaultAsync(s => s.SubscriptionId == id);
+            if (!User.IsInRole("Admin"))
+                return Forbid();
+
+            var sub = await _context.Subscriptions
+                .Include(s => s.Payments)
+                .FirstOrDefaultAsync(s => s.SubscriptionId == id);
+
             if (sub != null)
             {
-                if (sub.Payments.Any()) _context.Payments.RemoveRange(sub.Payments);
+                if (sub.Payments.Any())
+                    _context.Payments.RemoveRange(sub.Payments);
+
                 _context.Subscriptions.Remove(sub);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Абонемент аннулирован.";
             }
+
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostSavePaymentAsync()
         {
-            if (!User.IsInRole("Admin") && ModalPayment.PaymentId != 0) return Forbid();
+            if (!User.IsInRole("Admin") && ModalPayment.PaymentId != 0)
+                return Forbid();
+
             ModelState.Clear();
 
             try
@@ -232,32 +268,42 @@ namespace FootballSchool.Pages
                 if (ModalPayment.PaymentId == 0)
                 {
                     _context.Payments.Add(ModalPayment);
-                    TempData["SuccessMessage"] = User.IsInRole("Parent") ? "Заявка на оплату сформирована." : "Платеж зарегистрирован!";
+                    TempData["SuccessMessage"] = User.IsInRole("Parent")
+                        ? "Заявка на оплату сформирована."
+                        : "Платеж зарегистрирован!";
                 }
                 else
                 {
                     var existing = await _context.Payments.FindAsync(ModalPayment.PaymentId);
                     if (existing != null)
                     {
-                        // Обновляем параметры И вызываем Update, чтобы контекст точно зафиксировал изменения
                         existing.StatusPayment = ModalPayment.StatusPayment;
                         existing.MethodPayment = ModalPayment.MethodPayment;
                         existing.AmountPayment = ModalPayment.AmountPayment;
-                        if (ModalPayment.DatePayment != default) existing.DatePayment = ModalPayment.DatePayment;
+
+                        if (ModalPayment.DatePayment != default)
+                            existing.DatePayment = ModalPayment.DatePayment;
 
                         _context.Payments.Update(existing);
                         TempData["SuccessMessage"] = "Статус платежа обновлен!";
                     }
                 }
+
                 await _context.SaveChangesAsync();
             }
-            catch (Exception ex) { TempData["ErrorMessage"] = "Ошибка сохранения: " + (ex.InnerException?.Message ?? ex.Message); }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Ошибка сохранения: " + (ex.InnerException?.Message ?? ex.Message);
+            }
+
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostDeletePaymentAsync(int id)
         {
-            if (!User.IsInRole("Admin")) return Forbid();
+            if (!User.IsInRole("Admin"))
+                return Forbid();
+
             var payment = await _context.Payments.FindAsync(id);
             if (payment != null)
             {
@@ -265,6 +311,7 @@ namespace FootballSchool.Pages
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Запись о платеже удалена.";
             }
+
             return RedirectToPage();
         }
     }
