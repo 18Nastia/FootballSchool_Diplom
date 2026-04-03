@@ -8,38 +8,40 @@
     <link rel="stylesheet" href="~/css/index-coach.css" asp-append-version="true" />
 }
 
-
 <div class="coach-page">
     <div class="coach-content">
-        <!-- Welcome Section -->
         <div class="welcome-card">
             <h1 class="welcome-title">Добрый день, @(Model.CurrentCoach?.NameCoach ?? "Тренер")!</h1>
             <p class="welcome-subtitle">Сегодня у вас @Model.TodayTrainingsCount тренировок.</p>
         </div>
 
-        <!-- Quick Actions -->
         <div class="quick-actions">
             <a href="/Attendance" class="action-card">
                 <i class="fas fa-calendar-check action-icon"></i>
-                <div class="action-title">Посещаемость</div>
-                <div class="action-desc">Отметить присутствующих</div>
+                <div>
+                    <div class="action-title">Посещаемость</div>
+                    <div class="action-desc">Отметить присутствующих</div>
+                </div>
             </a>
 
             <a href="/TrainingResults" class="action-card">
                 <i class="fas fa-chart-line action-icon"></i>
-                <div class="action-title">Результаты</div>
-                <div class="action-desc">Внести показатели</div>
+                <div>
+                    <div class="action-title">Результаты</div>
+                    <div class="action-desc">Внести показатели</div>
+                </div>
             </a>
 
             <a href="/Schedule" class="action-card">
                 <i class="fas fa-calendar-alt action-icon"></i>
-                <div class="action-title">Мое расписание</div>
-                <div class="action-desc">Просмотр всех занятий</div>
+                <div>
+                    <div class="action-title">Мое расписание</div>
+                    <div class="action-desc">Просмотр всех занятий</div>
+                </div>
             </a>
         </div>
 
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
-            <!-- Trainings Card -->
             <div class="trainings-card" style="margin-bottom: 0;">
                 <h2 class="section-title">Ближайшие тренировки</h2>
 
@@ -84,7 +86,6 @@
                 }
             </div>
 
-            <!-- Statistics Card -->
             <div class="statistics-card" style="margin-bottom: 0;">
                 <h2 class="section-title">Ваша статистика</h2>
 
@@ -107,7 +108,6 @@
             </div>
         </div>
 
-        <!-- News Card -->
         <div class="news-card mt-4">
             <h2 class="section-title">Новости и события</h2>
 
@@ -128,4 +128,4 @@
             </div>
         </div>
     </div>
-</div> 
+</div>

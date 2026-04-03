@@ -9,7 +9,7 @@
 }
 
 <div class="attendance-page">
-    <div class="main-content">
+    <div class="attendance-content">
 
         <h1 class="page-title">Учет и статистика посещаемости</h1>
 
@@ -20,7 +20,6 @@
             </div>
         }
 
-        <!-- Навигация по вкладкам -->
         <div class="tabs">
             <a href="?ViewMode=Daily&FilterTeamId=@Model.FilterTeamId" class="tab-link @(Model.ViewMode == "Daily" ? "active" : "")">
                 <i class="fas fa-clipboard-check"></i> Журнал тренировок
@@ -32,14 +31,14 @@
 
         @if (Model.ViewMode == "Daily")
         {
-            <!-- Вкладка: Ежедневный журнал -->
             <form method="get" class="filters">
                 <input type="hidden" name="ViewMode" value="Daily" />
+
                 <div class="filter-group">
                     <label class="filter-label">Выберите группу</label>
                     <select asp-for="FilterTeamId" asp-items="Model.TeamList" class="select-input" onchange="this.form.submit()"></select>
                 </div>
-                
+
                 <div class="filter-group">
                     <label class="filter-label">Дата</label>
                     <input type="date" asp-for="FilterDate" class="date-input" onchange="this.form.submit()">
@@ -51,7 +50,7 @@
                         <label class="filter-label">Выберите занятие</label>
                         <select asp-for="SelectedTrainingId" class="select-input" onchange="this.form.submit()">
                             <option value="">-- Выберите тренировку --</option>
-                            @foreach(var t in Model.AvailableTrainings)
+                            @foreach (var t in Model.AvailableTrainings)
                             {
                                 var time = t.TimeTraining.ToString("HH:mm");
                                 var plan = string.IsNullOrEmpty(t.PlanTraining) ? "Тренировка" : t.PlanTraining;
@@ -67,7 +66,7 @@
             {
                 <div class="no-data-alert">
                     <i class="fas fa-calendar-times" style="font-size: 24px; margin-bottom: 12px; display: block;"></i>
-                    <strong>Тренировок не найдено.</strong><br/>
+                    <strong>Тренировок не найдено.</strong><br />
                     На выбранную дату для данной группы тренировки не запланированы.
                 </div>
             }
@@ -75,13 +74,12 @@
             {
                 <div class="info-alert">
                     <i class="fas fa-hand-pointer" style="font-size: 24px; margin-bottom: 12px; display: block; color: #64748b;"></i>
-                    <strong>Выберите тренировку</strong><br/>
+                    <strong>Выберите тренировку</strong><br />
                     В выпадающем списке занятия отмечены иконками (✅ - заполнено, ⏳ - ожидает). Выберите занятие для продолжения.
                 </div>
             }
             else
             {
-                <!-- Статус-баннер -->
                 @if (Model.IsAlreadyFilled)
                 {
                     <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
@@ -134,21 +132,29 @@
                         {
                             <div class="table-row student-row">
                                 <input type="hidden" asp-for="AttendanceItems[i].StudentId" />
-                                
-                                <div class="student-name">@Model.AttendanceItems[i].StudentName</div>
-                                
-                                <div class="status-group">
-                                    <label class="radio-option">
-                                        <input type="radio" asp-for="AttendanceItems[i].Status" value="Был" onchange="updateStatistics()" />
-                                        <span>Был</span>
-                                    </label>
-                                    <label class="radio-option absent">
-                                        <input type="radio" asp-for="AttendanceItems[i].Status" value="Не был" onchange="updateStatistics()" />
-                                        <span>Не был</span>
-                                    </label>
-                                </div>
-                                
+
                                 <div>
+                                    <div class="mobile-label">Ученик</div>
+                                    <div class="student-name">@Model.AttendanceItems[i].StudentName</div>
+                                </div>
+
+                                <div>
+                                    <div class="mobile-label">Статус</div>
+                                    <div class="status-group">
+                                        <label class="radio-option">
+                                            <input type="radio" asp-for="AttendanceItems[i].Status" value="Был" onchange="updateStatistics()" />
+                                            <span>Был</span>
+                                        </label>
+
+                                        <label class="radio-option absent">
+                                            <input type="radio" asp-for="AttendanceItems[i].Status" value="Не был" onchange="updateStatistics()" />
+                                            <span>Не был</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="mobile-label">Комментарий</div>
                                     <input type="text" asp-for="AttendanceItems[i].Comment" class="comment-input" placeholder="Комментарий (необязательно)">
                                 </div>
                             </div>
@@ -166,15 +172,16 @@
         }
         else if (Model.ViewMode == "Report")
         {
-            <!-- Вкладка: Статистика и отчеты -->
             <form method="get" class="filters mb-4">
                 <input type="hidden" name="ViewMode" value="Report" />
+
                 <div class="filter-group">
                     <label class="filter-label">Выберите группу</label>
                     <select asp-for="FilterTeamId" asp-items="Model.TeamList" class="select-input" onchange="this.form.submit()"></select>
                 </div>
+
                 <div class="filter-group">
-                    <label class="filter-label">Период для отчета</label>
+                    <label class="filter-label">Период для журнала</label>
                     <select asp-for="ReportPeriod" class="select-input" onchange="this.form.submit()">
                         <option value="week">За последние 7 дней</option>
                         <option value="month">За последний месяц</option>
@@ -185,45 +192,74 @@
             </form>
 
             <div class="mb-4">
-                <a href="?handler=ExportReport&teamId=@(Model.FilterTeamId ?? 0)&period=@Model.ReportPeriod" class="btn-save" style="background-color: #10b981; text-decoration: none; width: fit-content; display: inline-flex;">
+                <a href="?handler=ExportReport&teamId=@(Model.FilterTeamId ?? 0)&period=@Model.ReportPeriod"
+                   class="btn-save"
+                   style="background-color: #10b981; text-decoration: none; width: fit-content; display: inline-flex;">
                     <i class="fas fa-file-excel"></i> Экспорт в Excel
                 </a>
             </div>
 
-            <div class="attendance-table">
-                <div class="table-header report-grid">
-                    <div>Ученик</div>
-                    <div class="text-center">Занятий всего</div>
-                    <div class="text-center" style="color: #16a34a;">Присутствовал</div>
-                    <div class="text-center" style="color: #dc2626;">Пропустил</div>
-                    <div>% Посещаемости</div>
+            @if (!Model.JournalTrainings.Any() || !Model.JournalRows.Any())
+            {
+                <div class="p-4 text-center text-muted empty-report-alert" style="background-color: #f8fafc; border-radius: 8px;">
+                    В выбранном периоде не найдено занятий или в группе нет учеников.
                 </div>
-                
-                @if (!Model.ReportStats.Any())
-                {
-                    <div class="p-4 text-center text-muted empty-report-alert" style="background-color: #f8fafc; border-radius: 8px;">В выбранном периоде не было проведенных тренировок или в группе нет учеников.</div>
-                }
-                else
-                {
-                    @foreach (var stat in Model.ReportStats)
-                    {
-                        <div class="table-row report-grid">
-                            <div class="student-name">@stat.StudentName</div>
-                            <div class="text-center" style="font-weight: 600;">@stat.TotalTrainings</div>
-                            <div class="text-center" style="color: #16a34a; font-weight: 600;">@stat.Attended</div>
-                            <div class="text-center" style="color: #dc2626; font-weight: 600;">@stat.Absent</div>
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
-                                        <div style="height: 100%; width: @stat.Percentage%; background: @(stat.Percentage >= 75 ? "#10b981" : stat.Percentage >= 50 ? "#f59e0b" : "#ef4444"); transition: width 0.5s ease;"></div>
-                                    </div>
-                                    <span style="font-size: 14px; font-weight: 600; width: 45px; text-align: right;">@stat.Percentage%</span>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
-            </div>
+            }
+            else
+            {
+                <div class="journal-wrapper">
+                    <div class="journal-table">
+                        <table class="attendance-journal-table">
+                            <thead>
+                                <tr>
+                                    <th class="sticky-col">ФИО</th>
+                                    @foreach (var tr in Model.JournalTrainings)
+                                    {
+                                        <th>
+                                            <div>@tr.DateTraining.ToString("dd.MM")</div>
+                                            <div class="journal-time">@tr.TimeTraining.ToString("HH:mm")</div>
+                                        </th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in Model.JournalRows)
+                                {
+                                    <tr>
+                                        <td class="sticky-col student-col">@row.StudentName</td>
+                                        @foreach (var mark in row.Marks)
+                                        {
+                                            <td class="mark-cell">
+                                                @if (mark == "✔")
+                                                {
+                                                    <span class="mark-present">✔</span>
+                                                }
+                                                else if (mark == "✖")
+                                                {
+                                                    <span class="mark-absent">✖</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="mark-empty">—</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="sticky-col total-label">ИТОГО</td>
+                                    @foreach (var total in Model.JournalTotals)
+                                    {
+                                        <td class="total-cell">@total</td>
+                                    }
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            }
         }
 
     </div>
@@ -234,7 +270,7 @@
         function updateStatistics() {
             const rows = document.querySelectorAll('.student-row');
             const totalStudents = rows.length;
-            
+
             if (totalStudents === 0) return;
 
             let presentCount = 0;
@@ -246,9 +282,9 @@
             });
 
             const percentage = Math.round((presentCount / totalStudents) * 100);
-            
+
             const statsElement = document.getElementById('live-stats');
-            if(statsElement) {
+            if (statsElement) {
                 statsElement.innerHTML = `Присутствует: <strong>${presentCount} из ${totalStudents} учеников (${percentage}%)</strong>`;
             }
         }

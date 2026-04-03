@@ -2,6 +2,9 @@
     padding: 24px;
     background: #f9fafb;
     min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .profile-card {
@@ -15,6 +18,7 @@
     width: 100%;
     position: relative;
     border: 1px solid #E5E7EB;
+    box-sizing: border-box;
 }
 
 .profile-avatar-block {
@@ -40,6 +44,7 @@
     object-fit: cover;
     overflow: hidden;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
     .avatar-circle img {
@@ -54,6 +59,8 @@
     font-size: 12px;
     font-weight: 500;
     display: inline-block;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .status-free {
@@ -78,6 +85,7 @@
     margin-bottom: 24px;
     color: #111827;
     line-height: 1.2;
+    word-break: break-word;
 }
 
 .info-grid {
@@ -91,6 +99,7 @@
     display: flex;
     gap: 12px;
     align-items: flex-start;
+    min-width: 0;
 }
 
     .info-item i {
@@ -124,7 +133,8 @@
     flex-wrap: wrap;
 }
 
-.btn-edit, .btn-delete {
+.btn-edit,
+.btn-delete {
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 14px;
@@ -135,6 +145,7 @@
     gap: 6px;
     border: 1px solid transparent;
     transition: all 0.2s ease;
+    text-decoration: none;
 }
 
 .btn-edit {
@@ -169,6 +180,7 @@
     width: 100%;
     overflow-x: auto;
     border: 1px solid #E5E7EB;
+    box-sizing: border-box;
 }
 
 .tab-btn {
@@ -204,6 +216,7 @@
     width: 100%;
     display: none;
     border: 1px solid #E5E7EB;
+    box-sizing: border-box;
 }
 
     .content-section.active {
@@ -217,6 +230,8 @@
     color: #111827;
     border-bottom: 2px solid #F3F4F6;
     padding-bottom: 12px;
+    line-height: 1.25;
+    word-break: break-word;
 }
 
 .groups-grid {
@@ -234,6 +249,7 @@
     border-radius: 12px;
     border: 1px solid #E5E7EB;
     border-left: 4px solid #2563EB;
+    min-width: 0;
 }
 
 .group-card-icon {
@@ -249,19 +265,25 @@
     flex-shrink: 0;
 }
 
-.group-details h4 {
-    margin: 0 0 4px 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #111827;
+.group-details {
+    min-width: 0;
 }
 
-.group-details p {
-    margin: 0;
-    font-size: 13px;
-    color: #6B7280;
-    line-height: 1.5;
-}
+    .group-details h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        word-break: break-word;
+    }
+
+    .group-details p {
+        margin: 0;
+        font-size: 13px;
+        color: #6B7280;
+        line-height: 1.5;
+        word-break: break-word;
+    }
 
 .awards-grid {
     display: grid;
@@ -277,6 +299,7 @@
     background: #ffffff;
     padding: 20px;
     transition: transform 0.2s;
+    min-width: 0;
 }
 
     .award-card:hover {
@@ -296,12 +319,17 @@
     flex-shrink: 0;
 }
 
-.award-details h4 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #111827;
+.award-details {
+    min-width: 0;
 }
+
+    .award-details h4 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #111827;
+        word-break: break-word;
+    }
 
 .award-date {
     font-size: 12px;
@@ -315,44 +343,441 @@
     color: #6B7280;
     margin: 0;
     line-height: 1.5;
+    word-break: break-word;
 }
 
-@@media (max-width: 900px) {
+.profile-submit-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+.image-preview-close {
+    background-color: white;
+    border-radius: 50%;
+    opacity: 0.9;
+    padding: 10px;
+}
+
+.full-size-image {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 900px) {
+    .coach-profile-page {
+        padding: 20px;
+    }
+
     .profile-card {
         flex-direction: column;
         align-items: flex-start;
-        padding-top: 72px;
+        padding-top: 88px;
+        gap: 20px;
     }
 
     .admin-actions {
-        position: static;
-        margin-top: 20px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        justify-content: flex-end;
     }
 
     .profile-avatar-block {
         width: 100%;
         align-items: flex-start;
     }
+
+    .profile-name {
+        font-size: 28px;
+    }
 }
 
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
     .coach-profile-page {
-        padding: 16px;
+        padding: 14px 12px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
-    .profile-card, .content-section {
-        padding: 20px;
+    .profile-card {
+        padding: 14px;
+        padding-top: 70px;
+        gap: 14px;
+        border-radius: 14px;
+        margin-bottom: 16px;
     }
 
-    .tabs {
-        padding: 12px;
+    .admin-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        left: auto;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        align-items: center;
+        z-index: 3;
+    }
+
+        .admin-actions form {
+            flex: 0 0 auto;
+            margin: 0;
+        }
+
+    .btn-edit,
+    .btn-delete {
+        width: 40px;
+        height: 40px;
+        min-height: 40px;
+        padding: 0;
+        border-radius: 10px;
+        justify-content: center;
+        font-size: 0;
+        gap: 0;
+    }
+
+        .btn-edit i,
+        .btn-delete i {
+            font-size: 15px;
+            margin: 0;
+        }
+
+    .btn-edit {
+        background: #334155;
+        border-color: #475569;
+        color: #ffffff;
+    }
+
+    .btn-delete {
+        background: #991b1b;
+        border-color: #b91c1c;
+        color: #ffffff;
+    }
+
+    .profile-card {
+        padding-top: 56px;
+    }
+
+    .profile-avatar-block {
+        width: 100%;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .avatar-circle {
+        width: 88px;
+        height: 88px;
+        font-size: 28px;
+        border-width: 3px;
+    }
+
+    .status-badge {
+        font-size: 11px;
+        padding: 5px 12px;
+    }
+
+    .profile-info {
+        width: 100%;
+        min-width: 0;
+        text-align: center;
     }
 
     .profile-name {
-        font-size: 26px;
+        font-size: 22px;
+        margin-bottom: 16px;
+        line-height: 1.25;
     }
 
-    .info-grid, .groups-grid, .awards-grid {
+    .info-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
+
+    .info-item {
+        gap: 10px;
+        text-align: left;
+    }
+
+        .info-item i {
+            width: 14px;
+            font-size: 14px;
+        }
+
+    .info-label {
+        font-size: 11px;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        font-size: 14px;
+        line-height: 1.35;
+    }
+
+    .tabs {
+        padding: 10px;
+        gap: 8px;
+        margin-bottom: 16px;
+        border-radius: 14px;
+    }
+
+    .tab-btn {
+        padding: 10px 12px;
+        font-size: 13px;
+        border-radius: 8px;
+        justify-content: center;
+        flex: 1 1 auto;
+    }
+
+    .content-section {
+        padding: 16px 14px;
+        border-radius: 14px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+    }
+
+    .groups-grid,
+    .awards-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .group-card {
+        padding: 14px;
+        gap: 12px;
+        border-radius: 12px;
+    }
+
+    .group-card-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
+        border-radius: 8px;
+    }
+
+    .group-details h4 {
+        font-size: 15px;
+    }
+
+    .group-details p {
+        font-size: 12px;
+    }
+
+    .award-card {
+        padding: 14px;
+        gap: 12px;
+        border-radius: 12px;
+    }
+
+    .award-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 20px;
+    }
+
+    .award-details h4 {
+        font-size: 15px;
+        margin-bottom: 4px;
+    }
+
+    .award-date {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+
+    .award-details p {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .profile-submit-btn {
+        min-height: 42px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .coach-profile-page {
+        padding: 12px 10px;
+    }
+
+    .profile-card {
+        padding: 12px;
+        padding-top: 64px;
+    }
+
+    .admin-actions {
+        top: 10px;
+        right: 10px;
+        left: auto;
+        gap: 6px;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        width: 36px;
+        height: 36px;
+        min-height: 36px;
+        border-radius: 9px;
+    }
+
+        .btn-edit i,
+        .btn-delete i {
+            font-size: 14px;
+        }
+
+    .profile-card {
+        padding-top: 52px;
+    }
+
+    .avatar-circle {
+        width: 78px;
+        height: 78px;
+        font-size: 24px;
+    }
+
+    .profile-name {
+        font-size: 20px;
+    }
+
+    .info-value {
+        font-size: 13px;
+    }
+
+    .tab-btn {
+        font-size: 12px;
+        padding: 9px 10px;
+    }
+
+    .content-section {
+        padding: 14px 12px;
+    }
+
+    .section-title {
+        font-size: 18px;
+    }
+}
+
+body.dark-theme .coach-profile-page {
+    background: #0f172a !important;
+}
+
+body.dark-theme .profile-card,
+body.dark-theme .tabs,
+body.dark-theme .content-section,
+body.dark-theme .award-card,
+body.dark-theme .group-card,
+body.dark-theme #editCoachModal .modal-content {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+    box-shadow: none !important;
+}
+
+body.dark-theme .profile-name,
+body.dark-theme .section-title,
+body.dark-theme .group-details h4,
+body.dark-theme .award-details h4,
+body.dark-theme .info-value {
+    color: var(--text-color) !important;
+}
+
+body.dark-theme .info-label,
+body.dark-theme .group-details p,
+body.dark-theme .award-details p {
+    color: var(--text-muted) !important;
+}
+
+body.dark-theme .tabs {
+    background-color: var(--card-bg) !important;
+}
+
+body.dark-theme .tab-btn {
+    color: var(--text-muted) !important;
+}
+
+    body.dark-theme .tab-btn:hover {
+        background-color: var(--item-bg) !important;
+        color: var(--text-color) !important;
+    }
+
+    body.dark-theme .tab-btn.active {
+        background-color: var(--item-hover) !important;
+        color: var(--nav-active-text) !important;
+    }
+
+body.dark-theme .section-title {
+    border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-theme .group-card {
+    background-color: var(--item-bg) !important;
+    border-left-color: #60A5FA !important;
+}
+
+body.dark-theme .group-card-icon {
+    background-color: #1e3a8a !important;
+    color: #dbeafe !important;
+}
+
+body.dark-theme .award-card {
+    background-color: var(--item-bg) !important;
+}
+
+body.dark-theme .award-icon {
+    background-color: #4a3411 !important;
+}
+
+body.dark-theme .avatar-circle {
+    background: #1e3a8a !important;
+    border-color: #334155 !important;
+    color: #dbeafe !important;
+}
+
+body.dark-theme .btn-edit {
+    background-color: var(--item-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+    body.dark-theme .btn-edit:hover {
+        background-color: var(--item-hover) !important;
+    }
+
+body.dark-theme .btn-delete {
+    background-color: #451a1a !important;
+    border-color: #7f1d1d !important;
+    color: #fca5a5 !important;
+}
+
+    body.dark-theme .btn-delete:hover {
+        background-color: #7f1d1d !important;
+        color: #ffffff !important;
+    }
+
+body.dark-theme .award-date {
+    color: #60A5FA !important;
+}
+
+body.dark-theme #editCoachModal .modal-header,
+body.dark-theme #editCoachModal .modal-footer {
+    border-color: var(--border-color) !important;
+}
+
+body.dark-theme #editCoachModal .form-control {
+    background-color: var(--item-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-theme #editCoachModal label,
+body.dark-theme #editCoachModal h6 {
+    color: var(--text-color) !important;
 }

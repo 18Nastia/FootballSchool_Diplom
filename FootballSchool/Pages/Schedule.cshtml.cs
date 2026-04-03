@@ -61,10 +61,8 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostSaveAsync(bool isBulkAdd)
         {
-            // ѕроверка прав: только администратор может добавл€ть или измен€ть расписание
             if (!User.IsInRole("Admin")) return RedirectToPage("/AccessDenied");
 
-            // ќчистка навигационных свойств от ошибок валидации, чтобы не блокировать сохранение
             ModelState.Remove("ModalTraining.Facility");
             ModelState.Remove("ModalTraining.Coach");
             ModelState.Remove("ModalTraining.Team");
@@ -72,7 +70,6 @@ namespace FootballSchool.Pages
 
             try
             {
-                // ѕроверка совпадени€ филиалов группы и площадки
                 var team = await _context.Teams.FindAsync(ModalTraining.TeamId);
                 var facility = await _context.Facilities.FindAsync(ModalTraining.FacilityId);
 
@@ -149,7 +146,6 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
-            // ѕроверка прав: только администратор может удал€ть тренировки
             if (!User.IsInRole("Admin")) return RedirectToPage("/AccessDenied");
 
             var training = await _context.Training.FindAsync(id);
@@ -193,7 +189,6 @@ namespace FootballSchool.Pages
                 .Include(t => t.Facility)
                 .AsQueryable();
 
-            // Ћогика: “ренер видит только свои тренировки
             if (User.IsInRole("Coach"))
             {
                 var coachIdStr = User.FindFirst("CoachId")?.Value;

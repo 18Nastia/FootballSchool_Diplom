@@ -1,35 +1,43 @@
-﻿.training-results-page .main-content {
+﻿.training-results-page .training-results-content {
     margin-left: 0 !important;
     min-height: 100vh;
+    padding: 24px;
+    box-sizing: border-box;
+    background: #f8fafc;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     margin-bottom: 24px;
 }
 
     .header h1 {
         font-size: 24px;
         font-weight: 600;
+        margin: 0;
+        color: #111827;
     }
 
 .header-actions {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .btn {
     padding: 10px 16px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     transition: all 0.2s;
+    text-decoration: none;
 }
 
 .btn-secondary {
@@ -40,6 +48,7 @@
 
     .btn-secondary:hover {
         background-color: #f5f5f7;
+        color: #111827;
     }
 
 .btn-primary {
@@ -49,41 +58,72 @@
 
     .btn-primary:hover {
         background-color: #1d4ed8;
+        color: #fff;
     }
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+    background: white;
+}
+
+.content-with-sidebar {
+    display: flex;
+    gap: 24px;
+}
+
+.main-content-area {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+}
+
+.team-filter-form {
+    margin-bottom: 24px;
+    max-width: 320px;
+}
+
+.team-filter-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
 
 .table-container {
     background-color: #fff;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     margin-bottom: 24px;
     width: 100%;
 }
 
-table {
+.results-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-thead {
-    background-color: #f9fafb;
-    border-bottom: 1px solid #e5e5e5;
-}
+    .results-table thead {
+        background-color: #f9fafb;
+        border-bottom: 1px solid #e5e5e5;
+    }
 
-th {
-    padding: 12px 16px;
-    text-align: left;
-    font-size: 12px;
-    font-weight: 600;
-    color: #666;
-    text-transform: uppercase;
-}
+    .results-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+    }
 
-td {
-    padding: 16px;
-    border-bottom: 1px solid #f5f5f7;
-    vertical-align: middle;
-}
+    .results-table td {
+        padding: 16px;
+        border-bottom: 1px solid #f5f5f7;
+        vertical-align: middle;
+    }
 
 .student-cell {
     display: flex;
@@ -95,19 +135,20 @@ td {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #e5e5e5;
+    background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
     color: #2563eb;
-    background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+    flex-shrink: 0;
 }
 
 .student-info h3 {
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 2px;
+    margin: 0 0 2px 0;
+    color: #111827;
 }
 
 .student-info p {
@@ -129,7 +170,8 @@ td {
 .test-info h4 {
     font-size: 14px;
     font-weight: 500;
-    margin-bottom: 2px;
+    margin: 0 0 2px 0;
+    color: #111827;
 }
 
 .test-info .date {
@@ -141,6 +183,7 @@ td {
 .test-info .result {
     font-size: 14px;
     font-weight: 600;
+    color: #111827;
 }
 
 .progress-chart {
@@ -156,8 +199,11 @@ td {
 
 .progress-fill {
     height: 100%;
-    background: #2563eb;
     border-radius: 3px;
+}
+
+.progress-mobile-text {
+    display: none;
 }
 
 .action-buttons {
@@ -177,13 +223,13 @@ td {
     cursor: pointer;
     transition: all 0.2s;
     color: #666;
+    text-decoration: none;
 }
 
     .icon-btn:hover {
         background-color: #f5f5f7;
         color: #2563eb;
     }
-
 
 .right-sidebar {
     width: 450px;
@@ -213,6 +259,7 @@ td {
     align-items: center;
     border-bottom: 1px solid #e5e5e5;
     background: #fff;
+    gap: 12px;
 }
 
     .sidebar-header-wrapper h2 {
@@ -266,7 +313,7 @@ td {
         animation: fadeIn 0.3s ease;
     }
 
-@@keyframes fadeIn {
+@keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(5px);
@@ -305,16 +352,6 @@ td {
             transform: rotate(180deg);
         }
 
-.content-with-sidebar {
-    display: flex;
-    gap: 24px;
-}
-
-.main-content-area {
-    flex: 1;
-    width: 100%;
-}
-
 .chart-canvas-container {
     width: 100%;
     height: 220px;
@@ -324,6 +361,32 @@ td {
     background-color: #fff;
     margin-bottom: 20px;
     position: relative;
+}
+
+.history-block {
+    margin-top: 32px;
+}
+
+.history-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+    .history-block-header h4 {
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0;
+        color: #111827;
+    }
+
+.history-table-wrap {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
 }
 
 .history-table {
@@ -409,6 +472,7 @@ td {
     border: 1px solid #e5e5e5;
     border-radius: 6px;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
     .form-control:focus {
@@ -445,6 +509,7 @@ textarea.form-control {
     justify-content: center;
     cursor: pointer;
     color: #666;
+    flex-shrink: 0;
 }
 
     .close-sidebar:hover {
@@ -452,7 +517,109 @@ textarea.form-control {
         color: #333;
     }
 
-@@media (max-width: 1200px) {
+.form-actions-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.justify-center-mobile {
+    justify-content: center;
+}
+
+.journal-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.journal-table {
+    min-width: max-content;
+}
+
+.attendance-journal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+    .attendance-journal-table th,
+    .attendance-journal-table td {
+        border: 1px solid #e5e7eb;
+        padding: 12px 10px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .attendance-journal-table thead th {
+        background: #f8fafc;
+        color: #334155;
+        font-weight: 700;
+    }
+
+    .attendance-journal-table .sticky-col {
+        position: sticky;
+        left: 0;
+        background: #ffffff;
+        z-index: 2;
+        text-align: left;
+        min-width: 220px;
+        max-width: 220px;
+        white-space: normal;
+        font-weight: 600;
+    }
+
+    .attendance-journal-table thead .sticky-col {
+        background: #f8fafc;
+        z-index: 3;
+    }
+
+.student-col {
+    color: #111827;
+}
+
+.mark-cell {
+    min-width: 62px;
+}
+
+.mark-present {
+    color: #16a34a;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.mark-absent {
+    color: #dc2626;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.mark-empty {
+    color: #94a3b8;
+}
+
+.total-label {
+    font-weight: 700;
+    color: #111827;
+}
+
+.total-cell {
+    font-weight: 700;
+    color: #1f2937;
+    background: #f8fafc;
+}
+
+.journal-time {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+@media (max-width: 1200px) {
     .right-sidebar {
         width: 350px;
         right: -350px;
@@ -463,24 +630,405 @@ textarea.form-control {
     }
 }
 
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
+    .training-results-page .training-results-content {
+        padding: 16px 12px;
+    }
+
     .header {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
+        align-items: stretch;
+        gap: 14px;
+        margin-bottom: 18px;
     }
+
+        .header h1 {
+            font-size: 22px;
+        }
 
     .header-actions {
         width: 100%;
-        justify-content: space-between;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+        .header-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+    .team-filter-form {
+        max-width: 100%;
+        width: 100%;
+        margin-bottom: 18px;
+    }
+
+    .table-container {
+        background: transparent;
+        box-shadow: none;
+        border-radius: 0;
+        overflow: visible;
+    }
+
+    .results-table,
+    .results-table thead,
+    .results-table tbody,
+    .results-table tr,
+    .results-table th,
+    .results-table td {
+        display: block;
+        width: 100%;
+    }
+
+        .results-table thead {
+            display: none;
+        }
+
+        .results-table tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .results-table tr {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+        }
+
+        .results-table td {
+            border: none;
+            padding: 0;
+            margin-bottom: 12px;
+        }
+
+            .results-table td:last-child {
+                margin-bottom: 0;
+            }
+
+            .results-table td::before {
+                content: attr(data-label);
+                display: block;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: #6b7280;
+                margin-bottom: 6px;
+            }
+
+    .student-cell {
+        align-items: flex-start;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 14px;
+    }
+
+    .student-info h3 {
+        font-size: 14px;
+    }
+
+    .student-info p {
+        font-size: 12px;
+    }
+
+    .test-info h4 {
+        font-size: 14px;
+    }
+
+    .test-info .result {
+        font-size: 13px;
+    }
+
+    .progress-chart {
+        width: 100%;
+        height: 8px;
+        margin-bottom: 6px;
+    }
+
+    .progress-mobile-text {
+        display: block;
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    .action-buttons {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .icon-btn {
+        width: 38px;
+        height: 38px;
     }
 
     .right-sidebar {
         width: 100%;
         right: -100%;
+        top: 0;
+        height: 100vh;
+        border-left: none;
+        z-index: 1100;
     }
 
-    .toggle-sidebar-btn.open {
-        right: 100%;
+        .right-sidebar.open {
+            right: 0;
+        }
+
+    .toggle-sidebar-btn {
+        width: 42px;
+        height: 42px;
     }
+
+        .toggle-sidebar-btn.open {
+            right: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+    .sidebar-header-wrapper {
+        padding: 18px 16px 14px 16px;
+    }
+
+        .sidebar-header-wrapper h2 {
+            font-size: 16px;
+        }
+
+    .sidebar-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .sidebar-tab {
+        min-width: 50%;
+        padding: 12px 10px;
+        font-size: 12px;
+    }
+
+    .sidebar-content {
+        padding: 16px;
+    }
+
+    .chart-canvas-container {
+        height: 220px;
+        padding: 12px;
+    }
+
+    .history-block {
+        margin-top: 22px;
+    }
+
+    .history-block-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+        .history-block-header .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+    .history-table-wrap {
+        overflow-x: auto;
+    }
+
+    .history-table {
+        min-width: 520px;
+    }
+
+    .result-input-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+        .result-input-group select {
+            width: 100%;
+        }
+
+    .form-actions-row {
+        flex-direction: column;
+    }
+
+        .form-actions-row .btn {
+            width: 100%;
+        }
+
+    .attendance-journal-table {
+        font-size: 13px;
+    }
+
+        .attendance-journal-table th,
+        .attendance-journal-table td {
+            padding: 10px 8px;
+        }
+
+        .attendance-journal-table .sticky-col {
+            min-width: 150px;
+            max-width: 150px;
+            font-size: 13px;
+        }
+
+    .mark-cell {
+        min-width: 52px;
+    }
+
+    .journal-time {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .training-results-page .training-results-content {
+        padding: 12px 10px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .results-table tr {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .sidebar-content {
+        padding: 14px;
+    }
+
+    .chart-canvas-container {
+        height: 200px;
+    }
+
+    .sidebar-tab {
+        font-size: 11px;
+    }
+}
+
+/* ==================== DARK THEME ==================== */
+body.dark-theme .training-results-page .training-results-content {
+    background: var(--bg-color) !important;
+}
+
+body.dark-theme .header h1,
+body.dark-theme .student-info h3,
+body.dark-theme .test-info h4,
+body.dark-theme .test-info .result,
+body.dark-theme .sidebar-header-wrapper h2,
+body.dark-theme .history-block-header h4,
+body.dark-theme .form-group label,
+body.dark-theme .results-table td,
+body.dark-theme .history-table td {
+    color: var(--text-color) !important;
+}
+
+body.dark-theme .table-container,
+body.dark-theme .results-table tr,
+body.dark-theme .right-sidebar,
+body.dark-theme .sidebar-header-wrapper,
+body.dark-theme .history-table-wrap,
+body.dark-theme .chart-canvas-container,
+body.dark-theme .stat-card,
+body.dark-theme .journal-wrapper {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: none !important;
+}
+
+body.dark-theme .results-table thead,
+body.dark-theme .history-table th,
+body.dark-theme .sidebar-tabs,
+body.dark-theme .attendance-journal-table thead th {
+    background: var(--item-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-theme .results-table th,
+body.dark-theme .history-table th,
+body.dark-theme .student-info p,
+body.dark-theme .test-info .date,
+body.dark-theme .results-table td::before,
+body.dark-theme .journal-time {
+    color: var(--text-muted) !important;
+}
+
+body.dark-theme .btn-secondary {
+    background: var(--item-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+    body.dark-theme .btn-secondary:hover {
+        background: var(--item-hover) !important;
+    }
+
+body.dark-theme .icon-btn,
+body.dark-theme .close-sidebar,
+body.dark-theme .form-control {
+    background: var(--item-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+    body.dark-theme .icon-btn:hover,
+    body.dark-theme .close-sidebar:hover {
+        background: var(--item-hover) !important;
+        color: var(--nav-active-text) !important;
+    }
+
+body.dark-theme .sidebar-tab {
+    color: var(--text-muted) !important;
+}
+
+    body.dark-theme .sidebar-tab.active {
+        color: var(--nav-active-text) !important;
+        border-bottom-color: var(--nav-active-text) !important;
+    }
+
+body.dark-theme .group-badge,
+body.dark-theme .val-badge {
+    background: rgba(37, 99, 235, 0.15) !important;
+    color: #93c5fd !important;
+}
+
+body.dark-theme .avatar {
+    background: rgba(37, 99, 235, 0.15) !important;
+    color: #93c5fd !important;
+}
+
+body.dark-theme .history-btn.edit:hover {
+    background: rgba(37, 99, 235, 0.15) !important;
+}
+
+body.dark-theme .history-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+}
+
+body.dark-theme .attendance-journal-table th,
+body.dark-theme .attendance-journal-table td {
+    border-color: #334155;
+}
+
+body.dark-theme .attendance-journal-table .sticky-col {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-theme .attendance-journal-table thead .sticky-col {
+    background: var(--item-bg) !important;
+}
+
+body.dark-theme .total-cell {
+    background: var(--item-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-theme .mark-empty {
+    color: #64748b;
 }

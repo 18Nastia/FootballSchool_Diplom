@@ -60,7 +60,6 @@ namespace FootballSchool.Pages
         [BindProperty]
         public string? CoachComments { get; set; }
 
-        // Добавляем свойства для фильтрации по группе
         [BindProperty(SupportsGet = true)]
         public int? FilterTeamId { get; set; }
 
@@ -68,7 +67,6 @@ namespace FootballSchool.Pages
 
         public async Task OnGetAsync()
         {
-            // Загружаем список групп для выпадающего списка (с учетом прав тренера)
             var teamsQuery = _context.Teams.AsQueryable();
             if (User.IsInRole("Coach"))
             {
@@ -108,7 +106,6 @@ namespace FootballSchool.Pages
                 }
             }
 
-            // Применяем фильтр по группе, если он выбран
             if (FilterTeamId.HasValue)
             {
                 studentsQuery = studentsQuery.Where(s => s.TeamId == FilterTeamId.Value);
@@ -182,7 +179,6 @@ namespace FootballSchool.Pages
                     testDate = latestProgress.DateProgress.ToString("dd.MM.yyyy");
                 }
 
-                // ЛОГИКА РАСЧЕТА ПРОГРЕССА НА ОСНОВЕ ПОСЕЩАЕМОСТИ ЗА МЕСЯЦ
                 int progressPercentage = 0;
                 var monthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
 
@@ -291,8 +287,6 @@ namespace FootballSchool.Pages
 
             return RedirectToPage();
         }
-
-        // --- ЭКСПОРТ В EXCEL ---
         public async Task<IActionResult> OnGetExportAsync()
         {
             await OnGetAsync();
@@ -336,8 +330,6 @@ namespace FootballSchool.Pages
                 }
             }
         }
-
-        // --- ДЕТАЛЬНЫЙ ЭКСПОРТ (ВСЯ ИСТОРИЯ ТЕСТОВ ГРУППЫ ИЛИ УЧЕНИКА) ---
         public async Task<IActionResult> OnGetExportDetailedAsync(int? teamId, int? studentId)
         {
             var progressesQuery = _context.Progresses
@@ -347,7 +339,6 @@ namespace FootballSchool.Pages
 
             string reportName = "История_результатов";
 
-            // Если передан ID ученика - фильтруем по нему
             if (studentId.HasValue)
             {
                 progressesQuery = progressesQuery.Where(p => p.StudentId == studentId.Value);
@@ -357,7 +348,7 @@ namespace FootballSchool.Pages
                     reportName += $"_{student.SurnameStudent}_{student.NameStudent}";
                 }
             }
-            // Если передан ID группы - фильтруем по ней
+
             else if (teamId.HasValue)
             {
                 progressesQuery = progressesQuery.Where(p => p.Student.TeamId == teamId.Value);
@@ -368,7 +359,6 @@ namespace FootballSchool.Pages
                 }
             }
 
-            // Ограничения доступа для тренера
             if (User.IsInRole("Coach"))
             {
                 var coachIdStr = User.FindFirst("CoachId")?.Value;

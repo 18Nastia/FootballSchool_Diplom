@@ -167,13 +167,41 @@
     <div class="modal fade" id="editCoachModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form method="post" asp-page-handler="Edit">
+                <form method="post" asp-page-handler="Edit" enctype="multipart/form-data">
                     <div class="modal-header">
                         <h5 class="modal-title">Редактирование профиля</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" asp-for="EditCoach.CoachId" />
+                        <input type="hidden" asp-for="EditCoach.PhotoCoach" />
+
+                        <h6 class="mb-3 text-primary border-bottom pb-2">Фотография</h6>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label>Текущее фото</label>
+                                <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                                    @if (!string.IsNullOrEmpty(Model.EditCoach.PhotoCoach))
+                                    {
+                                        <img src="@Model.EditCoach.PhotoCoach"
+                                             alt="Фото тренера"
+                                             style="width:90px; height:90px; object-fit:cover; border-radius:50%; border:1px solid #e5e7eb;" />
+                                    }
+                                    else
+                                    {
+                                        <div style="width:90px; height:90px; border-radius:50%; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:700; color:#2563eb;">
+                                            @Model.Profile.Initials
+                                        </div>
+                                    }
+
+                                    <div style="flex:1; min-width:220px;">
+                                        <label class="form-label">Новое фото</label>
+                                        <input type="file" name="CoachPhotoFile" class="form-control" accept="image/*" />
+                                        <small class="text-muted">Если файл не выбран, текущее фото останется прежним.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные</h6>
                         <div class="row">

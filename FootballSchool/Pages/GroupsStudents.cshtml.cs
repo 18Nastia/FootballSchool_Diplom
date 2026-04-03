@@ -129,7 +129,6 @@ namespace FootballSchool.Pages
                 string surnameInit = string.IsNullOrEmpty(s.SurnameStudent) ? "" : s.SurnameStudent[0].ToString();
                 string nameInit = string.IsNullOrEmpty(s.NameStudent) ? "" : s.NameStudent[0].ToString();
 
-                // кнцхйю пюяверю опнцпеяяю мю нямнбе оняеыюелнярх гю леяъж
                 int progressPercentage = 0;
                 var monthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
 

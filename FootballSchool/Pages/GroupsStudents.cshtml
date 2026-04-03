@@ -9,7 +9,7 @@
 }
 
 <div class="groups-students-page">
-    <div class="main-content">
+    <div class="groups-students-content">
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success mb-4"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
@@ -19,7 +19,6 @@
             <div class="alert alert-danger mb-4"><i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]</div>
         }
 
-        <!-- КНОПКА ДОБАВЛЕНИЯ ТОЛЬКО ДЛЯ АДМИНА -->
         @if (User.IsInRole("Admin"))
         {
             <button class="btn-primary" id="addButton">
@@ -39,7 +38,6 @@
             </button>
         </div>
 
-        <!-- Groups View -->
         <div class="groups-view" id="groupsView">
             <div class="filter-section">
                 <div class="filter-group">
@@ -61,7 +59,6 @@
                             <div class="card-header">
                                 <h3 class="card-title">@team.CategoryName</h3>
 
-                                <!-- РЕДАКТИРОВАНИЕ ГРУППЫ ТОЛЬКО ДЛЯ АДМИНА -->
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <button class="edit-button" title="Редактировать">
@@ -104,7 +101,6 @@
             }
         </div>
 
-        <!-- Students View -->
         <div class="students-view" id="studentsView">
             <div class="section-header">
                 <h2>Список учеников</h2>
@@ -190,10 +186,8 @@
     </div>
 </div>
 
-<!-- МОДАЛЬНЫЕ ОКНА РЕНДЕРЯТСЯ ТОЛЬКО ДЛЯ АДМИНОВ -->
 @if (User.IsInRole("Admin"))
 {
-    <!-- Модальное окно: Добавление (регистрация) группы -->
     <div class="modal fade" id="addTeamModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -232,7 +226,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно: Назначение существующего ученика в группу -->
     <div class="modal fade" id="assignStudentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -242,7 +235,6 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <!-- Скрытое поле для передачи ID выбранной группы -->
                         <input type="hidden" id="AssignStudent_TeamId" name="TeamId" value="" />
 
                         <div class="mb-3">
@@ -266,7 +258,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно: Регистрация нового ученика (полная форма) -->
     <div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">

@@ -7,8 +7,9 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/training-results.css" asp-append-version="true" />
 }
+
 <div class="training-results-page">
-    <div class="main-content">
+    <div class="training-results-content">
 
         @if (TempData["SuccessMessage"] != null)
         {
@@ -34,16 +35,15 @@
         <div class="content-with-sidebar">
             <div class="main-content-area">
 
-                <!-- ФИЛЬТР ПО ГРУППЕ -->
-                <form method="get" class="mb-4" style="max-width: 300px;">
-                    <label style="display: block; font-size: 14px; font-weight: 500; color: #333; margin-bottom: 8px;">Выберите группу</label>
+                <form method="get" class="team-filter-form">
+                    <label class="team-filter-label">Выберите группу</label>
                     <select asp-for="FilterTeamId" asp-items="Model.TeamList" class="form-control" onchange="this.form.submit()">
                         <option value="">-- Все доступные группы --</option>
                     </select>
                 </form>
 
                 <div class="table-container">
-                    <table>
+                    <table class="results-table">
                         <thead>
                             <tr>
                                 <th>Ученик</th>
@@ -56,14 +56,16 @@
                         <tbody>
                             @if (Model.StudentsList == null || !Model.StudentsList.Any())
                             {
-                                <tr><td colspan="5" class="text-center text-muted">Учеников не найдено.</td></tr>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Учеников не найдено.</td>
+                                </tr>
                             }
                             else
                             {
                                 @foreach (var student in Model.StudentsList)
                                 {
                                     <tr>
-                                        <td>
+                                        <td data-label="Ученик">
                                             <div class="student-cell">
                                                 <div class="avatar">@student.Initials</div>
                                                 <div class="student-info">
@@ -72,24 +74,29 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Группа">
                                             <span class="group-badge">@student.TeamName</span>
                                         </td>
-                                        <td>
+                                        <td data-label="Последний тест">
                                             <div class="test-info">
                                                 <h4>@student.LatestTestName</h4>
                                                 <div class="date">@student.LatestTestDate</div>
                                                 <div class="result">@student.LatestTestResult</div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Прогресс">
                                             <div class="progress-chart" title="Посещаемость за 30 дней: @student.ProgressPercentage%">
                                                 <div class="progress-fill" style="width: @student.ProgressPercentage%; background: @(student.ProgressPercentage >= 75 ? "#10b981" : student.ProgressPercentage >= 50 ? "#f59e0b" : "#ef4444");"></div>
                                             </div>
+                                            <div class="progress-mobile-text">@student.ProgressPercentage%</div>
                                         </td>
-                                        <td>
+                                        <td data-label="Действия">
                                             <div class="action-buttons">
-                                                <button type="button" class="icon-btn" title="Добавить/Посмотреть результат" data-name="@student.FullName" onclick="openSidebar(@student.StudentId, this.getAttribute('data-name'))">
+                                                <button type="button"
+                                                        class="icon-btn"
+                                                        title="Добавить/Посмотреть результат"
+                                                        data-name="@student.FullName"
+                                                        onclick="openSidebar(@student.StudentId, this.getAttribute('data-name'))">
                                                     <i class="fas fa-chart-pie"></i>
                                                 </button>
                                                 <a href="/ChildProfile/@student.StudentId" class="icon-btn" title="Профиль ученика">
@@ -107,7 +114,7 @@
         </div>
     </div>
 
-    <button class="toggle-sidebar-btn" onclick="toggleSidebar()">
+    <button class="toggle-sidebar-btn" type="button" onclick="toggleSidebar()">
         <i class="fas fa-chevron-left"></i>
     </button>
 
@@ -121,8 +128,8 @@
         </div>
 
         <div class="sidebar-tabs">
-            <button class="sidebar-tab active" onclick="switchSidebarTab('history')">История и Графики</button>
-            <button class="sidebar-tab" onclick="switchSidebarTab('add')">Внести результат</button>
+            <button type="button" class="sidebar-tab active" onclick="switchSidebarTab('history', this)">История и графики</button>
+            <button type="button" class="sidebar-tab" onclick="switchSidebarTab('add', this)">Внести результат</button>
         </div>
 
         <div class="sidebar-content">
@@ -143,14 +150,15 @@
                     <canvas id="progressChart"></canvas>
                 </div>
 
-                <div style="margin-top: 32px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom:12px;">
-                        <h4 style="font-size:15px; font-weight:600; margin:0; color:#111827;">История результатов</h4>
-                        <a href="#" id="exportStudentHistoryBtn" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; background: white;">
+                <div class="history-block">
+                    <div class="history-block-header">
+                        <h4>История результатов</h4>
+                        <a href="#" id="exportStudentHistoryBtn" class="btn btn-secondary btn-small">
                             <i class="fas fa-file-excel" style="color: #10b981;"></i> Экспорт истории
                         </a>
                     </div>
-                    <div style="border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;">
+
+                    <div class="history-table-wrap">
                         <table class="history-table">
                             <thead>
                                 <tr>
@@ -212,11 +220,11 @@
                         <textarea asp-for="CoachComments" class="form-control" id="formCoachComments" placeholder="Добавьте развернутый комментарий о прогрессе..."></textarea>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 16px;">
-                        <button type="button" class="btn btn-secondary w-100" onclick="clearAddForm()" style="justify-content: center;">
+                    <div class="form-actions-row">
+                        <button type="button" class="btn btn-secondary w-100 justify-center-mobile" onclick="clearAddForm()">
                             <i class="fas fa-eraser"></i> Очистить
                         </button>
-                        <button type="submit" class="btn btn-primary w-100" style="justify-content: center;">
+                        <button type="submit" class="btn btn-primary w-100 justify-center-mobile">
                             <i class="fas fa-save"></i> <span id="saveBtnText">Сохранить</span>
                         </button>
                     </div>
@@ -262,11 +270,14 @@
             toggleBtn.classList.toggle('open');
         }
 
-        function switchSidebarTab(tabId) {
+        function switchSidebarTab(tabId, btn) {
             document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.sidebar-tab-pane').forEach(p => p.classList.remove('active'));
 
-            event.target.classList.add('active');
+            if (btn) {
+                btn.classList.add('active');
+            }
+
             document.getElementById('tab-' + tabId).classList.add('active');
 
             if (tabId === 'history') {
@@ -278,14 +289,15 @@
             document.getElementById('selectedStudentId').value = studentId;
             document.getElementById('sidebarTitle').innerHTML = `<span style='color:#2563EB'>${studentName}</span>`;
 
-            // Обновляем ссылку для экспорта истории конкретного ученика
             const exportBtn = document.getElementById('exportStudentHistoryBtn');
             if (exportBtn) {
                 exportBtn.href = `?handler=ExportDetailed&studentId=${studentId}`;
             }
 
             clearAddForm();
-            document.querySelector('.sidebar-tabs button:first-child').click();
+
+            const historyBtn = document.querySelector('.sidebar-tabs button:first-child');
+            switchSidebarTab('history', historyBtn);
 
             const sidebar = document.getElementById('rightSidebar');
             const toggleBtn = document.querySelector('.toggle-sidebar-btn');
@@ -364,7 +376,7 @@
                     scales: {
                         y: {
                             beginAtZero: false,
-                            suggestedMin: Math.min(...values) > 0 ? Math.min(...values) * 0.8 : 0
+                            suggestedMin: values.length ? (Math.min(...values) > 0 ? Math.min(...values) * 0.8 : 0) : 0
                         }
                     }
                 }
@@ -391,7 +403,9 @@
             document.getElementById('formCoachComments').value = item.comment || '';
 
             document.getElementById('saveBtnText').innerText = 'Обновить';
-            document.querySelectorAll('.sidebar-tabs button')[1].click();
+
+            const addBtn = document.querySelector('.sidebar-tabs button:nth-child(2)');
+            switchSidebarTab('add', addBtn);
         }
 
         function clearAddForm() {

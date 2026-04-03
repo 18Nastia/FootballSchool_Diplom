@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FootballSchool.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using FootballSchool.Models;
 
 namespace FootballSchool.Pages
 {
@@ -52,6 +52,21 @@ namespace FootballSchool.Pages
         [BindProperty] public Subscription ModalSub { get; set; } = new();
         [BindProperty] public Payment ModalPayment { get; set; } = new();
 
+        [BindProperty(SupportsGet = true)]
+        public string? SearchSubscriptions { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string? SearchPayments { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string ActiveTab { get; set; } = "subs";
+
+        [BindProperty(SupportsGet = true)]
+        public string? SortSubscriptions { get; set; } = "student_asc";
+
+        [BindProperty(SupportsGet = true)]
+        public string? SortPayments { get; set; } = "date_desc";
+
         public SelectList StudentsList { get; set; } = default!;
         public SelectList ActiveSubscriptionsList { get; set; } = default!;
 
@@ -60,11 +75,12 @@ namespace FootballSchool.Pages
 
         public async Task OnGetAsync()
         {
-            IQueryable<Subscription> query = _context.Subscriptions
+            IQueryable<Subscription> subsQuery = _context.Subscriptions
                 .Include(s => s.Student)
                 .Include(s => s.Payments);
 
             IQueryable<Student> studentsQuery = _context.Students;
+
             IQueryable<Payment> paymentsQuery = _context.Payments
                 .Include(p => p.Subscription)
                 .ThenInclude(s => s.Student);
@@ -74,13 +90,38 @@ namespace FootballSchool.Pages
                 var userIdStr = User.FindFirst("UserId")?.Value;
                 if (int.TryParse(userIdStr, out int uid))
                 {
-                    query = query.Where(s => s.Student.UserId == uid);
+                    subsQuery = subsQuery.Where(s => s.Student.UserId == uid);
                     studentsQuery = studentsQuery.Where(s => s.UserId == uid);
                     paymentsQuery = paymentsQuery.Where(p => p.Subscription.Student.UserId == uid);
                 }
             }
 
-            var subs = await query.ToListAsync();
+            if (!string.IsNullOrWhiteSpace(SearchSubscriptions))
+            {
+                var subSearch = SearchSubscriptions.Trim().ToLower();
+
+                subsQuery = subsQuery.Where(s =>
+                    ((s.TypeSubscription ?? "").ToLower().Contains(subSearch)) ||
+                    ((s.TermsSubscription ?? "").ToLower().Contains(subSearch)) ||
+                    (((s.Student.SurnameStudent ?? "") + " " + (s.Student.NameStudent ?? "")).ToLower().Contains(subSearch)) ||
+                    (((s.Student.NameStudent ?? "") + " " + (s.Student.SurnameStudent ?? "")).ToLower().Contains(subSearch))
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(SearchPayments))
+            {
+                var paySearch = SearchPayments.Trim().ToLower();
+
+                paymentsQuery = paymentsQuery.Where(p =>
+                    ((p.MethodPayment ?? "").ToLower().Contains(paySearch)) ||
+                    ((p.StatusPayment ?? "").ToLower().Contains(paySearch)) ||
+                    ((p.Subscription.TypeSubscription ?? "").ToLower().Contains(paySearch)) ||
+                    (((p.Subscription.Student.SurnameStudent ?? "") + " " + (p.Subscription.Student.NameStudent ?? "")).ToLower().Contains(paySearch)) ||
+                    (((p.Subscription.Student.NameStudent ?? "") + " " + (p.Subscription.Student.SurnameStudent ?? "")).ToLower().Contains(paySearch))
+                );
+            }
+
+            var subs = await subsQuery.ToListAsync();
 
             var students = await studentsQuery
                 .Select(s => new
@@ -155,11 +196,28 @@ namespace FootballSchool.Pages
                 });
             }
 
-            var payments = await paymentsQuery
-                .OrderByDescending(p => p.DatePayment)
-                .ToListAsync();
+            SubscriptionsList = (SortSubscriptions ?? "student_asc") switch
+            {
+                "student_desc" => SubscriptionsList.OrderByDescending(x => x.StudentName).ToList(),
+                "type_asc" => SubscriptionsList.OrderBy(x => x.Type).ToList(),
+                "type_desc" => SubscriptionsList.OrderByDescending(x => x.Type).ToList(),
+                "cost_asc" => SubscriptionsList.OrderBy(x => x.Cost).ToList(),
+                "cost_desc" => SubscriptionsList.OrderByDescending(x => x.Cost).ToList(),
+                "days_asc" => SubscriptionsList.OrderBy(x => x.DaysCount).ToList(),
+                "days_desc" => SubscriptionsList.OrderByDescending(x => x.DaysCount).ToList(),
+                "status_asc" => SubscriptionsList.OrderBy(x => x.Status).ToList(),
+                "status_desc" => SubscriptionsList.OrderByDescending(x => x.Status).ToList(),
+                _ => SubscriptionsList.OrderBy(x => x.StudentName).ToList()
+            };
 
-            var activeSubs = await query
+            var payments = await paymentsQuery.ToListAsync();
+
+            var activeSubs = await _context.Subscriptions
+                .Include(s => s.Student)
+                .Where(s =>
+                    !User.IsInRole("Parent") ||
+                    (User.FindFirst("UserId") != null &&
+                     s.Student.UserId == int.Parse(User.FindFirst("UserId")!.Value)))
                 .Select(s => new
                 {
                     s.SubscriptionId,
@@ -185,6 +243,20 @@ namespace FootballSchool.Pages
                     Status = (p.StatusPayment ?? "В обработке").Trim()
                 });
             }
+
+            PaymentsList = (SortPayments ?? "date_desc") switch
+            {
+                "date_asc" => PaymentsList.OrderBy(x => x.Date).ToList(),
+                "student_asc" => PaymentsList.OrderBy(x => x.StudentName).ToList(),
+                "student_desc" => PaymentsList.OrderByDescending(x => x.StudentName).ToList(),
+                "amount_asc" => PaymentsList.OrderBy(x => x.Amount).ToList(),
+                "amount_desc" => PaymentsList.OrderByDescending(x => x.Amount).ToList(),
+                "method_asc" => PaymentsList.OrderBy(x => x.Method).ToList(),
+                "method_desc" => PaymentsList.OrderByDescending(x => x.Method).ToList(),
+                "status_asc" => PaymentsList.OrderBy(x => x.Status).ToList(),
+                "status_desc" => PaymentsList.OrderByDescending(x => x.Status).ToList(),
+                _ => PaymentsList.OrderByDescending(x => x.Date).ToList()
+            };
         }
 
         public async Task<IActionResult> OnPostSaveSubAsync()
@@ -224,7 +296,14 @@ namespace FootballSchool.Pages
                 TempData["ErrorMessage"] = "Ошибка: " + (ex.InnerException?.Message ?? ex.Message);
             }
 
-            return RedirectToPage();
+            return RedirectToPage(new
+            {
+                SearchSubscriptions,
+                SearchPayments,
+                SortSubscriptions,
+                SortPayments,
+                ActiveTab = "subs"
+            });
         }
 
         public async Task<IActionResult> OnPostDeleteSubAsync(int id)
@@ -246,7 +325,14 @@ namespace FootballSchool.Pages
                 TempData["SuccessMessage"] = "Абонемент аннулирован.";
             }
 
-            return RedirectToPage();
+            return RedirectToPage(new
+            {
+                SearchSubscriptions,
+                SearchPayments,
+                SortSubscriptions,
+                SortPayments,
+                ActiveTab = "subs"
+            });
         }
 
         public async Task<IActionResult> OnPostSavePaymentAsync()
@@ -296,7 +382,14 @@ namespace FootballSchool.Pages
                 TempData["ErrorMessage"] = "Ошибка сохранения: " + (ex.InnerException?.Message ?? ex.Message);
             }
 
-            return RedirectToPage();
+            return RedirectToPage(new
+            {
+                SearchSubscriptions,
+                SearchPayments,
+                SortSubscriptions,
+                SortPayments,
+                ActiveTab = "payments"
+            });
         }
 
         public async Task<IActionResult> OnPostDeletePaymentAsync(int id)
@@ -312,7 +405,14 @@ namespace FootballSchool.Pages
                 TempData["SuccessMessage"] = "Запись о платеже удалена.";
             }
 
-            return RedirectToPage();
+            return RedirectToPage(new
+            {
+                SearchSubscriptions,
+                SearchPayments,
+                SortSubscriptions,
+                SortPayments,
+                ActiveTab = "payments"
+            });
         }
     }
 }

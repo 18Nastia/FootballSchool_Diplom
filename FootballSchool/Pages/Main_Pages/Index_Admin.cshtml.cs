@@ -81,7 +81,6 @@ namespace FootballSchool.Pages.Main_Pages
             }
         }
 
-        // Обработчик скрытой формы добавления администратора
         public async Task<IActionResult> OnPostAddAdminAsync(string adminLogin, string adminPassword, string? adminEmail)
         {
             if (string.IsNullOrWhiteSpace(adminLogin) || string.IsNullOrWhiteSpace(adminPassword))
@@ -90,7 +89,6 @@ namespace FootballSchool.Pages.Main_Pages
                 return RedirectToPage();
             }
 
-            // Проверяем, существует ли уже пользователь с таким логином
             bool userExists = await _context.Users.AnyAsync(u => u.Login == adminLogin);
             if (userExists)
             {

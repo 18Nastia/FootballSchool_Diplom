@@ -43,7 +43,6 @@ namespace FootballSchool.Pages.Main_Pages
             {
                 if (StudentData.TeamId.HasValue)
                 {
-                    // Исправлено: используем DateTraining для фильтрации и сортировки
                     var today = DateOnly.FromDateTime(DateTime.Now);
                     UpcomingTrainings = await _context.Training
                         .Include(t => t.Coach)

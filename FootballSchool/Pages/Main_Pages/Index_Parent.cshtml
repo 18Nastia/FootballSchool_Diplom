@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="~/css/index-parent.css" asp-append-version="true" />
 }
 
-
 <div class="parent-page">
     <div class="parent-content">
         @if (Model.StudentData == null)
@@ -31,15 +30,15 @@
                     <h2 class="card-title">Профиль ребёнка</h2>
                     <div class="profile-content">
                         @{
-                            var photoPath = !string.IsNullOrEmpty(Model.StudentData.PhotoStudent) 
-                                ? "/uploads/" + Model.StudentData.PhotoStudent 
+                            var photoPath = !string.IsNullOrEmpty(Model.StudentData.PhotoStudent)
+                                ? "/uploads/" + Model.StudentData.PhotoStudent
                                 : "https://via.placeholder.com/120?text=Спортсмен";
                         }
                         <img src="@photoPath" alt="@Model.StudentData.NameStudent" class="profile-photo">
-                        
+
                         <h3 class="profile-name">@Model.StudentData.NameStudent @Model.StudentData.SurnameStudent</h3>
                         <p class="profile-info">Группа: @(Model.StudentData.Team?.CategoryTeam ?? "Не назначена")</p>
-                        
+
                         <a asp-page="/ChildProfile" asp-route-id="@Model.StudentData.StudentId" class="btn-primary">
                             <i class="fas fa-child"></i>
                             Подробный профиль
@@ -106,7 +105,7 @@
                         {
                             <p class="text-danger">Нет активного абонемента</p>
                         }
-                        
+
                         <button class="btn-primary">
                             <i class="fas fa-credit-card"></i>
                             История платежей
@@ -126,4 +125,4 @@
             </div>
         }
     </div>
-</div> 
+</div>

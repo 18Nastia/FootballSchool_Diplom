@@ -10,7 +10,7 @@
 
 <div class="profile-content">
 
-   @if (TempData["SuccessMessage"] != null)
+    @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
     }
@@ -35,7 +35,12 @@
             <div class="profile-avatar">
                 @if (!string.IsNullOrEmpty(Model.StudentProfile.PhotoPath))
                 {
-                    <img src="@Model.StudentProfile.PhotoPath" class="avatar-circle" alt="@Model.StudentProfile.FullName" style="cursor: pointer;" onclick="previewImage(this.src)" onerror="this.onerror=null;this.src='/img/default-avatar.png'; this.parentElement.innerHTML='<div class=\'avatar-circle\'>@Model.StudentProfile.Initials</div><span class=\'status-badge\'>Активный</span>';">
+                    <img src="@Model.StudentProfile.PhotoPath"
+                         class="avatar-circle"
+                         alt="@Model.StudentProfile.FullName"
+                         style="cursor: pointer;"
+                         onclick="previewImage(this.src)"
+                         onerror="this.onerror=null;this.src='/img/default-avatar.png'; this.parentElement.innerHTML='<div class=\'avatar-circle\'>@Model.StudentProfile.Initials</div><span class=\'status-badge\'>Активный</span>';">
                 }
                 else
                 {
@@ -43,8 +48,10 @@
                 }
                 <span class="status-badge">Активный</span>
             </div>
+
             <div class="profile-info">
                 <h2 class="profile-name">@Model.StudentProfile.FullName</h2>
+
                 <div class="info-grid">
                     <div class="info-item">
                         <i class="fas fa-user"></i>
@@ -53,6 +60,7 @@
                             <div class="info-value">@Model.StudentProfile.Age лет (@Model.StudentProfile.Level)</div>
                         </div>
                     </div>
+
                     <div class="info-item">
                         <i class="fas fa-users"></i>
                         <div>
@@ -60,6 +68,7 @@
                             <div class="info-value">@Model.StudentProfile.TeamName</div>
                         </div>
                     </div>
+
                     <div class="info-item">
                         <i class="fas fa-user-tie"></i>
                         <div>
@@ -67,6 +76,7 @@
                             <div class="info-value">@Model.StudentProfile.CoachName</div>
                         </div>
                     </div>
+
                     <div class="info-item">
                         <i class="fas fa-user-friends"></i>
                         <div>
@@ -74,6 +84,7 @@
                             <div class="info-value">@Model.StudentProfile.ParentName</div>
                         </div>
                     </div>
+
                     <div class="info-item">
                         <i class="fas fa-phone"></i>
                         <div>
@@ -81,6 +92,7 @@
                             <div class="info-value">@Model.StudentProfile.ParentPhone</div>
                         </div>
                     </div>
+
                     <div class="info-item">
                         <i class="fas fa-map-marker-alt"></i>
                         <div>
@@ -103,7 +115,6 @@
 
     @if (Model.StudentProfile != null)
     {
-        <!-- Вкладки -->
         <div class="tabs">
             <button class="tab-btn active" data-tab="schedule"><i class="fas fa-calendar-alt"></i> Расписание</button>
             <button class="tab-btn" data-tab="results"><i class="fas fa-chart-line"></i> Результаты тестирования</button>
@@ -111,8 +122,6 @@
         </div>
 
         <div class="content-sections">
-            
-            <!-- Секция Расписание -->
             <section class="schedule-section active" id="schedule-section">
                 <h3>Ближайшие тренировки группы «@Model.StudentProfile.TeamName»</h3>
                 @if (Model.StudentProfile.Schedule.Any())
@@ -139,7 +148,6 @@
                 }
             </section>
 
-            <!-- Секция Результаты -->
             <section class="results-section" id="results-section">
                 <h3>Динамика и результаты нормативов</h3>
                 @if (Model.StudentProfile.Results.Any())
@@ -163,13 +171,15 @@
                 }
             </section>
 
-            <!-- Секция Достижения -->
             <section class="achievements-section" id="achievements-section">
-                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                    <h3 class="m-0 border-0 pb-0">Личные достижения</h3>
+                <div class="section-header-inline">
+                    <h3 class="section-title-no-border">Личные достижения</h3>
+
                     @if (User.IsInRole("Admin"))
                     {
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAchievementModal" style="background-color: #2563EB; border: none; padding: 8px 16px; border-radius: 8px; color: white;">
+                        <button class="btn btn-primary btn-sm add-achievement-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#addAchievementModal">
                             <i class="fas fa-plus me-1"></i> Добавить достижение
                         </button>
                     }
@@ -183,34 +193,56 @@
                             <div class="achievement-card">
                                 @if (!string.IsNullOrEmpty(ach.PhotoPath))
                                 {
-                                    <img src="@ach.PhotoPath" alt="@ach.Title" style="width: 100%; height: 180px; object-fit: cover; cursor: pointer;" onclick="previewImage(this.src)" />
-                                    <div class="p-3 d-flex flex-column" style="flex: 1;">
+                                    <img src="@ach.PhotoPath"
+                                         alt="@ach.Title"
+                                         class="achievement-photo"
+                                         onclick="previewImage(this.src)" />
+
+                                    <div class="achievement-body with-photo">
                                         <h4>@ach.Title</h4>
                                         <p>@ach.Description</p>
-                                        <div class="achievement-date"><i class="far fa-calendar-alt me-1"></i> @ach.Date</div>
-                                        
+                                        <div class="achievement-date">
+                                            <i class="far fa-calendar-alt me-1"></i> @ach.Date
+                                        </div>
+
                                         @if (User.IsInRole("Admin") && ach.IsManual)
                                         {
-                                            <form method="post" asp-page-handler="DeleteProgress" asp-route-progressId="@ach.Id" asp-route-studentId="@Model.StudentProfile.StudentId" onsubmit="return confirm('Вы уверены, что хотите удалить это достижение?');" class="mt-3">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="fas fa-trash"></i> Удалить</button>
+                                            <form method="post"
+                                                  asp-page-handler="DeleteProgress"
+                                                  asp-route-progressId="@ach.Id"
+                                                  asp-route-studentId="@Model.StudentProfile.StudentId"
+                                                  onsubmit="return confirm('Вы уверены, что хотите удалить это достижение?');"
+                                                  class="mt-3">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                                    <i class="fas fa-trash"></i> Удалить
+                                                </button>
                                             </form>
                                         }
                                     </div>
                                 }
                                 else
                                 {
-                                    <div class="p-4 d-flex flex-column text-center" style="flex: 1;">
+                                    <div class="achievement-body no-photo">
                                         <div class="achievement-icon-wrapper">
                                             <i class="@ach.IconClass"></i>
                                         </div>
                                         <h4>@ach.Title</h4>
                                         <p>@ach.Description</p>
-                                        <div class="achievement-date"><i class="far fa-calendar-alt me-1"></i> @ach.Date</div>
-                                        
+                                        <div class="achievement-date">
+                                            <i class="far fa-calendar-alt me-1"></i> @ach.Date
+                                        </div>
+
                                         @if (User.IsInRole("Admin") && ach.IsManual)
                                         {
-                                            <form method="post" asp-page-handler="DeleteProgress" asp-route-progressId="@ach.Id" asp-route-studentId="@Model.StudentProfile.StudentId" onsubmit="return confirm('Вы уверены, что хотите удалить это достижение?');" class="mt-3 w-100">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="fas fa-trash"></i> Удалить</button>
+                                            <form method="post"
+                                                  asp-page-handler="DeleteProgress"
+                                                  asp-route-progressId="@ach.Id"
+                                                  asp-route-studentId="@Model.StudentProfile.StudentId"
+                                                  onsubmit="return confirm('Вы уверены, что хотите удалить это достижение?');"
+                                                  class="mt-3 w-100">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                                    <i class="fas fa-trash"></i> Удалить
+                                                </button>
                                             </form>
                                         }
                                     </div>
@@ -232,37 +264,42 @@
 {
     @if (User.IsInRole("Admin"))
     {
-        <!-- Модальное окно: Добавление достижения -->
         <div class="modal fade" id="addAchievementModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <form method="post" asp-page-handler="AddAchievement" enctype="multipart/form-data">
                         <input type="hidden" name="studentId" value="@Model.StudentProfile.StudentId" />
+
                         <div class="modal-header">
                             <h5 class="modal-title">Новое достижение</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
+
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label">Заголовок (Событие)</label>
                                 <input asp-for="NewAchievement.Title" class="form-control" placeholder="Например: Победитель летнего кубка" required />
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Дата получения</label>
                                 <input asp-for="NewAchievement.Date" type="date" class="form-control" required />
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Описание</label>
                                 <textarea asp-for="NewAchievement.Description" class="form-control" rows="3" placeholder="Краткое описание за что получена награда..." required></textarea>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Фотография (Медаль, Грамота, Кубок)</label>
                                 <input type="file" name="AchievementPhoto" class="form-control" accept="image/*" />
                                 <small class="text-muted">Загрузите фотографию для подтверждения. Это не обязательно.</small>
                             </div>
                         </div>
+
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none; width: 100%;">Сохранить достижение</button>
+                            <button type="submit" class="btn btn-primary w-100 modal-save-btn">Сохранить достижение</button>
                         </div>
                     </form>
                 </div>
@@ -270,24 +307,52 @@
         </div>
     }
 
-    <!-- Модальное окно редактирования -->
     <div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form method="post" asp-page-handler="Edit">
+                <form method="post" asp-page-handler="Edit" enctype="multipart/form-data">
                     <div class="modal-header">
                         <h5 class="modal-title">Редактирование ученика</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
+
                     <div class="modal-body">
                         <input type="hidden" asp-for="EditStudent.StudentId" />
-                        
+                        <input type="hidden" asp-for="EditStudent.PhotoStudent" />
+
+                        <h6 class="mb-3 text-primary border-bottom pb-2">Фотография</h6>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label>Текущее фото</label>
+                                <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                                    @if (!string.IsNullOrEmpty(Model.EditStudent.PhotoStudent))
+                                    {
+                                        <img src="@Model.EditStudent.PhotoStudent"
+                                             alt="Фото ученика"
+                                             style="width:90px; height:90px; object-fit:cover; border-radius:50%; border:1px solid #e5e7eb;" />
+                                    }
+                                    else
+                                    {
+                                        <div style="width:90px; height:90px; border-radius:50%; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:700; color:#2563eb;">
+                                            @Model.StudentProfile.Initials
+                                        </div>
+                                    }
+
+                                    <div style="flex:1; min-width:220px;">
+                                        <label class="form-label">Новое фото</label>
+                                        <input type="file" name="StudentPhoto" class="form-control" accept="image/*" />
+                                        <small class="text-muted">Если файл не выбран, текущее фото останется прежним.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные</h6>
                         <div class="row">
                             <div class="col-md-4 mb-3"><label>Фамилия</label><input asp-for="EditStudent.SurnameStudent" class="form-control" required /></div>
                             <div class="col-md-4 mb-3"><label>Имя</label><input asp-for="EditStudent.NameStudent" class="form-control" required /></div>
                             <div class="col-md-4 mb-3"><label>Отчество</label><input asp-for="EditStudent.MiddleStudent" class="form-control" /></div>
-                            
+
                             <div class="col-md-4 mb-3"><label>Дата рождения</label><input asp-for="EditStudent.BirthStudent" type="date" class="form-control" required /></div>
                             <div class="col-md-4 mb-3">
                                 <label>Пол</label>
@@ -297,7 +362,7 @@
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3"><label>Уровень</label><input asp-for="EditStudent.LevelStudent" class="form-control" required /></div>
-                            
+
                             <div class="col-md-12 mb-3">
                                 <label>Группа</label>
                                 <select asp-for="EditStudent.TeamId" asp-items="Model.TeamList" class="form-select">
@@ -323,23 +388,30 @@
                             <div class="col-md-6 mb-3"><label>Квартира</label><input asp-for="EditStudent.ApartmentStudent" class="form-control" /></div>
                         </div>
                     </div>
+
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Сохранить изменения</button>
+                        <button type="submit" class="btn btn-primary modal-save-btn">Сохранить изменения</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Модальное окно: Увеличенный просмотр изображения -->
     <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content bg-transparent border-0">
                 <div class="modal-header border-0 p-0 justify-content-end mb-2">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white; border-radius: 50%; opacity: 0.8; padding: 10px;"></button>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            style="background-color: white; border-radius: 50%; opacity: 0.8; padding: 10px;"></button>
                 </div>
                 <div class="modal-body text-center p-0">
-                    <img id="fullSizeImage" src="" alt="Preview" style="max-width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+                    <img id="fullSizeImage"
+                         src=""
+                         alt="Preview"
+                         style="max-width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
                 </div>
             </div>
         </div>
@@ -349,21 +421,22 @@
 @section Scripts {
     <script>
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
+
                 document.querySelectorAll('.schedule-section, .results-section, .achievements-section').forEach(section => {
                     section.classList.remove('active');
                 });
+
                 const tabName = this.getAttribute('data-tab');
                 const targetSection = document.getElementById(tabName + '-section');
-                if(targetSection) {
+                if (targetSection) {
                     targetSection.classList.add('active');
                 }
             });
         });
 
-        // Функция для увеличения изображений по клику
         function previewImage(src) {
             if (!src) return;
             document.getElementById('fullSizeImage').src = src;

@@ -4,8 +4,6 @@
 @{
     ViewData["Title"] = "Расписание тренировок";
 
-    // Гарантированно получаем данные напрямую из БД для надежной работы фильтрации площадок,
-    // минуя возможные пустые переменные из бэкенда
     var dbTeams = DbContext.Teams.ToList();
     var dbFacilities = DbContext.Facilities.Where(f => f.StatusFacility != "На ремонте").ToList();
 
@@ -56,10 +54,10 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/schedule.css" asp-append-version="true" />
 }
-<div class="schedule-page">
-    <div class="main-content">
 
-        <!-- ВЫВОД СООБЩЕНИЙ TEMPDATA ДЛЯ ОТОБРАЖЕНИЯ ОШИБОК/УСПЕХА -->
+<div class="schedule-page">
+    <div class="schedule-content">
+
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success mb-3"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
@@ -142,8 +140,20 @@
                 @for (int i = 0; i < 7; i++)
                 {
                     var currentDayOfWeek = daysOfWeek[i];
-                    <div class="day-column">
-                        @if (currentWeekTrainings.ContainsKey(currentDayOfWeek))
+                    var dayDate = safeStartOfWeek.AddDays(i);
+                    var hasTrainings = currentWeekTrainings.ContainsKey(currentDayOfWeek);
+
+                    <div class="day-column @(hasTrainings ? "" : "mobile-empty-day")">
+                        <div class="mobile-day-header">
+                            <div class="mobile-day-name">
+                                @dayDate.ToString("dddd", new System.Globalization.CultureInfo("ru-RU"))
+                            </div>
+                            <div class="mobile-day-date">
+                                @dayDate.ToString("dd MMMM", new System.Globalization.CultureInfo("ru-RU"))
+                            </div>
+                        </div>
+
+                        @if (hasTrainings)
                         {
                             var dayTrainings = currentWeekTrainings[currentDayOfWeek].OrderBy(t => t.TimeTraining).ToList();
 
@@ -192,7 +202,7 @@
                         }
                         else
                         {
-                            <div class="text-center text-muted" style="font-size: 11px; margin-top: 10px; opacity: 0.6;">
+                            <div class="text-center text-muted mobile-no-events" style="font-size: 11px; margin-top: 10px; opacity: 0.6;">
                                 Нет занятий
                             </div>
                         }
@@ -304,7 +314,6 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label asp-for="ModalTraining.TimeTraining" class="form-label">Время начала</label>
-                                <!-- Установлено ограничение времени с 08:00 до 22:00 -->
                                 <input asp-for="ModalTraining.TimeTraining" type="time" min="08:00" max="22:00" class="form-control" required id="ModalTraining_TimeTraining" />
                                 <small class="text-muted" style="font-size: 11px;">Рабочие часы: 08:00 - 22:00</small>
                             </div>
@@ -319,7 +328,6 @@
 
                         <div class="mb-3">
                             <label asp-for="ModalTraining.TeamId" class="form-label">Группа (Команда)</label>
-                            <!-- Загружаем группы напрямую из DbContext и добавляем onchange -->
                             <select asp-for="ModalTraining.TeamId" class="form-select" required id="ModalTraining_TeamId" onchange="filterFacilitiesByTeam()">
                                 <option value="">-- Выберите группу --</option>
                                 @foreach (var team in dbTeams)
@@ -331,7 +339,6 @@
 
                         <div class="mb-3">
                             <label asp-for="ModalTraining.FacilityId" class="form-label">Помещение (Зал)</label>
-                            <!-- Залы фильтруются через JS на основе выбранной группы -->
                             <select asp-for="ModalTraining.FacilityId" class="form-select" required id="ModalTraining_FacilityId">
                                 <option value="">-- Сначала выберите группу --</option>
                             </select>
@@ -357,26 +364,22 @@
 
 @section Scripts {
     <script>
-        // Все доступные залы гарантированно подгружаются из БД
         const allFacilities = [
             @foreach (var f in dbFacilities)
             {
-                        <text>{ id: '@f.FacilityId', name: '@Html.Raw(f.NameFacility.Replace("'", "\\'"))', branchId: '@f.BranchId' },</text>
+                    <text>{ id: '@f.FacilityId', name: '@Html.Raw(f.NameFacility.Replace("'", "\\'"))', branchId: '@f.BranchId' },</text>
             }
         ];
 
-        // Фильтрация площадок в зависимости от выбранной группы
         function filterFacilitiesByTeam() {
             const teamSelect = document.getElementById('ModalTraining_TeamId');
             const facilitySelect = document.getElementById('ModalTraining_FacilityId');
 
-            // Проверка безопасности: если элементов модального окна нет в DOM, прекращаем выполнение.
             if (!teamSelect || !facilitySelect) return;
 
             const selectedOption = teamSelect.options[teamSelect.selectedIndex];
             const currentFacilityVal = facilitySelect.value;
 
-            // Очищаем текущие опции
             facilitySelect.innerHTML = '<option value="">-- Выберите помещение --</option>';
 
             if (!selectedOption || !selectedOption.value) {
@@ -428,11 +431,10 @@
             document.getElementById('trainingForm').reset();
             document.getElementById('ModalTraining_TrainingId').value = 0;
             document.getElementById('ModalTraining_DateTraining').value = document.getElementById('CurrentDate').value;
-            // Сбрасываем время на 08:00 по умолчанию
             document.getElementById('ModalTraining_TimeTraining').value = '08:00';
             document.getElementById('trainingModalLabel').innerText = 'Новая тренировка';
             document.getElementById('bulkAddBtn').style.display = 'inline-block';
-            filterFacilitiesByTeam(); // Обновляем список площадок
+            filterFacilitiesByTeam();
         }
 
         function prepareEditModal(id, date, time, coachId, teamId, facilityId, plan) {
@@ -444,7 +446,7 @@
             document.getElementById('ModalTraining_CoachId').value = coachId;
             document.getElementById('ModalTraining_TeamId').value = teamId;
 
-            filterFacilitiesByTeam(); // Сначала фильтруем залы под выбранную группу
+            filterFacilitiesByTeam();
 
             document.getElementById('ModalTraining_FacilityId').value = facilityId;
             document.getElementById('ModalTraining_PlanTraining').value = plan;
@@ -453,9 +455,8 @@
             document.getElementById('bulkAddBtn').style.display = 'none';
         }
 
-        // Инициализируем фильтрацию при загрузке страницы, если форма была открыта
         document.addEventListener('DOMContentLoaded', function() {
-            if(document.getElementById('ModalTraining_TeamId') && document.getElementById('ModalTraining_TeamId').value) {
+            if (document.getElementById('ModalTraining_TeamId') && document.getElementById('ModalTraining_TeamId').value) {
                 filterFacilitiesByTeam();
             }
         });
@@ -470,7 +471,7 @@
                 document.getElementById('ModalTraining_DateTraining').value = '@TempData["BulkDate"]';
                 document.getElementById('ModalTraining_TeamId').value = '@TempData["BulkTeamId"]';
 
-                filterFacilitiesByTeam(); // Важно: фильтруем залы до установки ID площадки!
+                filterFacilitiesByTeam();
 
                 document.getElementById('ModalTraining_FacilityId').value = '@TempData["BulkFacilityId"]';
                 document.getElementById('ModalTraining_CoachId').value = '@TempData["BulkCoachId"]';

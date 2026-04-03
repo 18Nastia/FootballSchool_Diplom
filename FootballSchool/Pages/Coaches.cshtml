@@ -32,37 +32,41 @@
 
     <div class="coaches-content">
         <div class="filters-panel">
-            <div class="filter-section">
-                <h4>Специализация</h4>
-                <div class="filter-option">
-                    <input type="radio" id="spec-all" name="specialization" value="all" checked>
-                    <label for="spec-all">Все специализации</label>
-                </div>
-                @foreach (var spec in Model.Specialties)
-                {
-                    var safeSpecId = spec.Replace(" ", "-").Replace("/", "-").Replace("\\", "-").ToLower();
+            <details class="filter-accordion" open>
+                <summary>Специализация</summary>
+                <div class="filter-section filter-section-scroll">
                     <div class="filter-option">
-                        <input type="radio" id="spec-@safeSpecId" name="specialization" value="@spec.ToLower()">
-                        <label for="spec-@safeSpecId">@spec</label>
+                        <input type="radio" id="spec-all" name="specialization" value="all" checked>
+                        <label for="spec-all">Все специализации</label>
                     </div>
-                }
-            </div>
+                    @foreach (var spec in Model.Specialties)
+                    {
+                        var safeSpecId = spec.Replace(" ", "-").Replace("/", "-").Replace("\\", "-").ToLower();
+                        <div class="filter-option">
+                            <input type="radio" id="spec-@safeSpecId" name="specialization" value="@spec.ToLower()">
+                            <label for="spec-@safeSpecId">@spec</label>
+                        </div>
+                    }
+                </div>
+            </details>
 
-            <div class="filter-section">
-                <h4>Занятость</h4>
-                <div class="filter-option">
-                    <input type="radio" id="status-all" name="status" value="all" checked>
-                    <label for="status-all">Все</label>
+            <details class="filter-accordion">
+                <summary>Занятость</summary>
+                <div class="filter-section">
+                    <div class="filter-option">
+                        <input type="radio" id="status-all" name="status" value="all" checked>
+                        <label for="status-all">Все</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" id="status-free" name="status" value="status-free">
+                        <label for="status-free">Свободен</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" id="status-busy" name="status" value="status-busy">
+                        <label for="status-busy">Ведет группы (Занят)</label>
+                    </div>
                 </div>
-                <div class="filter-option">
-                    <input type="radio" id="status-free" name="status" value="status-free">
-                    <label for="status-free">Свободен</label>
-                </div>
-                <div class="filter-option">
-                    <input type="radio" id="status-busy" name="status" value="status-busy">
-                    <label for="status-busy">Ведет группы (Занят)</label>
-                </div>
-            </div>
+            </details>
         </div>
 
         <div class="trainers-list">

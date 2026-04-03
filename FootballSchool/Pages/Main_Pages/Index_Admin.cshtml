@@ -95,7 +95,6 @@
     </div>
 </div>
 
-<!-- Скрытое модальное окно для добавления администратора -->
 <div class="modal fade" id="addAdminModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -129,7 +128,6 @@
 
 @section Scripts {
     <script>
-        // Скрытный триггер: двойной клик по слову "Администратор"
         document.getElementById('secretTrigger').addEventListener('dblclick', function () {
             if (typeof bootstrap !== 'undefined') {
                 var myModal = new bootstrap.Modal(document.getElementById('addAdminModal'));

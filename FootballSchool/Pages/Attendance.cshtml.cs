@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+п»їusing ClosedXML.Excel;
 using FootballSchool.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -50,20 +49,21 @@ namespace FootballSchool.Pages
         {
             public int StudentId { get; set; }
             public string StudentName { get; set; } = string.Empty;
-            public string Status { get; set; } = "Был";
+            public string Status { get; set; } = "Р‘С‹Р»";
             public string? Comment { get; set; }
         }
 
-        public class StudentStatDto
+        public class AttendanceJournalRow
         {
+            public int StudentId { get; set; }
             public string StudentName { get; set; } = string.Empty;
-            public int TotalTrainings { get; set; }
-            public int Attended { get; set; }
-            public int Absent { get; set; }
-            public int Percentage { get; set; }
+            public List<string> Marks { get; set; } = new();
         }
 
-        public List<StudentStatDto> ReportStats { get; set; } = new List<StudentStatDto>();
+        public List<Training> JournalTrainings { get; set; } = new();
+        public List<AttendanceJournalRow> JournalRows { get; set; } = new();
+        public List<int> JournalTotals { get; set; } = new();
+
         public string TrainingInfo { get; set; } = string.Empty;
 
         public async Task OnGetAsync()
@@ -116,9 +116,12 @@ namespace FootballSchool.Pages
                         }
                     }
 
-                    AvailableTrainings = await trainingsQuery.OrderBy(t => t.TimeTraining).ToListAsync();
+                    AvailableTrainings = await trainingsQuery
+                        .OrderBy(t => t.TimeTraining)
+                        .ToListAsync();
 
                     var trainingIds = AvailableTrainings.Select(t => t.TrainingId).ToList();
+
                     var filledIds = await _context.Attendances
                         .Where(a => trainingIds.Contains(a.TrainingId))
                         .Select(a => a.TrainingId)
@@ -141,15 +144,24 @@ namespace FootballSchool.Pages
                         IsAlreadyFilled = FilledTrainingIds.Contains(SelectedTrainingId.Value);
                         var training = AvailableTrainings.First(t => t.TrainingId == SelectedTrainingId.Value);
 
-                        var coachName = training.Coach != null ? $"{training.Coach.SurnameCoach} {training.Coach.NameCoach[0]}." : "Без тренера";
-                        var facilityName = training.Facility != null ? training.Facility.NameFacility : "Зал не указан";
-                        var plan = string.IsNullOrEmpty(training.PlanTraining) ? "Тренировка" : training.PlanTraining;
+                        var coachName = training.Coach != null
+                            ? $"{training.Coach.SurnameCoach} {training.Coach.NameCoach[0]}."
+                            : "Р‘РµР· С‚СЂРµРЅРµСЂР°";
 
-                        TrainingInfo = $"{training.TimeTraining.ToString("HH:mm")} — {plan} ({facilityName} | Тренер: {coachName})";
+                        var facilityName = training.Facility != null
+                            ? training.Facility.NameFacility
+                            : "Р—Р°Р» РЅРµ СѓРєР°Р·Р°РЅ";
+
+                        var plan = string.IsNullOrEmpty(training.PlanTraining)
+                            ? "РўСЂРµРЅРёСЂРѕРІРєР°"
+                            : training.PlanTraining;
+
+                        TrainingInfo = $"{training.TimeTraining:HH:mm} вЂ” {plan} ({facilityName} | РўСЂРµРЅРµСЂ: {coachName})";
 
                         var students = await _context.Students
                             .Where(s => s.TeamId == FilterTeamId)
                             .OrderBy(s => s.SurnameStudent)
+                            .ThenBy(s => s.NameStudent)
                             .ToListAsync();
 
                         var existingAttendances = await _context.Attendances
@@ -186,41 +198,59 @@ namespace FootballSchool.Pages
                 var dateOnlyStart = DateOnly.FromDateTime(startDate);
                 var dateOnlyEnd = DateOnly.FromDateTime(DateTime.Today);
 
-                var pastTrainings = await _context.Training
-                    .Where(t => t.TeamId == FilterTeamId && t.DateTraining >= dateOnlyStart && t.DateTraining <= dateOnlyEnd)
-                    .Select(t => t.TrainingId)
+                JournalTrainings = await _context.Training
+                    .Where(t => t.TeamId == FilterTeamId &&
+                                t.DateTraining >= dateOnlyStart &&
+                                t.DateTraining <= dateOnlyEnd)
+                    .OrderBy(t => t.DateTraining)
+                    .ThenBy(t => t.TimeTraining)
                     .ToListAsync();
-
-                int totalTrainings = pastTrainings.Count;
 
                 var studentsInTeam = await _context.Students
                     .Where(s => s.TeamId == FilterTeamId)
                     .OrderBy(s => s.SurnameStudent)
+                    .ThenBy(s => s.NameStudent)
                     .ToListAsync();
 
+                var trainingIds = JournalTrainings.Select(t => t.TrainingId).ToList();
+
                 var attendances = await _context.Attendances
-                    .Where(a => pastTrainings.Contains(a.TrainingId))
+                    .Where(a => trainingIds.Contains(a.TrainingId))
                     .ToListAsync();
 
                 foreach (var st in studentsInTeam)
                 {
-                    var stAtt = attendances.Where(a => a.StudentId == st.StudentId).ToList();
-                    int attended = stAtt.Count(a => a.StatusAttendance == "Был");
-                    int absent = totalTrainings - attended;
-
-                    int percentage = totalTrainings > 0 ? (int)Math.Round((double)attended / totalTrainings * 100) : 0;
-
-                    ReportStats.Add(new StudentStatDto
+                    var row = new AttendanceJournalRow
                     {
-                        StudentName = $"{st.SurnameStudent} {st.NameStudent}",
-                        TotalTrainings = totalTrainings,
-                        Attended = attended,
-                        Absent = absent,
-                        Percentage = percentage
-                    });
+                        StudentId = st.StudentId,
+                        StudentName = $"{st.SurnameStudent} {st.NameStudent}"
+                    };
+
+                    foreach (var training in JournalTrainings)
+                    {
+                        var attendance = attendances.FirstOrDefault(a =>
+                            a.StudentId == st.StudentId &&
+                            a.TrainingId == training.TrainingId);
+
+                        if (attendance == null)
+                            row.Marks.Add("");
+                        else if (attendance.StatusAttendance == "Р‘С‹Р»")
+                            row.Marks.Add("вњ”");
+                        else
+                            row.Marks.Add("вњ–");
+                    }
+
+                    JournalRows.Add(row);
                 }
 
-                ReportStats = ReportStats.OrderByDescending(x => x.Percentage).ToList();
+                foreach (var training in JournalTrainings)
+                {
+                    var presentCount = attendances.Count(a =>
+                        a.TrainingId == training.TrainingId &&
+                        a.StatusAttendance == "Р‘С‹Р»");
+
+                    JournalTotals.Add(presentCount);
+                }
             }
         }
 
@@ -228,17 +258,25 @@ namespace FootballSchool.Pages
         {
             if (!SelectedTrainingId.HasValue || AttendanceItems == null || !AttendanceItems.Any())
             {
-                return RedirectToPage(new { FilterTeamId, FilterDate = FilterDate?.ToString("yyyy-MM-dd"), SelectedTrainingId, ViewMode = "Daily" });
+                return RedirectToPage(new
+                {
+                    FilterTeamId,
+                    FilterDate = FilterDate?.ToString("yyyy-MM-dd"),
+                    SelectedTrainingId,
+                    ViewMode = "Daily"
+                });
             }
 
             foreach (var item in AttendanceItems)
             {
                 var existing = await _context.Attendances
-                    .FirstOrDefaultAsync(a => a.TrainingId == SelectedTrainingId.Value && a.StudentId == item.StudentId);
+                    .FirstOrDefaultAsync(a =>
+                        a.TrainingId == SelectedTrainingId.Value &&
+                        a.StudentId == item.StudentId);
 
                 if (existing != null)
                 {
-                    existing.StatusAttendance = item.Status ?? "Был";
+                    existing.StatusAttendance = item.Status ?? "Р‘С‹Р»";
                     existing.NoteAttendance = item.Comment;
                 }
                 else
@@ -247,19 +285,24 @@ namespace FootballSchool.Pages
                     {
                         TrainingId = SelectedTrainingId.Value,
                         StudentId = item.StudentId,
-                        StatusAttendance = item.Status ?? "Был",
+                        StatusAttendance = item.Status ?? "Р‘С‹Р»",
                         NoteAttendance = item.Comment
                     });
                 }
             }
 
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Посещаемость успешно сохранена!";
+            TempData["SuccessMessage"] = "РџРѕСЃРµС‰Р°РµРјРѕСЃС‚СЊ СѓСЃРїРµС€РЅРѕ СЃРѕС…СЂР°РЅРµРЅР°!";
 
-            return RedirectToPage(new { FilterTeamId, FilterDate = FilterDate?.ToString("yyyy-MM-dd"), SelectedTrainingId, ViewMode = "Daily" });
+            return RedirectToPage(new
+            {
+                FilterTeamId,
+                FilterDate = FilterDate?.ToString("yyyy-MM-dd"),
+                SelectedTrainingId,
+                ViewMode = "Daily"
+            });
         }
 
-        // --- ЭКСПОРТ В EXCEL ДЛЯ СТАТИСТИКИ ---
         public async Task<IActionResult> OnGetExportReportAsync(int teamId, string period)
         {
             DateTime startDate = DateTime.Today;
@@ -274,49 +317,79 @@ namespace FootballSchool.Pages
             var team = await _context.Teams.FindAsync(teamId);
             if (team == null) return NotFound();
 
-            var pastTrainings = await _context.Training
-                .Where(t => t.TeamId == teamId && t.DateTraining >= dateOnlyStart && t.DateTraining <= dateOnlyEnd)
-                .Select(t => t.TrainingId)
+            var trainings = await _context.Training
+                .Where(t => t.TeamId == teamId &&
+                            t.DateTraining >= dateOnlyStart &&
+                            t.DateTraining <= dateOnlyEnd)
+                .OrderBy(t => t.DateTraining)
+                .ThenBy(t => t.TimeTraining)
                 .ToListAsync();
 
-            int totalTrainings = pastTrainings.Count;
-
             var students = await _context.Students
-                .Where(s => s.TeamId == teamId).OrderBy(s => s.SurnameStudent).ToListAsync();
+                .Where(s => s.TeamId == teamId)
+                .OrderBy(s => s.SurnameStudent)
+                .ThenBy(s => s.NameStudent)
+                .ToListAsync();
+
+            var trainingIds = trainings.Select(t => t.TrainingId).ToList();
 
             var attendances = await _context.Attendances
-                .Where(a => pastTrainings.Contains(a.TrainingId)).ToListAsync();
+                .Where(a => trainingIds.Contains(a.TrainingId))
+                .ToListAsync();
 
             using (var workbook = new XLWorkbook())
             {
-                var worksheet = workbook.Worksheets.Add("Статистика");
+                var worksheet = workbook.Worksheets.Add("РџРѕСЃРµС‰Р°РµРјРѕСЃС‚СЊ");
 
-                worksheet.Cell(1, 1).Value = $"Отчет по группе: {team.CategoryTeam}";
+                worksheet.Cell(1, 1).Value = $"Р–СѓСЂРЅР°Р» РїРѕСЃРµС‰Р°РµРјРѕСЃС‚Рё: {team.CategoryTeam}";
                 worksheet.Cell(1, 1).Style.Font.Bold = true;
                 worksheet.Cell(1, 1).Style.Font.FontSize = 14;
 
-                worksheet.Cell(3, 1).Value = "Ученик";
-                worksheet.Cell(3, 2).Value = "Всего занятий";
-                worksheet.Cell(3, 3).Value = "Присутствовал";
-                worksheet.Cell(3, 4).Value = "Пропустил";
-                worksheet.Cell(3, 5).Value = "% Посещаемости";
-                worksheet.Range("A3:E3").Style.Font.Bold = true;
-                worksheet.Range("A3:E3").Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(3, 1).Value = "Р¤РРћ";
+                for (int i = 0; i < trainings.Count; i++)
+                {
+                    worksheet.Cell(3, i + 2).Value = $"{trainings[i].DateTraining:dd.MM} {trainings[i].TimeTraining:HH\\:mm}";
+                }
 
-                int row = 4;
+                worksheet.Range(3, 1, 3, trainings.Count + 1).Style.Font.Bold = true;
+                worksheet.Range(3, 1, 3, trainings.Count + 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                int rowIndex = 4;
                 foreach (var st in students)
                 {
-                    var stAtt = attendances.Where(a => a.StudentId == st.StudentId).ToList();
-                    int attended = stAtt.Count(a => a.StatusAttendance == "Был");
-                    int absent = totalTrainings - attended;
-                    int percentage = totalTrainings > 0 ? (int)Math.Round((double)attended / totalTrainings * 100) : 0;
+                    worksheet.Cell(rowIndex, 1).Value = $"{st.SurnameStudent} {st.NameStudent}";
 
-                    worksheet.Cell(row, 1).Value = $"{st.SurnameStudent} {st.NameStudent}";
-                    worksheet.Cell(row, 2).Value = totalTrainings;
-                    worksheet.Cell(row, 3).Value = attended;
-                    worksheet.Cell(row, 4).Value = absent;
-                    worksheet.Cell(row, 5).Value = percentage + "%";
-                    row++;
+                    for (int i = 0; i < trainings.Count; i++)
+                    {
+                        var attendance = attendances.FirstOrDefault(a =>
+                            a.StudentId == st.StudentId &&
+                            a.TrainingId == trainings[i].TrainingId);
+
+                        string mark = "";
+                        if (attendance == null)
+                            mark = "";
+                        else if (attendance.StatusAttendance == "Р‘С‹Р»")
+                            mark = "вњ”";
+                        else
+                            mark = "вњ–";
+
+                        worksheet.Cell(rowIndex, i + 2).Value = mark;
+                    }
+
+                    rowIndex++;
+                }
+
+                worksheet.Cell(rowIndex, 1).Value = "РРўРћР“Рћ";
+                worksheet.Cell(rowIndex, 1).Style.Font.Bold = true;
+
+                for (int i = 0; i < trainings.Count; i++)
+                {
+                    var presentCount = attendances.Count(a =>
+                        a.TrainingId == trainings[i].TrainingId &&
+                        a.StatusAttendance == "Р‘С‹Р»");
+
+                    worksheet.Cell(rowIndex, i + 2).Value = presentCount;
+                    worksheet.Cell(rowIndex, i + 2).Style.Font.Bold = true;
                 }
 
                 worksheet.Columns().AdjustToContents();
@@ -325,7 +398,11 @@ namespace FootballSchool.Pages
                 {
                     workbook.SaveAs(stream);
                     var content = stream.ToArray();
-                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Посещаемость_{team.CategoryTeam}_{DateTime.Now:dd.MM.yyyy}.xlsx");
+                    return File(
+                        content,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        $"Р–СѓСЂРЅР°Р»_РїРѕСЃРµС‰Р°РµРјРѕСЃС‚Рё_{team.CategoryTeam}_{DateTime.Now:dd.MM.yyyy}.xlsx"
+                    );
                 }
             }
         }

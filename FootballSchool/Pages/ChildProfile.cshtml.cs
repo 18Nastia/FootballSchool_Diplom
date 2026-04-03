@@ -19,7 +19,6 @@ namespace FootballSchool.Pages
         private readonly FootballSchoolContext _context;
         private readonly IWebHostEnvironment _environment;
 
-        // Внедряем IWebHostEnvironment для загрузки файлов
         public ChildProfileModel(FootballSchoolContext context, IWebHostEnvironment environment)
         {
             _context = context;
@@ -52,8 +51,8 @@ namespace FootballSchool.Pages
             public string Date { get; set; } = string.Empty;
             public string Description { get; set; } = string.Empty;
             public string IconClass { get; set; } = "fas fa-medal";
-            public string? PhotoPath { get; set; } // Путь к картинке
-            public bool IsManual { get; set; } // Флаг для отображения кнопки удаления
+            public string? PhotoPath { get; set; }
+            public bool IsManual { get; set; }
         }
 
         public class ProfileDto
@@ -75,7 +74,6 @@ namespace FootballSchool.Pages
             public List<AchievementDto> Achievements { get; set; } = new List<AchievementDto>();
         }
 
-        // Модель для формы добавления достижения
         public class NewAchievementModel
         {
             public string Title { get; set; } = string.Empty;
@@ -93,6 +91,9 @@ namespace FootballSchool.Pages
 
         [BindProperty]
         public NewAchievementModel NewAchievement { get; set; } = new NewAchievementModel();
+
+        [BindProperty]
+        public IFormFile? StudentPhoto { get; set; }
 
         public SelectList TeamList { get; set; } = default!;
 
@@ -132,13 +133,13 @@ namespace FootballSchool.Pages
 
             var culture = new CultureInfo("ru-RU");
 
-            // 1. ДИНАМИЧЕСКОЕ РАСПИСАНИЕ
             var scheduleList = new List<ScheduleDto>();
             if (student.Team?.Training != null)
             {
                 scheduleList = student.Team.Training
                     .Where(t => t.DateTraining >= today)
-                    .OrderBy(t => t.DateTraining).ThenBy(t => t.TimeTraining)
+                    .OrderBy(t => t.DateTraining)
+                    .ThenBy(t => t.TimeTraining)
                     .Take(6)
                     .Select(t => new ScheduleDto
                     {
@@ -150,7 +151,6 @@ namespace FootballSchool.Pages
                     }).ToList();
             }
 
-            // 2. ДИНАМИЧЕСКИЕ РЕЗУЛЬТАТЫ (фильтруем, чтобы не выводить ручные достижения)
             var resultsList = student.Progresses?
                 .Where(p => string.IsNullOrEmpty(p.TestsProgress) || !p.TestsProgress.StartsWith("ACHIEVEMENT|"))
                 .OrderByDescending(p => p.DateProgress)
@@ -161,8 +161,15 @@ namespace FootballSchool.Pages
                     if (!string.IsNullOrEmpty(p.TestsProgress))
                     {
                         var parts = p.TestsProgress.Split('|');
-                        if (parts.Length == 2) { mName = parts[0]; score = parts[1]; }
-                        else { score = p.TestsProgress; }
+                        if (parts.Length == 2)
+                        {
+                            mName = parts[0];
+                            score = parts[1];
+                        }
+                        else
+                        {
+                            score = p.TestsProgress;
+                        }
                     }
 
                     return new ResultDto
@@ -175,21 +182,39 @@ namespace FootballSchool.Pages
                     };
                 }).ToList() ?? new List<ResultDto>();
 
-            // 3. ДОСТИЖЕНИЯ (Автоматические + Ручные)
             var achievementsList = new List<AchievementDto>();
 
-            // Автоматические (посещаемость)
             int attendancesCount = student.Attendances?.Count(a => a.StatusAttendance == "Был") ?? 0;
             if (attendancesCount > 0)
-                achievementsList.Add(new AchievementDto { Title = "Первый шаг", Description = "Успешно посетил первую тренировку!", Date = "Выполнено", IconClass = "fas fa-shoe-prints text-success", IsManual = false });
+                achievementsList.Add(new AchievementDto
+                {
+                    Title = "Первый шаг",
+                    Description = "Успешно посетил первую тренировку!",
+                    Date = "Выполнено",
+                    IconClass = "fas fa-shoe-prints text-success",
+                    IsManual = false
+                });
+
             if (attendancesCount >= 10)
-                achievementsList.Add(new AchievementDto { Title = "Стабильность", Description = $"Посетил {attendancesCount} тренировок", Date = "Выполнено", IconClass = "fas fa-fire text-danger", IsManual = false });
+                achievementsList.Add(new AchievementDto
+                {
+                    Title = "Стабильность",
+                    Description = $"Посетил {attendancesCount} тренировок",
+                    Date = "Выполнено",
+                    IconClass = "fas fa-fire text-danger",
+                    IsManual = false
+                });
 
-            // Автоматические (уровень)
             if (student.LevelStudent == "Продвинутый" || student.LevelStudent == "Профи")
-                achievementsList.Add(new AchievementDto { Title = "Элитный статус", Description = $"Достиг уровня: {student.LevelStudent}", Date = "Выполнено", IconClass = "fas fa-star text-warning", IsManual = false });
+                achievementsList.Add(new AchievementDto
+                {
+                    Title = "Элитный статус",
+                    Description = $"Достиг уровня: {student.LevelStudent}",
+                    Date = "Выполнено",
+                    IconClass = "fas fa-star text-warning",
+                    IsManual = false
+                });
 
-            // Ручные достижения, добавленные администратором (сохраненные в Progress с префиксом ACHIEVEMENT|)
             var manualAchievements = student.Progresses?
                 .Where(p => !string.IsNullOrEmpty(p.TestsProgress) && p.TestsProgress.StartsWith("ACHIEVEMENT|"))
                 .OrderByDescending(p => p.DateProgress)
@@ -199,7 +224,7 @@ namespace FootballSchool.Pages
                     Title = p.TestsProgress.Split('|').Length > 1 ? p.TestsProgress.Split('|')[1] : "Достижение",
                     Description = p.PlanProgress ?? "",
                     Date = p.DateProgress.ToString("dd.MM.yyyy"),
-                    PhotoPath = p.CommentProgress, // Фотографию храним в CommentProgress
+                    PhotoPath = p.CommentProgress,
                     IsManual = true,
                     IconClass = "fas fa-award text-primary"
                 }).ToList() ?? new List<AchievementDto>();
@@ -230,41 +255,40 @@ namespace FootballSchool.Pages
             return Page();
         }
 
-        // Обработчик для ручного добавления достижения
         public async Task<IActionResult> OnPostAddAchievementAsync(int studentId, IFormFile? AchievementPhoto)
         {
             if (!User.IsInRole("Admin")) return Forbid();
 
             string? photoPath = null;
 
-            // Логика сохранения картинки
             if (AchievementPhoto != null && AchievementPhoto.Length > 0)
             {
                 string imgext = Path.GetExtension(AchievementPhoto.FileName).ToLower();
-                if (imgext == ".jpg" || imgext == ".jpeg" || imgext == ".png" || imgext == ".gif")
+                if (imgext == ".jpg" || imgext == ".jpeg" || imgext == ".png" || imgext == ".gif" || imgext == ".webp")
                 {
                     string uniqueFileName = Guid.NewGuid().ToString() + imgext;
                     string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "achievements");
 
-                    if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
 
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await AchievementPhoto.CopyToAsync(stream);
                     }
+
                     photoPath = "/images/achievements/" + uniqueFileName;
                 }
             }
 
-            // Мы маскируем достижение как запись в таблице Progress
             var progress = new Progress
             {
                 StudentId = studentId,
                 DateProgress = DateOnly.FromDateTime(NewAchievement.Date),
                 TestsProgress = "ACHIEVEMENT|" + NewAchievement.Title,
                 PlanProgress = NewAchievement.Description,
-                CommentProgress = photoPath // Храним относительный путь картинки
+                CommentProgress = photoPath
             };
 
             _context.Progresses.Add(progress);
@@ -283,6 +307,7 @@ namespace FootballSchool.Pages
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Запись успешно добавлена!";
             }
+
             return RedirectToPage(new { id = studentId });
         }
 
@@ -293,10 +318,9 @@ namespace FootballSchool.Pages
             var progress = await _context.Progresses.FindAsync(progressId);
             if (progress != null)
             {
-                // Если удаляем достижение с картинкой - удаляем картинку с сервера
                 if (!string.IsNullOrEmpty(progress.CommentProgress) && progress.TestsProgress?.StartsWith("ACHIEVEMENT|") == true)
                 {
-                    var filePath = Path.Combine(_environment.WebRootPath, progress.CommentProgress.TrimStart('/'));
+                    var filePath = Path.Combine(_environment.WebRootPath, progress.CommentProgress.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
                     if (System.IO.File.Exists(filePath))
                     {
                         System.IO.File.Delete(filePath);
@@ -307,6 +331,7 @@ namespace FootballSchool.Pages
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Запись/Достижение успешно удалено!";
             }
+
             return RedirectToPage(new { id = studentId });
         }
 
@@ -332,9 +357,42 @@ namespace FootballSchool.Pages
                 existing.HouseStudent = EditStudent.HouseStudent;
                 existing.ApartmentStudent = EditStudent.ApartmentStudent;
 
+                if (StudentPhoto != null && StudentPhoto.Length > 0)
+                {
+                    string extension = Path.GetExtension(StudentPhoto.FileName).ToLower();
+                    string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+
+                    if (allowedExtensions.Contains(extension))
+                    {
+                        string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "students");
+                        if (!Directory.Exists(uploadsFolder))
+                            Directory.CreateDirectory(uploadsFolder);
+
+                        if (!string.IsNullOrEmpty(existing.PhotoStudent))
+                        {
+                            string oldFilePath = Path.Combine(_environment.WebRootPath, existing.PhotoStudent.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                        }
+
+                        string uniqueFileName = Guid.NewGuid().ToString() + extension;
+                        string newFilePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var stream = new FileStream(newFilePath, FileMode.Create))
+                        {
+                            await StudentPhoto.CopyToAsync(stream);
+                        }
+
+                        existing.PhotoStudent = "/images/students/" + uniqueFileName;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Данные ученика успешно обновлены!";
             }
+
             return RedirectToPage(new { id = EditStudent.StudentId });
         }
 
@@ -360,6 +418,15 @@ namespace FootballSchool.Pages
             {
                 var userId = student.UserId;
 
+                if (!string.IsNullOrEmpty(student.PhotoStudent))
+                {
+                    string studentPhotoPath = Path.Combine(_environment.WebRootPath, student.PhotoStudent.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    if (System.IO.File.Exists(studentPhotoPath))
+                    {
+                        System.IO.File.Delete(studentPhotoPath);
+                    }
+                }
+
                 if (student.Subscriptions != null && student.Subscriptions.Any())
                 {
                     foreach (var subscription in student.Subscriptions)
@@ -374,7 +441,21 @@ namespace FootballSchool.Pages
                 }
 
                 if (student.Progresses != null && student.Progresses.Any())
+                {
+                    foreach (var progress in student.Progresses)
+                    {
+                        if (!string.IsNullOrEmpty(progress.CommentProgress) && progress.TestsProgress?.StartsWith("ACHIEVEMENT|") == true)
+                        {
+                            string achievementPhotoPath = Path.Combine(_environment.WebRootPath, progress.CommentProgress.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                            if (System.IO.File.Exists(achievementPhotoPath))
+                            {
+                                System.IO.File.Delete(achievementPhotoPath);
+                            }
+                        }
+                    }
+
                     _context.Progresses.RemoveRange(student.Progresses);
+                }
 
                 if (student.Attendances != null && student.Attendances.Any())
                     _context.Attendances.RemoveRange(student.Attendances);

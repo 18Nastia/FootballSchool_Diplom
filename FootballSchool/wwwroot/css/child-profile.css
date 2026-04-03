@@ -1,4 +1,9 @@
-﻿.profile-card {
+﻿.profile-content {
+    width: 100%;
+    min-width: 0;
+}
+
+.profile-card {
     background: white;
     padding: 32px;
     border-radius: 0 0 12px 12px;
@@ -31,6 +36,7 @@
     color: #2563EB;
     font-weight: bold;
     object-fit: cover;
+    overflow: hidden;
 }
 
 .status-badge {
@@ -53,6 +59,8 @@
     font-weight: 700;
     margin-bottom: 24px;
     color: #111827;
+    line-height: 1.2;
+    word-break: break-word;
 }
 
 .info-grid {
@@ -66,6 +74,7 @@
     display: flex;
     gap: 12px;
     align-items: flex-start;
+    min-width: 0;
 }
 
     .info-item i {
@@ -86,9 +95,9 @@
     font-size: 16px;
     font-weight: 600;
     color: #111827;
+    word-break: break-word;
 }
 
-/* Вкладки */
 .tabs {
     display: flex;
     gap: 8px;
@@ -99,7 +108,12 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     width: 100%;
     overflow-x: auto;
+    scrollbar-width: none;
 }
+
+    .tabs::-webkit-scrollbar {
+        display: none;
+    }
 
 .tab-btn {
     display: flex;
@@ -115,6 +129,7 @@
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
+    flex: 0 0 auto;
 }
 
     .tab-btn:hover {
@@ -126,7 +141,6 @@
         color: #2563EB;
     }
 
-/* Контент секций */
 .content-sections {
     display: grid;
     gap: 24px;
@@ -134,7 +148,9 @@
     width: 100%;
 }
 
-.schedule-section, .results-section, .achievements-section {
+.schedule-section,
+.results-section,
+.achievements-section {
     background: white;
     padding: 32px;
     border-radius: 12px;
@@ -143,7 +159,9 @@
     display: none;
 }
 
-    .schedule-section.active, .results-section.active, .achievements-section.active {
+    .schedule-section.active,
+    .results-section.active,
+    .achievements-section.active {
         display: block;
     }
 
@@ -154,9 +172,9 @@ h3 {
     color: #111827;
     border-bottom: 2px solid #F3F4F6;
     padding-bottom: 12px;
+    line-height: 1.3;
 }
 
-/* Расписание */
 .schedule-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -172,6 +190,7 @@ h3 {
     border-radius: 12px;
     border: 1px solid #E5E7EB;
     border-left: 4px solid #2563EB;
+    min-width: 0;
 }
 
 .schedule-card-icon {
@@ -187,29 +206,34 @@ h3 {
     flex-shrink: 0;
 }
 
-.schedule-details h4 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #111827;
-    text-transform: capitalize;
+.schedule-details {
+    min-width: 0;
 }
 
-.schedule-details p {
-    margin: 4px 0 0;
-    font-size: 13px;
-    color: #6B7280;
-}
+    .schedule-details h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        text-transform: capitalize;
+    }
 
-.schedule-details .s-date {
-    font-size: 12px;
-    color: #2563EB;
-    font-weight: 500;
-    display: block;
-    margin-bottom: 2px;
-}
+    .schedule-details p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: #6B7280;
+        line-height: 1.4;
+        word-break: break-word;
+    }
 
-/* Результаты */
+    .schedule-details .s-date {
+        font-size: 12px;
+        color: #2563EB;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 2px;
+    }
+
 .results-list {
     display: flex;
     flex-direction: column;
@@ -220,24 +244,32 @@ h3 {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
     padding: 16px;
     background: #F9FAFB;
     border-radius: 8px;
     border: 1px solid #E5E7EB;
 }
 
-.result-info h4 {
-    margin: 0 0 4px 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #111827;
+.result-info {
+    min-width: 0;
+    flex: 1;
 }
 
-.result-info p {
-    margin: 0;
-    font-size: 13px;
-    color: #6B7280;
-}
+    .result-info h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .result-info p {
+        margin: 0;
+        font-size: 13px;
+        color: #6B7280;
+        line-height: 1.4;
+        word-break: break-word;
+    }
 
 .result-score {
     font-size: 18px;
@@ -247,9 +279,9 @@ h3 {
     padding: 6px 16px;
     border-radius: 20px;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
-/* Достижения */
 .achievements-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -264,11 +296,35 @@ h3 {
     background: #ffffff;
     transition: transform 0.2s;
     overflow: hidden;
+    min-width: 0;
 }
 
     .achievement-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+
+.achievement-photo {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.achievement-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+    .achievement-body.with-photo {
+        padding: 16px;
+    }
+
+    .achievement-body.no-photo {
+        padding: 24px;
+        text-align: center;
+        align-items: center;
     }
 
 .achievement-icon-wrapper {
@@ -289,12 +345,15 @@ h3 {
     font-weight: 600;
     margin-bottom: 8px;
     color: #111827;
+    line-height: 1.3;
 }
 
 .achievement-card p {
     font-size: 13px;
     color: #6B7280;
     margin-bottom: auto;
+    line-height: 1.5;
+    word-break: break-word;
 }
 
 .achievement-date {
@@ -312,18 +371,21 @@ h3 {
     right: 32px;
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
-.btn-edit, .btn-delete {
+.btn-edit,
+.btn-delete {
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
     border: 1px solid transparent;
+    white-space: nowrap;
 }
 
 .btn-edit {
@@ -346,3 +408,535 @@ h3 {
         background: #FCA5A5;
         color: white;
     }
+
+.section-header-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E5E7EB;
+    flex-wrap: wrap;
+}
+
+.section-title-no-border {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.add-achievement-btn {
+    background-color: #2563EB;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: white;
+}
+
+.modal-save-btn {
+    background: #2563EB;
+    border: none;
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    .profile-card {
+        padding: 24px;
+        gap: 24px;
+    }
+
+    .profile-name {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .schedule-section,
+    .results-section,
+    .achievements-section {
+        padding: 24px;
+    }
+
+    .admin-actions {
+        position: static;
+        width: 100%;
+        justify-content: flex-end;
+        margin-bottom: 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-content {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    .profile-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px !important;
+        gap: 14px !important;
+        margin-bottom: 14px;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    .admin-actions {
+        position: static;
+        order: -1;
+        width: 100%;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 4px;
+        flex-wrap: wrap;
+    }
+
+        .admin-actions form {
+            flex: 0 0 auto;
+            width: auto;
+            margin: 0;
+        }
+
+    .btn-edit,
+    .btn-delete {
+        width: 40px;
+        height: 40px;
+        min-height: 40px;
+        padding: 0;
+        border-radius: 10px;
+        justify-content: center;
+        font-size: 0;
+        gap: 0;
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+        .btn-edit i,
+        .btn-delete i {
+            font-size: 15px;
+            margin: 0;
+        }
+
+    .btn-edit {
+        background: #334155;
+        border-color: #475569;
+        color: #ffffff;
+    }
+
+    .btn-delete {
+        background: #991b1b;
+        border-color: #b91c1c;
+        color: #ffffff;
+    }
+
+    .profile-avatar {
+        width: 100%;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .avatar-circle {
+        width: 76px !important;
+        height: 76px !important;
+        font-size: 22px !important;
+        border-width: 3px;
+    }
+
+    .status-badge {
+        font-size: 10px;
+        padding: 4px 10px;
+        line-height: 1.1;
+    }
+
+    .profile-info {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .profile-name {
+        font-size: 18px !important;
+        line-height: 1.25;
+        margin-bottom: 14px;
+        text-align: center;
+        word-break: break-word;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .info-item {
+        gap: 8px;
+        min-width: 0;
+    }
+
+        .info-item i {
+            width: 14px;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+    .info-label {
+        font-size: 10px;
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+
+    .info-value {
+        font-size: 13px !important;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    .tabs {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 8px;
+        margin-bottom: 14px;
+        border-radius: 10px;
+        gap: 6px;
+        overflow-x: auto;
+        box-sizing: border-box;
+    }
+
+    .tab-btn {
+        padding: 8px 10px;
+        font-size: 11px;
+        border-radius: 8px;
+        gap: 6px;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+
+        .tab-btn i {
+            font-size: 11px;
+        }
+
+    .content-sections {
+        gap: 14px;
+    }
+
+    .schedule-section,
+    .results-section,
+    .achievements-section {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 14px 12px;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    h3 {
+        font-size: 16px !important;
+        line-height: 1.3;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        word-break: break-word;
+    }
+
+    .schedule-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .schedule-card {
+        padding: 12px;
+        gap: 10px;
+        border-radius: 10px;
+        align-items: flex-start;
+    }
+
+    .schedule-card-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+
+    .schedule-details h4 {
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    .schedule-details p {
+        font-size: 11px;
+        line-height: 1.35;
+    }
+
+    .schedule-details .s-date {
+        font-size: 10px;
+    }
+
+    .result-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    .result-info h4 {
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    .result-info p {
+        font-size: 11px;
+        line-height: 1.35;
+    }
+
+    .result-score {
+        font-size: 13px;
+        padding: 5px 10px;
+        border-radius: 16px;
+    }
+
+    .section-header-inline {
+        gap: 10px;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .add-achievement-btn {
+        width: 100%;
+        min-height: 40px;
+        font-size: 12px;
+        border-radius: 8px;
+        justify-content: center;
+    }
+
+    .achievements-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .achievement-photo {
+        height: 140px;
+    }
+
+    .achievement-body.with-photo,
+    .achievement-body.no-photo {
+        padding: 12px;
+    }
+
+    .achievement-icon-wrapper {
+        width: 58px;
+        height: 58px;
+        font-size: 22px;
+        margin-bottom: 12px;
+    }
+
+    .achievement-card h4 {
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    .achievement-card p {
+        font-size: 11px;
+        line-height: 1.35;
+    }
+
+    .achievement-date {
+        font-size: 10px;
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+
+    .modal-dialog {
+        margin: 12px;
+    }
+
+        .modal-dialog.modal-lg,
+        .modal-dialog.modal-xl {
+            max-width: calc(100% - 24px);
+        }
+
+    #editStudentModal .col-md-4,
+    #editStudentModal .col-md-6,
+    #editStudentModal .col-md-12 {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-card {
+        padding: 10px !important;
+    }
+
+    .admin-actions {
+        gap: 6px;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        width: 36px;
+        height: 36px;
+        min-height: 36px;
+        border-radius: 9px;
+    }
+
+        .btn-edit i,
+        .btn-delete i {
+            font-size: 14px;
+        }
+
+    .avatar-circle {
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 20px !important;
+    }
+
+    .profile-name {
+        font-size: 17px !important;
+    }
+
+    .info-value {
+        font-size: 12px !important;
+    }
+
+    .tab-btn {
+        font-size: 10px;
+        padding: 8px 9px;
+    }
+
+    .schedule-section,
+    .results-section,
+    .achievements-section {
+        padding: 12px 10px;
+    }
+
+    h3 {
+        font-size: 15px !important;
+    }
+}
+
+body.dark-theme .profile-card,
+body.dark-theme .tabs,
+body.dark-theme .schedule-section,
+body.dark-theme .results-section,
+body.dark-theme .achievements-section,
+body.dark-theme .schedule-card,
+body.dark-theme .result-item,
+body.dark-theme .achievement-card,
+body.dark-theme .achievement-icon-wrapper {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+    box-shadow: none !important;
+}
+
+    body.dark-theme .profile-name,
+    body.dark-theme .info-value,
+    body.dark-theme h3,
+    body.dark-theme .schedule-details h4,
+    body.dark-theme .result-info h4,
+    body.dark-theme .achievement-card h4 {
+        color: var(--text-color) !important;
+    }
+
+    body.dark-theme .info-label,
+    body.dark-theme .schedule-details p,
+    body.dark-theme .achievement-card p,
+    body.dark-theme .achievement-date,
+    body.dark-theme .result-info p {
+        color: var(--text-muted) !important;
+    }
+
+body.dark-theme .avatar-circle {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    color: #dbeafe;
+}
+
+body.dark-theme .tab-btn {
+    color: var(--text-muted) !important;
+}
+
+    body.dark-theme .tab-btn:hover {
+        background: var(--item-bg) !important;
+    }
+
+    body.dark-theme .tab-btn.active {
+        background: var(--item-bg) !important;
+        color: var(--nav-active-text) !important;
+    }
+
+body.dark-theme .schedule-card {
+    background: var(--item-bg) !important;
+}
+
+body.dark-theme .schedule-card-icon {
+    background: #1e3a8a !important;
+    color: #bfdbfe !important;
+}
+
+body.dark-theme .result-item {
+    background: var(--item-bg) !important;
+}
+
+body.dark-theme .result-score {
+    background: #064e3b !important;
+    color: #a7f3d0 !important;
+}
+
+body.dark-theme .achievement-icon-wrapper {
+    background: #3f2d12 !important;
+    color: #fbbf24 !important;
+}
+
+body.dark-theme .achievement-date {
+    border-top-color: var(--border-color) !important;
+}
+
+body.dark-theme .btn-edit {
+    background: var(--item-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+    body.dark-theme .btn-edit:hover {
+        background: var(--item-hover) !important;
+    }
+
+body.dark-theme .btn-delete {
+    background: #451a1a !important;
+    border-color: #7f1d1d !important;
+    color: #fca5a5 !important;
+}
+
+    body.dark-theme .btn-delete:hover {
+        background: #7f1d1d !important;
+        color: #ffffff !important;
+    }
+
+body.dark-theme .add-achievement-btn,
+body.dark-theme .modal-save-btn {
+    background: #2563EB !important;
+    color: white !important;
+    border: none !important;
+}
+
+body.dark-theme .achievement-body.with-photo,
+body.dark-theme .achievement-body.no-photo {
+    background: transparent !important;
+}

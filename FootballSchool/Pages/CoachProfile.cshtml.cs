@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +15,12 @@ namespace FootballSchool.Pages
     public class CoachProfileModel : PageModel
     {
         private readonly FootballSchoolContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public CoachProfileModel(FootballSchoolContext context)
+        public CoachProfileModel(FootballSchoolContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         public class CoachProfileDto
@@ -53,6 +58,9 @@ namespace FootballSchool.Pages
 
         [BindProperty]
         public Coach EditCoach { get; set; } = new Coach();
+
+        [BindProperty]
+        public IFormFile? CoachPhotoFile { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -167,9 +175,42 @@ namespace FootballSchool.Pages
                 existing.ScheduleCoach = EditCoach.ScheduleCoach;
                 existing.SalaryCoach = EditCoach.SalaryCoach;
 
+                if (CoachPhotoFile != null && CoachPhotoFile.Length > 0)
+                {
+                    string extension = Path.GetExtension(CoachPhotoFile.FileName).ToLower();
+                    string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+
+                    if (allowedExtensions.Contains(extension))
+                    {
+                        string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "coaches");
+                        if (!Directory.Exists(uploadsFolder))
+                            Directory.CreateDirectory(uploadsFolder);
+
+                        if (!string.IsNullOrEmpty(existing.PhotoCoach))
+                        {
+                            string oldFilePath = Path.Combine(_environment.WebRootPath, existing.PhotoCoach.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                        }
+
+                        string uniqueFileName = Guid.NewGuid().ToString() + extension;
+                        string newFilePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var stream = new FileStream(newFilePath, FileMode.Create))
+                        {
+                            await CoachPhotoFile.CopyToAsync(stream);
+                        }
+
+                        existing.PhotoCoach = "/images/coaches/" + uniqueFileName;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Профиль тренера успешно обновлен!";
             }
+
             return RedirectToPage(new { id = EditCoach.CoachId });
         }
 
@@ -192,6 +233,15 @@ namespace FootballSchool.Pages
             try
             {
                 var userId = coach.UserId;
+
+                if (!string.IsNullOrEmpty(coach.PhotoCoach))
+                {
+                    string coachPhotoPath = Path.Combine(_environment.WebRootPath, coach.PhotoCoach.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    if (System.IO.File.Exists(coachPhotoPath))
+                    {
+                        System.IO.File.Delete(coachPhotoPath);
+                    }
+                }
 
                 if (coach.Training != null && coach.Training.Any())
                 {

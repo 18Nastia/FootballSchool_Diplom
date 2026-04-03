@@ -14,8 +14,6 @@ namespace FootballSchool.Pages.Main_Pages
     public class Index_CoachModel : PageModel
     {
         private readonly FootballSchoolContext _context;
-
-        // Внедрение зависимости для доступа к БД (решает ошибку "_context не существует")
         public Index_CoachModel(FootballSchoolContext context)
         {
             _context = context;

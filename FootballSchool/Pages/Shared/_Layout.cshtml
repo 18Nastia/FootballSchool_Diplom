@@ -1,5 +1,4 @@
-﻿@using System.Security.Claims
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
@@ -9,7 +8,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FootballSchool.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
+
     <style>
         :root {
             --bg-color: #F9FAFB;
@@ -23,7 +22,23 @@
             --header-bg-end: #1D4ED8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 14px;
+            position: relative;
+            min-height: 100%;
+        }
+
+        @@media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -33,94 +48,213 @@
             min-height: 100vh;
             transition: background-color 0.3s, color 0.3s;
             margin-bottom: 0 !important;
+            overflow-x: hidden;
         }
 
-        html {
-            font-size: 14px;
-            position: relative;
-            min-height: 100%;
-        }
-
-        /* ОБЯЗАТЕЛЬНО двойное @@ для медиа-запросов в cshtml */
-        @@media (min-width: 768px) {
-            html {
-                font-size: 16px;
-            }
-        }
-
-        .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+        .btn:focus,
+        .btn:active:focus,
+        .btn-link.nav-link:focus,
+        .form-control:focus,
+        .form-check-input:focus {
             box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
         }
 
-        .dashboard-container { display: flex; width: 100%; min-height: 100vh; }
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
 
         .sidebar {
-            width: 240px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto;
-            transition: background-color 0.3s, border-color 0.3s;
+            width: 240px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: background-color 0.3s, border-color 0.3s, width 0.2s ease;
+            z-index: 1000;
         }
 
         .logo {
-            padding: 24px 20px; font-size: 18px; font-weight: 600; color: var(--nav-active-text);
-            border-bottom: 1px solid var(--border-color); text-decoration: none; display: block;
+            padding: 24px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--nav-active-text);
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            display: block;
+            line-height: 1.2;
         }
 
-        .logo:hover { color: #1D4ED8; text-decoration: none; }
+        .logo:hover {
+            color: #1D4ED8;
+            text-decoration: none;
+        }
 
-        .nav-menu { flex: 1; padding: 12px 0; }
+        .nav-menu {
+            flex: 1;
+            padding: 12px 0;
+        }
 
         .nav-item {
-            display: flex; align-items: center; padding: 12px 20px; color: #6B7280;
-            text-decoration: none; transition: all 0.2s; font-size: 14px;
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #6B7280;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 14px;
+            width: 100%;
         }
-        .nav-item:hover { background-color: var(--nav-hover-bg); color: var(--text-color); }
-        .nav-item.active { background-color: var(--nav-active-bg); color: var(--nav-active-text); border-left: 3px solid var(--nav-active-text); }
-        .nav-icon { width: 20px; height: 20px; margin-right: 12px; text-align: center; font-size: 16px; }
-        .sidebar-footer { border-top: 1px solid var(--border-color); padding: 12px 0; }
 
-        .main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+        .nav-item:hover {
+            background-color: var(--nav-hover-bg);
+            color: var(--text-color);
+        }
+
+        .nav-item.active {
+            background-color: var(--nav-active-bg);
+            color: var(--nav-active-text);
+            border-left: 3px solid var(--nav-active-text);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            text-align: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 12px 0;
+        }
+
+        .logout-button,
+        .settings-btn,
+        .profile-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-width: 0;
+            width: calc(100% - 240px);
+        }
 
         .page-header {
             background: linear-gradient(135deg, var(--header-bg-start) 0%, var(--header-bg-end) 100%);
-            padding: 20px 40px; width: 100%; margin-bottom: 16px; height: 75px; flex-shrink: 0;
+            padding: 20px 40px;
+            width: 100%;
+            margin-bottom: 16px;
+            min-height: 75px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
         }
-        .page-header h1 { color: white !important; font-size: 22px; font-weight: 600; margin: 0; }
 
-        .page-content { flex: 1; padding: 0 40px 32px 40px; width: 100%; }
+        .page-header h1 {
+            color: white !important;
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.25;
+            word-break: break-word;
+        }
+
+        .page-content {
+            flex: 1;
+            padding: 0 40px 32px 40px;
+            width: 100%;
+            min-width: 0;
+        }
 
         .page-footer {
-            border-top: 1px solid var(--border-color); padding: 32px 40px; width: 100%;
-            flex-shrink: 0; margin-top: auto; background-color: var(--sidebar-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 32px 40px;
+            width: 100%;
+            flex-shrink: 0;
+            margin-top: auto;
+            background-color: var(--sidebar-bg);
         }
 
-        .footer-content { display: flex; justify-content: space-between; align-items: center; max-width: 100%; height: 100%; }
-        .footer-logo { font-size: 18px; font-weight: 600; color: var(--nav-active-text); text-decoration: none; }
-        .footer-logo:hover { color: #1D4ED8; text-decoration: none; }
-        .footer-links { display: flex; gap: 32px; }
-        .footer-link { color: #6B7280; text-decoration: none; font-size: 15px; font-weight: 500; }
-        .footer-link:hover { color: var(--nav-active-text); }
-        .footer-copyright { color: #6B7280; font-size: 15px; font-weight: 500; }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 100%;
+            height: 100%;
+            gap: 20px;
+        }
 
-        /* Настройки модального окна */
+        .footer-logo {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--nav-active-text);
+            text-decoration: none;
+        }
+
+        .footer-logo:hover {
+            color: #1D4ED8;
+            text-decoration: none;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: #6B7280;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .footer-link:hover {
+            color: var(--nav-active-text);
+        }
+
+        .footer-copyright {
+            color: #6B7280;
+            font-size: 15px;
+            font-weight: 500;
+            text-align: right;
+        }
+
         .settings-modal .modal-content,
-        .password-modal .modal-content { background-color: var(--sidebar-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+        .password-modal .modal-content {
+            background-color: var(--sidebar-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
         .settings-modal .modal-header,
-        .password-modal .modal-header { border-bottom-color: var(--border-color); }
+        .password-modal .modal-header {
+            border-bottom-color: var(--border-color);
+        }
+
         .settings-modal .form-control,
-        .password-modal .form-control { background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color); }
-
-        @@media (max-width: 768px) {
-            .sidebar { width: 200px; } .main-content { margin-left: 200px; }
-            .page-header { padding: 16px 20px; } .page-content { padding: 0 20px 20px 20px; }
-            .page-footer { padding: 24px 20px; }
-            .footer-content { flex-direction: column; gap: 20px; text-align: center; }
+        .password-modal .form-control {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-color: var(--border-color);
         }
-        @@media (max-width: 576px) {
-            .sidebar { width: 60px; } .main-content { margin-left: 60px; }
-            .nav-item span { display: none; } .logo { font-size: 16px; padding: 16px 12px; text-align: center; }
-        }
-
-        .logout-button, .settings-btn, .profile-btn { width: 100%; background: none; border: none; text-align: left; cursor: pointer; }
 
         .admin-table {
             margin-bottom: 0.5rem;
@@ -150,6 +284,191 @@
         ul.list-group.list-compact .list-group-item {
             padding: 0.4rem 0.8rem;
             font-size: 0.9rem;
+        }
+
+        /* ===== TABLET ===== */
+        @@media (max-width: 992px) {
+            .sidebar {
+                width: 72px;
+            }
+
+            .main-content {
+                margin-left: 72px;
+                width: calc(100% - 72px);
+            }
+
+            .nav-item {
+                padding: 12px 0;
+                justify-content: center;
+            }
+
+            .nav-icon {
+                margin-right: 0;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .logo {
+                font-size: 11px;
+                padding: 16px 6px;
+                text-align: center;
+                word-break: break-word;
+            }
+
+            .page-header {
+                padding: 18px 24px;
+            }
+
+            .page-content {
+                padding: 0 24px 24px 24px;
+            }
+
+            .page-footer {
+                padding: 24px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .footer-copyright {
+                text-align: left;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar {
+                width: 44px;
+            }
+
+            .main-content {
+                margin-left: 44px;
+                width: calc(100% - 44px);
+                min-width: 0;
+            }
+
+            .nav-item {
+                padding: 10px 0;
+                justify-content: center;
+                min-height: 40px;
+            }
+
+            .nav-icon {
+                margin-right: 0;
+                font-size: 14px;
+                width: 16px;
+                height: 16px;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .logo {
+                font-size: 9px;
+                padding: 10px 2px;
+                text-align: center;
+                word-break: break-all;
+                line-height: 1.05;
+            }
+
+            .sidebar-footer {
+                padding: 8px 0;
+            }
+
+            .page-header {
+                padding: 14px 12px;
+                margin-bottom: 12px;
+                min-height: 60px;
+            }
+
+            .page-header h1 {
+                font-size: 18px;
+                line-height: 1.2;
+            }
+
+            .page-content {
+                padding: 0 12px 16px 12px;
+            }
+
+            .page-footer {
+                padding: 16px 12px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .footer-links {
+                gap: 12px;
+                flex-direction: column;
+            }
+
+            .footer-logo {
+                font-size: 16px;
+            }
+
+            .footer-link,
+            .footer-copyright {
+                font-size: 13px;
+            }
+
+            .footer-copyright {
+                text-align: left;
+            }
+
+            .modal-dialog {
+                margin: 12px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .sidebar {
+                width: 40px;
+            }
+
+            .main-content {
+                margin-left: 40px;
+                width: calc(100% - 40px);
+            }
+
+            .nav-item {
+                min-height: 36px;
+                padding: 8px 0;
+            }
+
+            .nav-icon {
+                font-size: 13px;
+                width: 14px;
+                height: 14px;
+            }
+
+            .logo {
+                font-size: 8px;
+                padding: 8px 2px;
+            }
+
+            .page-header {
+                padding: 12px 10px;
+                min-height: 56px;
+            }
+
+            .page-header h1 {
+                font-size: 16px;
+            }
+
+            .page-content {
+                padding: 0 10px 14px 10px;
+            }
+
+            .page-footer {
+                padding: 14px 10px;
+            }
         }
 
         body.dark-theme {
@@ -234,7 +553,6 @@
             box-shadow: none !important;
         }
 
-        /* Карточки внутри секций (расписание, результаты, достижения) */
         body.dark-theme .notification-item,
         body.dark-theme .action-item,
         body.dark-theme .news-item,
@@ -278,7 +596,6 @@
             color: var(--text-color) !important;
         }
 
-        /* Иконки в карточках */
         body.dark-theme .schedule-card-icon,
         body.dark-theme .achievement-icon-wrapper,
         body.dark-theme .award-icon,
@@ -355,7 +672,6 @@
             background-color: var(--item-hover) !important;
         }
 
-        /* === ТЕКСТОВЫЕ ЦВЕТА ДЛЯ ТЕМНОЙ ТЕМЫ === */
         body.dark-theme h1, body.dark-theme h2, body.dark-theme h3,
         body.dark-theme h4, body.dark-theme h5, body.dark-theme h6,
         body.dark-theme .card-title, body.dark-theme .student-name,
@@ -377,7 +693,6 @@
             color: var(--text-color) !important;
         }
 
-        /* Элементы, которые должны быть серыми, но читаемыми (var(--text-muted)) */
         body.dark-theme p, body.dark-theme .text-muted,
         body.dark-theme .info-label, body.dark-theme .card-info,
         body.dark-theme .stat-label, body.dark-theme .subscription-label,
@@ -397,28 +712,29 @@
             color: var(--text-muted) !important;
         }
 
-        /* ИСПРАВЛЕНИЕ: Делаем пункты меню навигации видимыми в темной теме */
         body.dark-theme .nav-item {
             color: var(--text-muted) !important;
         }
 
-        /* Сброс фона для табов и настройка цвета */
-        body.dark-theme .tab, body.dark-theme .sidebar-tab,
-        body.dark-theme .tab-btn, body.dark-theme .tab-button,
+        body.dark-theme .tab,
+        body.dark-theme .sidebar-tab,
+        body.dark-theme .tab-btn,
+        body.dark-theme .tab-button,
         body.dark-theme .toggle-btn {
             background-color: transparent !important;
             border-color: var(--border-color) !important;
         }
 
-        /* Активные состояния навигации и вкладок */
         body.dark-theme .nav-item:hover,
         body.dark-theme .nav-item.active {
             background-color: var(--nav-hover-bg) !important;
             color: var(--nav-active-text) !important;
         }
 
-        body.dark-theme .tab.active, body.dark-theme .sidebar-tab.active,
-        body.dark-theme .tab-btn.active, body.dark-theme .tab-button.active,
+        body.dark-theme .tab.active,
+        body.dark-theme .sidebar-tab.active,
+        body.dark-theme .tab-btn.active,
+        body.dark-theme .tab-button.active,
         body.dark-theme .toggle-btn.active {
             background-color: var(--item-hover) !important;
             color: var(--nav-active-text) !important;
@@ -457,7 +773,6 @@
     }
 
     <div class="dashboard-container">
-        <!-- Боковое меню -->
         <aside class="sidebar">
             <a href="@homeUrl" class="logo">FootballSchool</a>
 
@@ -508,7 +823,6 @@
             <div class="sidebar-footer">
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <!-- Кнопка с именем пользователя (открывает модалку смены пароля) -->
                     <button type="button" class="nav-item profile-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="color: var(--nav-active-text); font-weight: 600;">
                         <i class="fas fa-user-circle nav-icon"></i>
                         <span>@User.Identity.Name</span>
@@ -527,17 +841,16 @@
             </div>
         </aside>
 
-        <!-- Основной контент -->
         <main class="main-content">
             <div class="page-header">
                 <h1>@ViewData["Title"]</h1>
             </div>
+
             <div class="page-content">
                 @RenderBody()
             </div>
 
-            <!-- Подвал -->
-           <footer class="page-footer">
+            <footer class="page-footer">
                 <div class="footer-content">
                     <a href="@homeUrl" class="footer-logo">FootballSchool</a>
                     <div class="footer-links">
@@ -551,7 +864,6 @@
         </main>
     </div>
 
-    <!-- Модальное окно настроек -->
     <div class="modal fade settings-modal" id="settingsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -572,7 +884,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно смены пароля (Для авторизованных пользователей) -->
     <div class="modal fade password-modal" id="changePasswordModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -581,11 +892,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
-                    
-                    <!-- Стандартный вид: Смена пароля (если знает старый пароль) -->
                     <div id="cpStandardView">
                         <p class="text-muted" style="font-size: 14px;">Так как вы уже вошли в систему, для смены пароля достаточно ввести ваш текущий пароль.</p>
-                        
+
                         <form id="changePasswordForm">
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -606,10 +915,9 @@
                         </form>
                     </div>
 
-                    <!-- Вид: Восстановление пароля по Email (если забыл старый пароль) -->
                     <div id="cpRecoveryView" style="display: none;">
                         <p class="text-muted" style="font-size: 14px;">Введите email, привязанный к вашему аккаунту. Мы отправим на него ссылку для безопасного сброса пароля.</p>
-                        
+
                         <form id="recoveryPasswordForm">
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Email</label>
@@ -623,7 +931,6 @@
                             </div>
                         </form>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -633,17 +940,16 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- Скрипт для сохранения и загрузки темы -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const themeSwitch = document.getElementById('themeSwitch');
-            
+
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark-theme');
-                if(themeSwitch) themeSwitch.checked = true;
+                if (themeSwitch) themeSwitch.checked = true;
             }
 
-            if(themeSwitch) {
+            if (themeSwitch) {
                 themeSwitch.addEventListener('change', function () {
                     if (this.checked) {
                         document.body.classList.add('dark-theme');
@@ -656,8 +962,6 @@
             }
         });
 
-        /* --- Логика модального окна смены/восстановления пароля --- */
-        
         function showRecoveryView() {
             document.getElementById('cpStandardView').style.display = 'none';
             document.getElementById('cpRecoveryView').style.display = 'block';
@@ -741,16 +1045,16 @@
             }
         }
 
-        // Очистка формы при закрытии модального окна
         document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function () {
             document.getElementById('changePasswordForm').reset();
-            
+
             const recoveryForm = document.getElementById('recoveryPasswordForm');
-            if(recoveryForm) recoveryForm.reset();
-            
-            showStandardView(); // Всегда возвращать стандартный вид при новом открытии
+            if (recoveryForm) recoveryForm.reset();
+
+            showStandardView();
         });
     </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
