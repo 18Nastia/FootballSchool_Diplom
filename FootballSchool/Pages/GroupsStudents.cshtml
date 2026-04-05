@@ -21,18 +21,18 @@
 
         @if (User.IsInRole("Admin"))
         {
-            <button class="btn-primary" id="addButton">
+            <button class="btn-primary" id="addButton" type="button">
                 <i class="fas fa-plus"></i>
                 <span id="addButtonText">Добавить группу</span>
             </button>
         }
 
         <div class="tabs">
-            <button class="tab active" data-view="groups">
+            <button class="tab active" data-view="groups" type="button">
                 <i class="fas fa-users tab-icon"></i>
                 Группы
             </button>
-            <button class="tab" data-view="students">
+            <button class="tab" data-view="students" type="button">
                 <i class="fas fa-user tab-icon"></i>
                 Ученики
             </button>
@@ -42,7 +42,9 @@
             <div class="filter-section">
                 <div class="filter-group">
                     <label>Поиск по группе</label>
-                    <input type="text" class="search-input" placeholder="Введите название группы" id="searchGroup">
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" class="search-input" placeholder="Введите название группы" id="searchGroup" style="flex-grow: 1;" oninput="window.applyGroupSearch()">
+                    </div>
                 </div>
             </div>
 
@@ -55,60 +57,65 @@
                 <div class="cards-grid">
                     @foreach (var team in Model.Teams)
                     {
-                        <div class="card group-card-item">
+                        var teamSearch = $"{team.CategoryName} {team.Status} {team.CoachName}".ToLower();
+
+                        <div class="card group-card-item" data-search="@teamSearch">
                             <div class="card-header">
                                 <h3 class="card-title">@team.CategoryName</h3>
 
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    <button class="edit-button" title="Редактировать">
+                                    <button class="edit-button" title="Редактировать" type="button">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 }
                             </div>
+
                             <p class="card-age">Статус: @team.Status</p>
+
                             <div class="card-students">
                                 <i class="fas fa-users students-icon"></i>
                                 <span>@team.StudentsCount учеников</span>
                             </div>
+
                             <p class="card-info">Тренер: @team.CoachName</p>
 
                             <div style="display: flex; gap: 8px; margin-top: 16px;">
-    <button class="view-button" style="margin-top: 0; flex: 1;" onclick="switchToStudentsTab('@team.CategoryName')">
-        Состав группы
-    </button>
+                                <button class="view-button" type="button" style="margin-top: 0; flex: 1;" onclick="switchToStudentsTab('@team.CategoryName')">
+                                    Состав группы
+                                </button>
 
-    @if (User.IsInRole("Admin"))
-    {
-        <button type="button" class="quick-add-btn" onclick="openAssignStudentModal('@team.TeamId', '@team.CategoryName')" title="Добавить ученика в эту группу">
-            <i class="fas fa-user-plus"></i>
-        </button>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <button type="button" class="quick-add-btn" onclick="openAssignStudentModal('@team.TeamId', '@team.CategoryName')" title="Добавить ученика в эту группу">
+                                        <i class="fas fa-user-plus"></i>
+                                    </button>
 
-        <form method="post"
-              asp-page-handler="DeleteTeam"
-              asp-route-id="@team.TeamId"
-              style="display:inline-flex;"
-              onsubmit="return confirm('Удалить группу? Все тренировки этой группы будут удалены, а ученики останутся без группы.');">
-            <button type="submit" class="quick-add-btn" style="color:#dc2626; border-color:#fecaca; background:#fef2f2;" title="Удалить группу">
-                <i class="fas fa-trash"></i>
-            </button>
-        </form>
-    }
-</div>
+                                    <form method="post"
+                                          asp-page-handler="DeleteTeam"
+                                          asp-route-id="@team.TeamId"
+                                          style="display:inline-flex;"
+                                          onsubmit="return confirm('Удалить группу? Все тренировки этой группы будут удалены, а ученики останутся без группы.');">
+                                        <button type="submit" class="quick-add-btn" style="color:#dc2626; border-color:#fecaca; background:#fef2f2;" title="Удалить группу">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
             }
         </div>
 
-        <div class="students-view" id="studentsView">
+        <div class="students-view" id="studentsView" style="display: none;">
             <div class="section-header">
                 <h2>Список учеников</h2>
                 <p class="section-subtitle">Управление профилями учащихся</p>
             </div>
 
-            <div class="search-bar">
-                <input type="text" id="searchStudent" class="search-input-large" placeholder="Поиск по имени или группе">
+            <div class="search-bar" style="display: flex; gap: 8px; margin-bottom: 20px;">
+                <input type="text" id="searchStudent" class="search-input-large" placeholder="Поиск по имени, телефону или группе" style="flex-grow: 1;" oninput="window.applyStudentSearch()">
             </div>
 
             @if (!Model.Students.Any())
@@ -119,21 +126,37 @@
             {
                 @foreach (var student in Model.Students)
                 {
-                    <div class="student-card student-list-item" data-team="@student.TeamName">
-                        <div class="student-header">
-                            <div class="student-header-info">
-                                @if (!string.IsNullOrEmpty(student.PhotoPath))
-                                {
-                                    <img src="@student.PhotoPath" alt="@student.FullName" class="student-avatar" onerror="this.onerror=null;this.src='/img/default-avatar.png'; this.parentElement.innerHTML='<div class=\'student-avatar\'>@student.Initials</div>';">
-                                }
-                                else
-                                {
-                                    <div class="student-avatar">@student.Initials</div>
-                                }
-                                <h3 class="student-name">@student.FullName</h3>
+                    // Данные для JS фильтрации
+                    var searchData = $"{student.FullName} {student.TeamName} {student.ParentName} {student.Phone}".ToLower();
+
+                    <div class="student-card student-list-item" data-search="@searchData">
+                         
+                        <div class="student-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                            <div class="student-header-info" style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0;">
+                                <div style="position: relative; width: 48px; height: 48px; flex-shrink: 0;">
+                                    <div class="student-avatar" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e5e7eb; color: #374151; font-weight: bold; border-radius: 50%; z-index: 1;">
+                                        @student.Initials
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(student.PhotoPath))
+                                    {
+                                        <img src="@student.PhotoPath"
+                                             alt="Фото"
+                                             class="student-avatar"
+                                             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; z-index: 2;"
+                                             onerror="this.style.display='none';">
+                                    }
+                                </div>
+
+                                <h3 class="student-name" style="margin: 0; font-size: 18px; font-weight: 600; color: #1d1d1f; word-break: break-word; white-space: normal;">
+                                    @student.FullName
+                                </h3>
                             </div>
-                            <span class="age">@student.Age лет</span>
+
+                            <span class="age" style="background: #f5f5f7; padding: 4px 12px; border-radius: 16px; font-size: 14px; color: #6e6e73; white-space: nowrap; flex-shrink: 0;">
+                                @student.Age лет
+                            </span>
                         </div>
+
                         <div class="progress-section" title="Посещаемость за 30 дней: @student.ProgressPercentage%">
                             <div class="progress-label">
                                 <span>Посещаемость</span>
@@ -141,43 +164,48 @@
                                     Открыть профиль <i class="fas fa-arrow-right" style="font-size:10px;"></i>
                                 </a>
                             </div>
+
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: @student.ProgressPercentage%; background: @(student.ProgressPercentage >= 75 ? "#10b981" : student.ProgressPercentage >= 50 ? "#f59e0b" : "#ef4444");"></div>
                             </div>
                         </div>
+
                         <div class="student-info">
                             <div class="info-item">
                                 <span class="info-label">Родитель</span>
                                 <span class="info-value">@student.ParentName</span>
                             </div>
+
                             <div class="info-item">
                                 <span class="info-label">Телефон</span>
                                 <span class="info-value">@student.Phone</span>
                             </div>
+
                             <div class="info-item">
                                 <span class="info-label">Группа</span>
                                 <span class="info-value student-team-name">@student.TeamName</span>
                             </div>
-                            @if (User.IsInRole("Admin"))
-{
-    <div style="display:flex; gap:8px; margin-top:16px;">
-        <a href="/ChildProfile/@student.StudentId" class="view-button" style="margin-top:0; flex:1; text-align:center; text-decoration:none;">
-            Открыть профиль
-        </a>
 
-        <form method="post"
-              asp-page-handler="DeleteStudent"
-              asp-route-id="@student.StudentId"
-              style="flex:1;"
-              onsubmit="return confirm('Удалить ученика? Будут удалены посещения, достижения, абонементы, платежи и аккаунт родителя.');">
-            <button type="submit"
-                    class="view-button"
-                    style="margin-top:0; width:100%; background:#fef2f2; color:#dc2626;">
-                <i class="fas fa-trash"></i> Удалить
-            </button>
-        </form>
-    </div>
-}
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div style="display:flex; gap:8px; margin-top:16px;">
+                                    <a href="/ChildProfile/@student.StudentId" class="view-button" style="margin-top:0; flex:1; text-align:center; text-decoration:none;">
+                                        Открыть профиль
+                                    </a>
+
+                                    <form method="post"
+                                          asp-page-handler="DeleteStudent"
+                                          asp-route-id="@student.StudentId"
+                                          style="flex:1;"
+                                          onsubmit="return confirm('Удалить ученика? Будут удалены посещения, достижения, абонементы, платежи и аккаунт родителя.');">
+                                        <button type="submit"
+                                                class="view-button"
+                                                style="margin-top:0; width:100%; background:#fef2f2; color:#dc2626;">
+                                            <i class="fas fa-trash"></i> Удалить
+                                        </button>
+                                    </form>
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -196,6 +224,7 @@
                         <h5 class="modal-title">Создание новой группы</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Название группы</label>
@@ -218,6 +247,7 @@
                             </select>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Создать группу</button>
                     </div>
@@ -234,6 +264,7 @@
                         <h5 class="modal-title" id="assignStudentModalTitle">Добавление ученика в группу</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+
                     <div class="modal-body">
                         <input type="hidden" id="AssignStudent_TeamId" name="TeamId" value="" />
 
@@ -249,6 +280,7 @@
                             <div class="form-text mt-2 text-muted">Выбранный ученик будет переведен в указанную группу.</div>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                         <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Назначить</button>
@@ -266,6 +298,7 @@
                         <h5 class="modal-title">Регистрация нового ученика</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+
                     <div class="modal-body">
                         <h6 class="mb-3 text-primary border-bottom pb-2">Основные данные ученика</h6>
                         <div class="row">
@@ -292,7 +325,8 @@
 
                             <div class="col-md-12 mb-3">
                                 <label>Фотография ученика</label>
-                                <input type="file" name="StudentPhotoUpload" class="form-control" accept="image/*" />
+                                <input type="file" name="StudentPhotoUpload" class="form-control image-file-input" accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+                                <small class="text-muted">Допустимы только: jpg, jpeg, png, gif, webp.</small>
                             </div>
 
                             <div class="col-md-12 mb-3">
@@ -301,6 +335,7 @@
                                     <option value="">Оставить без группы (Резерв)</option>
                                 </select>
                             </div>
+
                             <div class="col-md-12 mb-3"><label>Медицинские показания</label><textarea asp-for="NewStudent.MedicalStudent" class="form-control" rows="2" placeholder="Аллергии, травмы и т.д."></textarea></div>
                         </div>
 
@@ -321,6 +356,7 @@
                             <div class="col-md-6 mb-3"><label>Квартира</label><input asp-for="NewStudent.ApartmentStudent" class="form-control" /></div>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" style="background:#2563EB; border:none;">Зарегистрировать ученика</button>
                     </div>
@@ -332,82 +368,158 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        window.applyGroupSearch = function() {
+            const input = document.getElementById('searchGroup');
+            if (!input) return;
+            const term = input.value.toLowerCase().trim();
+
+            document.querySelectorAll('.group-card-item').forEach(card => {
+                const searchValue = (card.getAttribute('data-search') || '').toLowerCase();
+                if (term === '' || searchValue.includes(term)) {
+                    card.style.setProperty('display', 'block', 'important');
+                } else {
+                    card.style.setProperty('display', 'none', 'important');
+                }
+            });
+        };
+
+        window.applyStudentSearch = function() {
+            const input = document.getElementById('searchStudent');
+            if (!input) return;
+            const term = input.value.toLowerCase().trim();
+
+            document.querySelectorAll('.student-list-item').forEach(card => {
+                const searchValue = (card.getAttribute('data-search') || '').toLowerCase();
+                if (term === '' || searchValue.includes(term)) {
+                    card.style.setProperty('display', 'block', 'important');
+                } else {
+                    card.style.setProperty('display', 'none', 'important');
+                }
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
             const tabs = document.querySelectorAll('.tab');
             const groupsView = document.getElementById('groupsView');
             const studentsView = document.getElementById('studentsView');
             const addButtonText = document.getElementById('addButtonText');
             const addButton = document.getElementById('addButton');
 
+            function setActiveView(view) {
+                if (view === 'students') {
+                    groupsView.style.display = 'none';
+                    studentsView.style.display = 'block';
+                    if (addButtonText) addButtonText.textContent = 'Добавить ученика';
+                } else {
+                    groupsView.style.display = 'block';
+                    studentsView.style.display = 'none';
+                    if (addButtonText) addButtonText.textContent = 'Добавить группу';
+                }
+            }
+
+            setActiveView(document.querySelector('.tab.active')?.getAttribute('data-view') || 'groups');
+
             tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
+                tab.addEventListener('click', function () {
                     tabs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
 
                     const view = this.getAttribute('data-view');
-                    if (view === 'groups') {
-                        groupsView.style.display = 'block';
-                        studentsView.style.display = 'none';
-                        if (addButtonText) addButtonText.textContent = 'Добавить группу';
+                    setActiveView(view);
 
-                        document.getElementById('searchStudent').value = '';
-                        filterStudents('');
+                    if (view === 'groups') {
+                        window.applyGroupSearch();
                     } else {
-                        groupsView.style.display = 'none';
-                        studentsView.style.display = 'block';
-                        if (addButtonText) addButtonText.textContent = 'Добавить ученика';
+                        window.applyStudentSearch();
                     }
                 });
             });
 
             if (addButton) {
-                addButton.addEventListener('click', function() {
+                addButton.addEventListener('click', function () {
                     const activeTab = document.querySelector('.tab.active');
-                    if (activeTab.getAttribute('data-view') === 'groups') {
+                    const currentView = activeTab ? activeTab.getAttribute('data-view') : 'groups';
+
+                    if (currentView === 'groups') {
                         $('#addTeamModal').modal('show');
                     } else {
                         const select = document.getElementById('NewStudent_TeamId');
-                        if (select) select.value = "";
+                        if (select) select.value = '';
                         $('#addStudentModal').modal('show');
                     }
                 });
             }
 
-            document.getElementById('searchGroup').addEventListener('input', function(e) {
-                const term = e.target.value.toLowerCase();
-                document.querySelectorAll('.group-card-item').forEach(card => {
-                    const title = card.querySelector('.card-title').textContent.toLowerCase();
-                    card.style.display = title.includes(term) ? 'block' : 'none';
-                });
-            });
-
-            document.getElementById('searchStudent').addEventListener('input', function(e) {
-                filterStudents(e.target.value.toLowerCase());
-            });
+            setupModalReset('addTeamModal');
+            setupModalReset('assignStudentModal');
+            setupModalReset('addStudentModal');
+            setupImageValidation();
         });
 
-        function filterStudents(term) {
-            document.querySelectorAll('.student-list-item').forEach(card => {
-                const name = card.querySelector('.student-name').textContent.toLowerCase();
-                const team = card.querySelector('.student-team-name').textContent.toLowerCase();
-                card.style.display = (name.includes(term) || team.includes(term)) ? 'block' : 'none';
-            });
-        }
-
         function switchToStudentsTab(teamName) {
-            document.querySelector('.tab[data-view="students"]').click();
-
+            const studentsTab = document.querySelector('.tab[data-view="students"]');
             const searchInput = document.getElementById('searchStudent');
-            searchInput.value = teamName;
-            filterStudents(teamName.toLowerCase());
+
+            if (studentsTab) {
+                studentsTab.click();
+            }
+
+            if (searchInput) {
+                searchInput.value = teamName;
+                window.applyStudentSearch();
+            }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function openAssignStudentModal(teamId, teamName) {
-            document.getElementById('AssignStudent_TeamId').value = teamId;
-            document.getElementById('assignStudentModalTitle').innerText = 'Добавление ученика в группу: ' + teamName;
+            const teamIdInput = document.getElementById('AssignStudent_TeamId');
+            const modalTitle = document.getElementById('assignStudentModalTitle');
+
+            if (teamIdInput) teamIdInput.value = teamId;
+            if (modalTitle) modalTitle.innerText = 'Добавление ученика в группу: ' + teamName;
+
             $('#assignStudentModal').modal('show');
+        }
+
+        function setupModalReset(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            modal.addEventListener('hidden.bs.modal', function () {
+                const form = modal.querySelector('form');
+                if (form) {
+                    form.reset();
+                }
+
+                modal.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                modal.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+
+                const hiddenTeamId = modal.querySelector('#AssignStudent_TeamId');
+                if (hiddenTeamId) hiddenTeamId.value = '';
+
+                const modalTitle = modal.querySelector('#assignStudentModalTitle');
+                if (modalTitle) modalTitle.innerText = 'Добавление ученика в группу';
+            });
+        }
+
+        function setupImageValidation() {
+            const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+            document.querySelectorAll('.image-file-input').forEach(input => {
+                input.addEventListener('change', function () {
+                    if (!this.files || this.files.length === 0) return;
+
+                    const file = this.files[0];
+                    const fileName = file.name.toLowerCase();
+                    const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+
+                    if (!allowedExtensions.includes(extension)) {
+                        alert('Недопустимый формат файла. Разрешены только: .jpg, .jpeg, .png, .gif, .webp');
+                        this.value = '';
+                    }
+                });
+            });
         }
     </script>
 }

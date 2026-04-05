@@ -30,11 +30,11 @@
                     <h2 class="card-title">Профиль ребёнка</h2>
                     <div class="profile-content">
                         @{
-                            var photoPath = !string.IsNullOrEmpty(Model.StudentData.PhotoStudent)
-                                ? "/uploads/" + Model.StudentData.PhotoStudent
-                                : "https://via.placeholder.com/120?text=Спортсмен";
-                        }
-                        <img src="@photoPath" alt="@Model.StudentData.NameStudent" class="profile-photo">
+    var photoPath = !string.IsNullOrEmpty(Model.StudentData.PhotoStudent)
+        ? Url.Content(Model.StudentData.PhotoStudent)
+        : "https://via.placeholder.com/120?text=Спортсмен";
+}
+<img src="@photoPath" alt="@Model.StudentData.NameStudent" class="profile-photo">
 
                         <h3 class="profile-name">@Model.StudentData.NameStudent @Model.StudentData.SurnameStudent</h3>
                         <p class="profile-info">Группа: @(Model.StudentData.Team?.CategoryTeam ?? "Не назначена")</p>

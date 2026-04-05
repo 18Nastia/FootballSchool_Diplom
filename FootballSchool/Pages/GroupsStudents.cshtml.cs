@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using FootballSchool.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
-using System.IO;
 
 namespace FootballSchool.Pages
 {
@@ -23,6 +23,25 @@ namespace FootballSchool.Pages
         {
             _context = context;
             _env = env;
+        }
+
+        private static readonly string[] AllowedImageExtensions =
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".webp"
+        };
+
+        private bool IsValidImage(IFormFile? file)
+        {
+            if (file == null || file.Length == 0)
+                return true;
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            return AllowedImageExtensions.Contains(extension);
+        }
+
+        private string AllowedImageFormatsText()
+        {
+            return "Допустимы только файлы: .jpg, .jpeg, .png, .gif, .webp";
         }
 
         public class TeamDto
@@ -126,8 +145,24 @@ namespace FootballSchool.Pages
                 var age = today.Year - s.BirthStudent.Year;
                 if (s.BirthStudent > today.AddYears(-age)) age--;
 
-                string surnameInit = string.IsNullOrEmpty(s.SurnameStudent) ? "" : s.SurnameStudent[0].ToString();
-                string nameInit = string.IsNullOrEmpty(s.NameStudent) ? "" : s.NameStudent[0].ToString();
+                // ИСПРАВЛЕНИЕ: Гарантированная обработка пустых имен из БД
+                string surname = s.SurnameStudent?.Trim() ?? "";
+                string name = s.NameStudent?.Trim() ?? "";
+                string fullName = $"{surname} {name}".Trim();
+
+                if (string.IsNullOrWhiteSpace(fullName))
+                {
+                    fullName = "Не указано (Проверьте БД)";
+                }
+
+                string surnameInit = string.IsNullOrEmpty(surname) ? "" : surname[0].ToString();
+                string nameInit = string.IsNullOrEmpty(name) ? "" : name[0].ToString();
+                string initials = (surnameInit + nameInit).ToUpper();
+
+                if (string.IsNullOrWhiteSpace(initials))
+                {
+                    initials = "??";
+                }
 
                 int progressPercentage = 0;
                 var monthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
@@ -145,11 +180,11 @@ namespace FootballSchool.Pages
                 Students.Add(new StudentDto
                 {
                     StudentId = s.StudentId,
-                    FullName = $"{s.SurnameStudent} {s.NameStudent}",
-                    Initials = (surnameInit + nameInit).ToUpper(),
+                    FullName = fullName,
+                    Initials = initials,
                     Age = age,
-                    ParentName = $"{s.SurnameParent} {s.NameParent}",
-                    Phone = s.ParentNumber ?? "Не указан",
+                    ParentName = string.IsNullOrWhiteSpace(s.SurnameParent) ? "Не указан" : $"{s.SurnameParent} {s.NameParent}".Trim(),
+                    Phone = string.IsNullOrWhiteSpace(s.ParentNumber) ? "Не указан" : s.ParentNumber,
                     TeamName = s.Team?.CategoryTeam ?? "Без группы",
                     ProgressPercentage = progressPercentage,
                     PhotoPath = s.PhotoStudent ?? ""
@@ -201,15 +236,22 @@ namespace FootballSchool.Pages
                 return RedirectToPage();
             }
 
+            if (!IsValidImage(StudentPhotoUpload))
+            {
+                TempData["ErrorMessage"] = AllowedImageFormatsText();
+                return RedirectToPage();
+            }
+
             try
             {
-                if (StudentPhotoUpload != null)
+                if (StudentPhotoUpload != null && StudentPhotoUpload.Length > 0)
                 {
                     string wwwRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
                     string uploadsFolder = Path.Combine(wwwRootPath, "uploads", "students");
                     Directory.CreateDirectory(uploadsFolder);
 
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + StudentPhotoUpload.FileName;
+                    string extension = Path.GetExtension(StudentPhotoUpload.FileName).ToLowerInvariant();
+                    string uniqueFileName = Guid.NewGuid().ToString() + extension;
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
@@ -326,6 +368,7 @@ namespace FootballSchool.Pages
 
             return new string(password.OrderBy(x => random.Next()).ToArray());
         }
+
         public async Task<IActionResult> OnPostDeleteStudentAsync(int id)
         {
             if (!User.IsInRole("Admin"))
@@ -348,6 +391,15 @@ namespace FootballSchool.Pages
             {
                 var userId = student.UserId;
 
+                if (!string.IsNullOrEmpty(student.PhotoStudent))
+                {
+                    string studentPhotoPath = Path.Combine(_env.WebRootPath, student.PhotoStudent.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    if (System.IO.File.Exists(studentPhotoPath))
+                    {
+                        System.IO.File.Delete(studentPhotoPath);
+                    }
+                }
+
                 if (student.Subscriptions != null && student.Subscriptions.Any())
                 {
                     foreach (var sub in student.Subscriptions)
@@ -360,7 +412,21 @@ namespace FootballSchool.Pages
                 }
 
                 if (student.Progresses != null && student.Progresses.Any())
+                {
+                    foreach (var progress in student.Progresses)
+                    {
+                        if (!string.IsNullOrEmpty(progress.CommentProgress) && progress.TestsProgress?.StartsWith("ACHIEVEMENT|") == true)
+                        {
+                            string achievementPhotoPath = Path.Combine(_env.WebRootPath, progress.CommentProgress.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                            if (System.IO.File.Exists(achievementPhotoPath))
+                            {
+                                System.IO.File.Delete(achievementPhotoPath);
+                            }
+                        }
+                    }
+
                     _context.Progresses.RemoveRange(student.Progresses);
+                }
 
                 if (student.Attendances != null && student.Attendances.Any())
                     _context.Attendances.RemoveRange(student.Attendances);
@@ -384,6 +450,7 @@ namespace FootballSchool.Pages
 
             return RedirectToPage();
         }
+
         public async Task<IActionResult> OnPostDeleteTeamAsync(int id)
         {
             if (!User.IsInRole("Admin"))

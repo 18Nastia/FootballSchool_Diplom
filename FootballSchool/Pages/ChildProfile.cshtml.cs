@@ -25,6 +25,25 @@ namespace FootballSchool.Pages
             _environment = environment;
         }
 
+        private static readonly string[] AllowedImageExtensions =
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".webp"
+        };
+
+        private bool IsValidImage(IFormFile? file)
+        {
+            if (file == null || file.Length == 0)
+                return true;
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            return AllowedImageExtensions.Contains(extension);
+        }
+
+        private string AllowedImageFormatsText()
+        {
+            return "Допустимы только файлы: .jpg, .jpeg, .png, .gif, .webp";
+        }
+
         public class ScheduleDto
         {
             public int Id { get; set; }
@@ -259,27 +278,31 @@ namespace FootballSchool.Pages
         {
             if (!User.IsInRole("Admin")) return Forbid();
 
+            if (!IsValidImage(AchievementPhoto))
+            {
+                TempData["ErrorMessage"] = AllowedImageFormatsText();
+                return RedirectToPage(new { id = studentId });
+            }
+
             string? photoPath = null;
 
             if (AchievementPhoto != null && AchievementPhoto.Length > 0)
             {
-                string imgext = Path.GetExtension(AchievementPhoto.FileName).ToLower();
-                if (imgext == ".jpg" || imgext == ".jpeg" || imgext == ".png" || imgext == ".gif" || imgext == ".webp")
+                string imgext = Path.GetExtension(AchievementPhoto.FileName).ToLowerInvariant();
+
+                string uniqueFileName = Guid.NewGuid().ToString() + imgext;
+                string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "achievements");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    string uniqueFileName = Guid.NewGuid().ToString() + imgext;
-                    string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "achievements");
-
-                    if (!Directory.Exists(uploadsFolder))
-                        Directory.CreateDirectory(uploadsFolder);
-
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await AchievementPhoto.CopyToAsync(stream);
-                    }
-
-                    photoPath = "/images/achievements/" + uniqueFileName;
+                    await AchievementPhoto.CopyToAsync(stream);
                 }
+
+                photoPath = "/images/achievements/" + uniqueFileName;
             }
 
             var progress = new Progress
@@ -337,6 +360,12 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostEditAsync()
         {
+            if (!IsValidImage(StudentPhoto))
+            {
+                TempData["ErrorMessage"] = AllowedImageFormatsText();
+                return RedirectToPage(new { id = EditStudent.StudentId });
+            }
+
             var existing = await _context.Students.FindAsync(EditStudent.StudentId);
             if (existing != null)
             {
@@ -359,34 +388,30 @@ namespace FootballSchool.Pages
 
                 if (StudentPhoto != null && StudentPhoto.Length > 0)
                 {
-                    string extension = Path.GetExtension(StudentPhoto.FileName).ToLower();
-                    string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    string extension = Path.GetExtension(StudentPhoto.FileName).ToLowerInvariant();
 
-                    if (allowedExtensions.Contains(extension))
+                    string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "students");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    if (!string.IsNullOrEmpty(existing.PhotoStudent))
                     {
-                        string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "students");
-                        if (!Directory.Exists(uploadsFolder))
-                            Directory.CreateDirectory(uploadsFolder);
-
-                        if (!string.IsNullOrEmpty(existing.PhotoStudent))
+                        string oldFilePath = Path.Combine(_environment.WebRootPath, existing.PhotoStudent.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                        if (System.IO.File.Exists(oldFilePath))
                         {
-                            string oldFilePath = Path.Combine(_environment.WebRootPath, existing.PhotoStudent.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-                            if (System.IO.File.Exists(oldFilePath))
-                            {
-                                System.IO.File.Delete(oldFilePath);
-                            }
+                            System.IO.File.Delete(oldFilePath);
                         }
-
-                        string uniqueFileName = Guid.NewGuid().ToString() + extension;
-                        string newFilePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var stream = new FileStream(newFilePath, FileMode.Create))
-                        {
-                            await StudentPhoto.CopyToAsync(stream);
-                        }
-
-                        existing.PhotoStudent = "/images/students/" + uniqueFileName;
                     }
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + extension;
+                    string newFilePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var stream = new FileStream(newFilePath, FileMode.Create))
+                    {
+                        await StudentPhoto.CopyToAsync(stream);
+                    }
+
+                    existing.PhotoStudent = "/images/students/" + uniqueFileName;
                 }
 
                 await _context.SaveChangesAsync();

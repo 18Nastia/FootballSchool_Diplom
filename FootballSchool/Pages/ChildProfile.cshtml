@@ -15,6 +15,11 @@
         <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
     }
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mt-3"><i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]</div>
+    }
+
     <div class="profile-card">
         @if (User.IsInRole("Admin"))
         {
@@ -293,8 +298,8 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Фотография (Медаль, Грамота, Кубок)</label>
-                                <input type="file" name="AchievementPhoto" class="form-control" accept="image/*" />
-                                <small class="text-muted">Загрузите фотографию для подтверждения. Это не обязательно.</small>
+                                <input type="file" name="AchievementPhoto" class="form-control image-file-input" accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+                                <small class="text-muted">Загрузите фотографию для подтверждения. Это не обязательно. Допустимы только: jpg, jpeg, png, gif, webp.</small>
                             </div>
                         </div>
 
@@ -340,8 +345,8 @@
 
                                     <div style="flex:1; min-width:220px;">
                                         <label class="form-label">Новое фото</label>
-                                        <input type="file" name="StudentPhoto" class="form-control" accept="image/*" />
-                                        <small class="text-muted">Если файл не выбран, текущее фото останется прежним.</small>
+                                        <input type="file" name="StudentPhoto" class="form-control image-file-input" accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+                                        <small class="text-muted">Если файл не выбран, текущее фото останется прежним. Допустимы только: jpg, jpeg, png, gif, webp.</small>
                                     </div>
                                 </div>
                             </div>
@@ -420,28 +425,123 @@
 
 @section Scripts {
     <script>
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
 
-                document.querySelectorAll('.schedule-section, .results-section, .achievements-section').forEach(section => {
-                    section.classList.remove('active');
+                    document.querySelectorAll('.schedule-section, .results-section, .achievements-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+
+                    const tabName = this.getAttribute('data-tab');
+                    const targetSection = document.getElementById(tabName + '-section');
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    }
                 });
-
-                const tabName = this.getAttribute('data-tab');
-                const targetSection = document.getElementById(tabName + '-section');
-                if (targetSection) {
-                    targetSection.classList.add('active');
-                }
             });
+
+            setupSimpleModalReset('addAchievementModal');
+            setupEditStudentModalReset();
+            setupImageValidation();
         });
 
         function previewImage(src) {
             if (!src) return;
             document.getElementById('fullSizeImage').src = src;
-            var previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
             previewModal.show();
+        }
+
+        function setupSimpleModalReset(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            const form = modal.querySelector('form');
+
+            modal.addEventListener('show.bs.modal', function () {
+                if (!form) return;
+                form.reset();
+            });
+
+            modal.addEventListener('hidden.bs.modal', function () {
+                if (!form) return;
+
+                form.reset();
+
+                form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                form.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+            });
+        }
+
+        function setupEditStudentModalReset() {
+            const modal = document.getElementById('editStudentModal');
+            if (!modal) return;
+
+            const form = modal.querySelector('form');
+            if (!form) return;
+
+            const initialValues = {};
+
+            form.querySelectorAll('input, select, textarea').forEach(el => {
+                if (!el.name) return;
+
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    initialValues[el.name] = el.checked;
+                } else {
+                    initialValues[el.name] = el.value;
+                }
+            });
+
+            modal.addEventListener('show.bs.modal', function () {
+                restoreFormValues(form, initialValues);
+            });
+
+            modal.addEventListener('hidden.bs.modal', function () {
+                form.reset();
+                restoreFormValues(form, initialValues);
+
+                form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                form.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+            });
+        }
+
+        function restoreFormValues(form, initialValues) {
+            form.querySelectorAll('input, select, textarea').forEach(el => {
+                if (!el.name || !(el.name in initialValues)) return;
+
+                if (el.type === 'file') {
+                    el.value = '';
+                    return;
+                }
+
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    el.checked = initialValues[el.name];
+                } else {
+                    el.value = initialValues[el.name];
+                }
+            });
+        }
+
+        function setupImageValidation() {
+            const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+            document.querySelectorAll('.image-file-input').forEach(input => {
+                input.addEventListener('change', function () {
+                    if (!this.files || this.files.length === 0) return;
+
+                    const file = this.files[0];
+                    const fileName = file.name.toLowerCase();
+                    const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+
+                    if (!allowedExtensions.includes(extension)) {
+                        alert('Недопустимый формат файла. Разрешены только: .jpg, .jpeg, .png, .gif, .webp');
+                        this.value = '';
+                    }
+                });
+            });
         }
     </script>
 }

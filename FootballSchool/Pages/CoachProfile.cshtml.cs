@@ -23,6 +23,25 @@ namespace FootballSchool.Pages
             _environment = environment;
         }
 
+        private static readonly string[] AllowedImageExtensions =
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".webp"
+        };
+
+        private bool IsValidImage(IFormFile? file)
+        {
+            if (file == null || file.Length == 0)
+                return true;
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            return AllowedImageExtensions.Contains(extension);
+        }
+
+        private string AllowedImageFormatsText()
+        {
+            return "Допустимы только файлы: .jpg, .jpeg, .png, .gif, .webp";
+        }
+
         public class CoachProfileDto
         {
             public int CoachId { get; set; }
@@ -164,6 +183,12 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostEditAsync()
         {
+            if (!IsValidImage(CoachPhotoFile))
+            {
+                TempData["ErrorMessage"] = AllowedImageFormatsText();
+                return RedirectToPage(new { id = EditCoach.CoachId });
+            }
+
             var existing = await _context.Coaches.FindAsync(EditCoach.CoachId);
             if (existing != null)
             {
@@ -177,34 +202,30 @@ namespace FootballSchool.Pages
 
                 if (CoachPhotoFile != null && CoachPhotoFile.Length > 0)
                 {
-                    string extension = Path.GetExtension(CoachPhotoFile.FileName).ToLower();
-                    string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    string extension = Path.GetExtension(CoachPhotoFile.FileName).ToLowerInvariant();
 
-                    if (allowedExtensions.Contains(extension))
+                    string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "coaches");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    if (!string.IsNullOrEmpty(existing.PhotoCoach))
                     {
-                        string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "coaches");
-                        if (!Directory.Exists(uploadsFolder))
-                            Directory.CreateDirectory(uploadsFolder);
-
-                        if (!string.IsNullOrEmpty(existing.PhotoCoach))
+                        string oldFilePath = Path.Combine(_environment.WebRootPath, existing.PhotoCoach.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                        if (System.IO.File.Exists(oldFilePath))
                         {
-                            string oldFilePath = Path.Combine(_environment.WebRootPath, existing.PhotoCoach.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-                            if (System.IO.File.Exists(oldFilePath))
-                            {
-                                System.IO.File.Delete(oldFilePath);
-                            }
+                            System.IO.File.Delete(oldFilePath);
                         }
-
-                        string uniqueFileName = Guid.NewGuid().ToString() + extension;
-                        string newFilePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var stream = new FileStream(newFilePath, FileMode.Create))
-                        {
-                            await CoachPhotoFile.CopyToAsync(stream);
-                        }
-
-                        existing.PhotoCoach = "/images/coaches/" + uniqueFileName;
                     }
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + extension;
+                    string newFilePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var stream = new FileStream(newFilePath, FileMode.Create))
+                    {
+                        await CoachPhotoFile.CopyToAsync(stream);
+                    }
+
+                    existing.PhotoCoach = "/images/coaches/" + uniqueFileName;
                 }
 
                 await _context.SaveChangesAsync();

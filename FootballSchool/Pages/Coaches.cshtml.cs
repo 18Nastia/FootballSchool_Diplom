@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using FootballSchool.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
-using System.IO;
 
 namespace FootballSchool.Pages
 {
@@ -21,6 +21,25 @@ namespace FootballSchool.Pages
         {
             _context = context;
             _env = env;
+        }
+
+        private static readonly string[] AllowedImageExtensions =
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".webp"
+        };
+
+        private bool IsValidImage(IFormFile? file)
+        {
+            if (file == null || file.Length == 0)
+                return true;
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            return AllowedImageExtensions.Contains(extension);
+        }
+
+        private string AllowedImageFormatsText()
+        {
+            return "Допустимы только файлы: .jpg, .jpeg, .png, .gif, .webp";
         }
 
         public class CoachListDto
@@ -78,7 +97,6 @@ namespace FootballSchool.Pages
 
         public async Task<IActionResult> OnPostAddCoachAsync()
         {
-            // Исключаем из валидации навигационные свойства, так как они не заполняются формой
             ModelState.Remove("NewCoach.User");
             ModelState.Remove("NewCoach.Training");
 
@@ -88,18 +106,23 @@ namespace FootballSchool.Pages
                 return RedirectToPage();
             }
 
-            // Начинаем транзакцию, чтобы в случае сбоя откатить изменения
+            if (!IsValidImage(CoachPhotoUpload))
+            {
+                TempData["ErrorMessage"] = AllowedImageFormatsText();
+                return RedirectToPage();
+            }
+
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Сохранение картинки тренера (если была загружена)
-                if (CoachPhotoUpload != null)
+                if (CoachPhotoUpload != null && CoachPhotoUpload.Length > 0)
                 {
                     string wwwRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
                     string uploadsFolder = Path.Combine(wwwRootPath, "uploads", "coaches");
                     Directory.CreateDirectory(uploadsFolder);
 
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + CoachPhotoUpload.FileName;
+                    string extension = Path.GetExtension(CoachPhotoUpload.FileName).ToLowerInvariant();
+                    string uniqueFileName = Guid.NewGuid().ToString() + extension;
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
@@ -109,15 +132,12 @@ namespace FootballSchool.Pages
                     NewCoach.PhotoCoach = "/uploads/coaches/" + uniqueFileName;
                 }
 
-                // 1. Генерируем сложный пароль (длина 12 символов)
                 var password = GenerateComplexPassword(12);
 
-                // 2. Формируем логин без использования ID
                 string safeName = NewCoach.NameCoach?.Replace(" ", "").ToLower() ?? "coach";
                 string baseLogin = $"coach_{safeName}";
                 string login = baseLogin;
 
-                // Проверяем логин на уникальность в БД (если занят - добавляем цифру)
                 int counter = 1;
                 while (await _context.Users.AnyAsync(u => u.Login == login))
                 {
@@ -125,7 +145,6 @@ namespace FootballSchool.Pages
                     counter++;
                 }
 
-                // 3. Создаем учетную запись пользователя первой
                 var newUser = new User
                 {
                     Login = login,
@@ -135,26 +154,23 @@ namespace FootballSchool.Pages
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                // 4. Связываем тренера с только что созданным пользователем и сохраняем
                 NewCoach.UserId = newUser.UserId;
                 _context.Coaches.Add(NewCoach);
                 await _context.SaveChangesAsync();
 
-                // 5. Подтверждаем транзакцию (все данные успешно сохранены)
                 await transaction.CommitAsync();
 
                 TempData["SuccessMessage"] = $"Тренер {NewCoach.SurnameCoach} {NewCoach.NameCoach} успешно добавлен! Данные для входа: Логин - {login}, Пароль - {password}";
             }
             catch (Exception ex)
             {
-                // Если произошла ошибка - откатываем все операции базы данных
                 await transaction.RollbackAsync();
                 TempData["ErrorMessage"] = "Ошибка при добавлении тренера: " + (ex.InnerException?.Message ?? ex.Message);
             }
+
             return RedirectToPage();
         }
 
-        // Вспомогательный метод для генерации сложного пароля
         private string GenerateComplexPassword(int length)
         {
             const string lower = "abcdefghijklmnopqrstuvwxyz";
@@ -178,6 +194,7 @@ namespace FootballSchool.Pages
 
             return new string(password.OrderBy(x => random.Next()).ToArray());
         }
+
         public async Task<IActionResult> OnPostDeleteCoachAsync(int id)
         {
             if (!User.IsInRole("Admin"))
@@ -197,6 +214,15 @@ namespace FootballSchool.Pages
             try
             {
                 var userId = coach.UserId;
+
+                if (!string.IsNullOrEmpty(coach.PhotoCoach))
+                {
+                    string coachPhotoPath = Path.Combine(_env.WebRootPath, coach.PhotoCoach.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    if (System.IO.File.Exists(coachPhotoPath))
+                    {
+                        System.IO.File.Delete(coachPhotoPath);
+                    }
+                }
 
                 if (coach.Training != null && coach.Training.Any())
                 {

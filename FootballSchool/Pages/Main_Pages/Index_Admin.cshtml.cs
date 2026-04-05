@@ -1,7 +1,8 @@
+using FootballSchool.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using FootballSchool.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace FootballSchool.Pages.Main_Pages
 {
+    [Authorize(Roles = "Admin")]
     public class Index_AdminModel : PageModel
     {
         private readonly FootballSchoolContext _context;

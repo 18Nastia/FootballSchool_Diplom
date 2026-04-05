@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation; // <-- Подключаем ValidateNever
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 
 namespace FootballSchool.Models;
@@ -14,7 +14,6 @@ public partial class Team
     [Column("Team_ID")]
     public int TeamId { get; set; }
 
-    // Внешний ключ для связи с филиалом
     [Column("Branch_ID")]
     [Required(ErrorMessage = "Необходимо выбрать филиал")]
     public int BranchId { get; set; }
@@ -30,17 +29,16 @@ public partial class Team
     [Unicode(false)]
     public string StatusTeam { get; set; } = null!;
 
-    // Навигационное свойство филиала
     [ForeignKey("BranchId")]
     [InverseProperty("Teams")]
-    [ValidateNever] // Игнорируем при валидации формы
+    [ValidateNever]
     public virtual Branch Branch { get; set; } = null!;
 
     [InverseProperty("Team")]
-    [ValidateNever] // Игнорируем при валидации формы
+    [ValidateNever]
     public virtual ICollection<Student> Students { get; set; } = new List<Student>();
 
     [InverseProperty("Team")]
-    [ValidateNever] // Игнорируем при валидации формы
+    [ValidateNever]
     public virtual ICollection<Training> Training { get; set; } = new List<Training>();
 }

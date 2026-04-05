@@ -16,6 +16,13 @@
         </div>
     }
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mb-3">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
     @if (Model.Profile != null)
     {
         <div class="profile-card">
@@ -196,8 +203,8 @@
 
                                     <div style="flex:1; min-width:220px;">
                                         <label class="form-label">Новое фото</label>
-                                        <input type="file" name="CoachPhotoFile" class="form-control" accept="image/*" />
-                                        <small class="text-muted">Если файл не выбран, текущее фото останется прежним.</small>
+                                        <input type="file" name="CoachPhotoFile" class="form-control image-file-input" accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+                                        <small class="text-muted">Если файл не выбран, текущее фото останется прежним. Допустимы только: jpg, jpeg, png, gif, webp.</small>
                                     </div>
                                 </div>
                             </div>
@@ -266,18 +273,26 @@
 
 @section Scripts {
     <script>
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-                this.classList.add('active');
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+                    this.classList.add('active');
 
-                document.querySelectorAll('.content-section').forEach(section => {
-                    section.classList.remove('active');
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+
+                    const tabId = this.getAttribute('data-tab');
+                    const tabContent = document.getElementById(tabId);
+                    if (tabContent) {
+                        tabContent.classList.add('active');
+                    }
                 });
-
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
             });
+
+            setupEditCoachModalReset();
+            setupImageValidation();
         });
 
         function previewImage(src) {
@@ -285,6 +300,74 @@
             document.getElementById('fullSizeImage').src = src;
             const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
             previewModal.show();
+        }
+
+        function setupEditCoachModalReset() {
+            const editCoachModal = document.getElementById('editCoachModal');
+            if (!editCoachModal) return;
+
+            const form = editCoachModal.querySelector('form');
+            if (!form) return;
+
+            const initialValues = {};
+
+            form.querySelectorAll('input, select, textarea').forEach(el => {
+                if (!el.name) return;
+
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    initialValues[el.name] = el.checked;
+                } else {
+                    initialValues[el.name] = el.value;
+                }
+            });
+
+            editCoachModal.addEventListener('hidden.bs.modal', function () {
+                form.reset();
+
+                form.querySelectorAll('input, select, textarea').forEach(el => {
+                    if (!el.name || !(el.name in initialValues)) return;
+
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        el.checked = initialValues[el.name];
+                    } else if (el.type !== 'file') {
+                        el.value = initialValues[el.name];
+                    }
+                });
+
+                form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                form.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+            });
+
+            editCoachModal.addEventListener('show.bs.modal', function () {
+                form.querySelectorAll('input, select, textarea').forEach(el => {
+                    if (!el.name || !(el.name in initialValues)) return;
+
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        el.checked = initialValues[el.name];
+                    } else if (el.type !== 'file') {
+                        el.value = initialValues[el.name];
+                    }
+                });
+            });
+        }
+
+        function setupImageValidation() {
+            const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+            document.querySelectorAll('.image-file-input').forEach(input => {
+                input.addEventListener('change', function () {
+                    if (!this.files || this.files.length === 0) return;
+
+                    const file = this.files[0];
+                    const fileName = file.name.toLowerCase();
+                    const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+
+                    if (!allowedExtensions.includes(extension)) {
+                        alert('Недопустимый формат файла. Разрешены только: .jpg, .jpeg, .png, .gif, .webp');
+                        this.value = '';
+                    }
+                });
+            });
         }
     </script>
 }

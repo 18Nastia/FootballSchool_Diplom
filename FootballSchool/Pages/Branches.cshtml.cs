@@ -162,19 +162,31 @@ namespace FootballSchool.Pages
             {
                 if (!ModelState.IsValid)
                 {
-                    // Собираем точные причины ошибок, чтобы сразу видеть проблему на экране
-                    var errs = ModelState.Where(x => x.Value?.Errors.Count > 0)
-                        .Select(x => $"{x.Key.Replace("ModalBranch.", "")}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
-
-                    TempData["ErrorMessage"] = "Ошибка заполнения: " + string.Join(" | ", errs);
+                    var errorMessages = new List<string>();
+                    foreach (var key in ModelState.Keys)
+                    {
+                        if (ModelState[key]?.Errors.Count > 0)
+                        {
+                            var fieldName = key.Replace("ModalBranch.", "");
+                            var localizedName = fieldName switch
+                            {
+                                "NameBranch" => "Название",
+                                "CityBranch" => "Город",
+                                "StreetBranch" => "Улица",
+                                "HouseBranch" => "Дом",
+                                "PhoneBranch" => "Телефон",
+                                _ => fieldName
+                            };
+                            errorMessages.Add($"«{localizedName}»");
+                        }
+                    }
+                    TempData["ErrorMessage"] = "Пожалуйста, проверьте правильность заполнения полей: " + string.Join(", ", errorMessages.Distinct());
                     return RedirectToPage();
                 }
 
                 string? relativePhotoPath = null;
 
                 if (BranchPhoto != null && BranchPhoto.Length > 0)
-
-                    if (BranchPhoto != null && BranchPhoto.Length > 0)
                 {
                     string imgext = Path.GetExtension(BranchPhoto.FileName).ToLower();
 
@@ -234,7 +246,7 @@ namespace FootballSchool.Pages
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Критическая ошибка базы данных: " + ex.InnerException?.Message ?? ex.Message;
+                TempData["ErrorMessage"] = "Критическая ошибка базы данных: " + (ex.InnerException?.Message ?? ex.Message);
             }
 
             return RedirectToPage();
@@ -300,9 +312,27 @@ namespace FootballSchool.Pages
 
             if (!ModelState.IsValid)
             {
-                var errs = ModelState.Where(x => x.Value?.Errors.Count > 0)
-                    .Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
-                TempData["ErrorMessage"] = "Ошибка заполнения площадки: " + string.Join(" | ", errs);
+                var errorMessages = new List<string>();
+                foreach (var key in ModelState.Keys)
+                {
+                    if (ModelState[key]?.Errors.Count > 0)
+                    {
+                        var fieldName = key.Replace("ModalFacility.", "");
+                        var localizedName = fieldName switch
+                        {
+                            "NameFacility" => "Название",
+                            "CapacityFacility" => "Вместимость",
+                            "CostFacility" => "Стоимость",
+                            "TypeFacility" => "Тип площадки",
+                            "StatusFacility" => "Статус площадки",
+                            "NumberFacility" => "Телефон площадки",
+                            _ => fieldName
+                        };
+                        errorMessages.Add($"«{localizedName}»");
+                    }
+                }
+
+                TempData["ErrorMessage"] = "Пожалуйста, корректно заполните обязательные поля: " + string.Join(", ", errorMessages.Distinct());
                 return RedirectToPage();
             }
 
@@ -341,7 +371,7 @@ namespace FootballSchool.Pages
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Ошибка при сохранении площадки: " + ex.Message;
+                TempData["ErrorMessage"] = "Ошибка при сохранении площадки: " + (ex.InnerException?.Message ?? ex.Message);
             }
             return RedirectToPage();
         }

@@ -170,7 +170,8 @@
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label>Фотография тренера</label>
-                                <input type="file" name="CoachPhotoUpload" class="form-control" accept="image/*" />
+                                <input type="file" name="CoachPhotoUpload" class="form-control image-file-input" accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+                                <small class="text-muted">Допустимы только: jpg, jpeg, png, gif, webp.</small>
                             </div>
                         </div>
 
@@ -197,21 +198,66 @@
 
 @section Scripts {
     <script>
-        document.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                const specVal = document.querySelector('input[name="specialization"]:checked').value;
-                const statVal = document.querySelector('input[name="status"]:checked').value;
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const specChecked = document.querySelector('input[name="specialization"]:checked');
+                    const statusChecked = document.querySelector('input[name="status"]:checked');
 
-                document.querySelectorAll('.trainer-card').forEach(card => {
-                    const cardSpec = card.getAttribute('data-specialty');
-                    const cardStat = card.getAttribute('data-status');
+                    const specVal = specChecked ? specChecked.value : 'all';
+                    const statVal = statusChecked ? statusChecked.value : 'all';
 
-                    const matchSpec = specVal === 'all' || cardSpec.includes(specVal);
-                    const matchStat = statVal === 'all' || cardStat === statVal;
+                    document.querySelectorAll('.trainer-card').forEach(card => {
+                        const cardSpec = (card.getAttribute('data-specialty') || '').toLowerCase();
+                        const cardStat = card.getAttribute('data-status') || '';
 
-                    card.style.display = (matchSpec && matchStat) ? 'flex' : 'none';
+                        const matchSpec = specVal === 'all' || cardSpec.includes(specVal.toLowerCase());
+                        const matchStat = statVal === 'all' || cardStat === statVal;
+
+                        card.style.display = (matchSpec && matchStat) ? 'flex' : 'none';
+                    });
                 });
             });
+
+            const addCoachModal = document.getElementById('addCoachModal');
+            if (addCoachModal) {
+                const form = addCoachModal.querySelector('form');
+
+                addCoachModal.addEventListener('hidden.bs.modal', function () {
+                    if (!form) return;
+
+                    form.reset();
+
+                    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    form.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+                });
+
+                addCoachModal.addEventListener('show.bs.modal', function () {
+                    if (!form) return;
+                    form.reset();
+                });
+            }
+
+            setupImageValidation();
         });
+
+        function setupImageValidation() {
+            const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+            document.querySelectorAll('.image-file-input').forEach(input => {
+                input.addEventListener('change', function () {
+                    if (!this.files || this.files.length === 0) return;
+
+                    const file = this.files[0];
+                    const fileName = file.name.toLowerCase();
+                    const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+
+                    if (!allowedExtensions.includes(extension)) {
+                        alert('Недопустимый формат файла. Разрешены только: .jpg, .jpeg, .png, .gif, .webp');
+                        this.value = '';
+                    }
+                });
+            });
+        }
     </script>
 }
