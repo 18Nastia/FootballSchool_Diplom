@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using FootballSchool.Models;
+using FootballSchool.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,12 @@ namespace FootballSchool.Pages
                 return Page();
             }
 
+            if (string.IsNullOrWhiteSpace(NewPassword))
+            {
+                ErrorMessage = "Введите новый пароль.";
+                return Page();
+            }
+
             if (NewPassword != ConfirmPassword)
             {
                 ErrorMessage = "Пароли не совпадают.";
@@ -87,7 +94,7 @@ namespace FootballSchool.Pages
                 }
 
                 // Меняем пароль
-                user.Password = NewPassword;
+                user.Password = PasswordHelper.HashPassword(NewPassword);
                 await _context.SaveChangesAsync();
 
                 IsSuccess = true;

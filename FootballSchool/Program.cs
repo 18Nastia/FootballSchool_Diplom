@@ -41,10 +41,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-var uploadsPath = Path.Combine(
-    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-    "FootballSchool",
-    "Uploads");
+var uploadsPath = Path.Combine(AppContext.BaseDirectory, "Uploads");
 
 Directory.CreateDirectory(uploadsPath);
 

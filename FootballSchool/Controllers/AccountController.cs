@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using FootballSchool.Models;
+using FootballSchool.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
@@ -36,16 +37,19 @@ namespace FootballSchool.Controllers
         {
             if (!User.Identity!.IsAuthenticated) return Unauthorized("Вы не авторизованы.");
 
+            if (string.IsNullOrWhiteSpace(request.OldPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
+                return BadRequest("Текущий и новый пароль обязательны для заполнения.");
+
             var userIdStr = User.FindFirst("UserId")?.Value;
             if (!int.TryParse(userIdStr, out int userId)) return BadRequest("Пользователь не найден.");
 
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound("Пользователь не найден.");
 
-            if (user.Password != request.OldPassword)
+            if (!PasswordHelper.VerifyPassword(user.Password, request.OldPassword))
                 return BadRequest("Неверный текущий пароль.");
 
-            user.Password = request.NewPassword;
+            user.Password = PasswordHelper.HashPassword(request.NewPassword);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Пароль успешно изменен." });

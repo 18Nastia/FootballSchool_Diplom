@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using FootballSchool.Models;
+using FootballSchool.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 
@@ -148,7 +149,7 @@ namespace FootballSchool.Pages
                 var newUser = new User
                 {
                     Login = login,
-                    Password = password,
+                    Password = PasswordHelper.HashPassword(password),
                     Role = "Coach"
                 };
                 _context.Users.Add(newUser);

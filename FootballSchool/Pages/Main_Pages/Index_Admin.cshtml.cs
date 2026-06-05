@@ -1,4 +1,5 @@
 using FootballSchool.Models;
+using FootballSchool.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -103,7 +104,7 @@ namespace FootballSchool.Pages.Main_Pages
                 var newAdmin = new User
                 {
                     Login = adminLogin,
-                    Password = adminPassword,
+                    Password = PasswordHelper.HashPassword(adminPassword),
                     Email = adminEmail,
                     Role = "Admin"
                 };

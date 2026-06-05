@@ -3,6 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FootballSchool.Models;
+using FootballSchool.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,7 @@ namespace FootballSchool.Pages
                 var admin = new User
                 {
                     Login = "admin",
-                    Password = "admin",
+                    Password = PasswordHelper.HashPassword("admin"),
                     Role = "Admin"
                 };
                 _context.Users.Add(admin);
@@ -55,10 +56,16 @@ namespace FootballSchool.Pages
             }
 
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Login == Login && u.Password == Password);
+                .FirstOrDefaultAsync(u => u.Login == Login);
 
-            if (user != null)
+            if (user != null && PasswordHelper.VerifyPassword(user.Password, Password))
             {
+                if (!PasswordHelper.IsHashedPassword(user.Password))
+                {
+                    user.Password = PasswordHelper.HashPassword(Password);
+                    await _context.SaveChangesAsync();
+                }
+
                 var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, user.Login),
